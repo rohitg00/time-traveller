@@ -1,0 +1,32 @@
+{
+  "name": "time-traveller",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --config frontend/vite.config.ts frontend",
+    "build": "vite build --config frontend/vite.config.ts frontend",
+    "preview": "vite preview --config frontend/vite.config.ts frontend",
+    "backend": "motia dev --port 3000",
+    "backend:build": "motia build",
+    "backend:start": "motia start --port 3000"
+  },
+  "dependencies": {
+    "@google/genai": "^1.30.0",
+    "@motiadev/plugin-endpoint": "^0.13.0",
+    "@motiadev/plugin-logs": "^0.13.0",
+    "@motiadev/plugin-observability": "^0.13.0",
+    "@motiadev/plugin-states": "^0.13.0",
+    "@motiadev/stream-client-browser": "^0.13.0",
+    "lucide-react": "^0.554.0",
+    "motia": "^0.12.0-beta.157",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

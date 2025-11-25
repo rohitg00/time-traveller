@@ -1,0 +1,7 @@
+{
+  "name": "Time Traveller",
+  "description": "A virtual time machine powered by Gemini Nano Banana Pro. Travel to any location in any era with immersive visuals, descriptions, and audio guides.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

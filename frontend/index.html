@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Time Traveller - Virtual Time Machine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet (Backup Map System) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDYAHlE5o7VzvOFW3TXj_EUpGFGvpepMFI&libraries=places"></script>
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              cyber: {
+                900: '#050b14',
+                800: '#0a1929',
+                700: '#0f2942',
+                500: '#0ea5e9',
+                400: '#38bdf8',
+                accent: '#f43f5e',
+              }
+            },
+            fontFamily: {
+              mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+              sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            },
+            animation: {
+              'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'scan': 'scan 3s linear infinite',
+            },
+            keyframes: {
+              scan: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        background-color: #050b14;
+        color: #e2e8f0;
+      }
+      /* Custom scrollbar for cyberpunk feel */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0a1929;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #0f2942;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #0ea5e9;
+      }
+      
+      /* Leaflet Dark Mode Override */
+      .leaflet-container {
+        background: #050b14 !important;
+      }
+      .leaflet-control-zoom a {
+        background-color: #0a1929 !important;
+        color: #0ea5e9 !important;
+        border-color: #0f2942 !important;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
