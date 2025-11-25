@@ -1,5 +1,7 @@
 # 🌀 Time Traveller - Virtual Time Machine
 
+![time traveller workbench](./docs/img/workbench.png)
+
 <div align="center">
 
 ![Time Traveller Banner](https://img.shields.io/badge/Time%20Traveller-Time%20Travel%20Redefined-00d4ff?style=for-the-badge&logo=clock&logoColor=white)
