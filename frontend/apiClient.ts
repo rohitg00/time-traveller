@@ -57,7 +57,8 @@ export interface TeleportRequest {
   destination: string;
   era: string;
   style: string;
-  referenceImage?: string;
+  // NOTE: referenceImage is NOT sent to backend due to Motia Cloud state size limits
+  // The reference image is kept client-side only for display in the history
   coordinates?: { lat: number; lng: number };
 }
 

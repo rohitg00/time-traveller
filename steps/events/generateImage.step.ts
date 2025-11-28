@@ -7,7 +7,7 @@ const inputSchema = z.object({
   destination: z.string(),
   era: z.string(),
   style: z.string(),
-  referenceImage: z.string().optional(),
+  // NOTE: referenceImage removed due to Motia Cloud state size limits
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()
@@ -30,7 +30,7 @@ interface TeleportData {
   era: string;
   style: string;
   mapsApiKey: string;
-  referenceImage?: string;
+  // NOTE: referenceImage is no longer stored in state due to Motia Cloud size limits
 }
 
 interface ImageData {
@@ -42,7 +42,7 @@ interface ImageData {
 type GenerateImageInput = z.infer<typeof inputSchema>;
 
 export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, streams, state, traceId }) => {
-  const { teleportId, destination, era, style, referenceImage, coordinates } = input as GenerateImageInput;
+  const { teleportId, destination, era, style, coordinates } = input as GenerateImageInput;
   
   try {
     logger.info('Starting image generation', { traceId, teleportId, destination });
@@ -62,8 +62,9 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
     const teleportData = await state.get<TeleportData>('teleports', teleportId);
     const mapsApiKey = teleportData?.mapsApiKey || process.env.GOOGLE_API_KEY || '';
     
-    // Use referenceImage from input OR state to avoid E2BIG errors with large payloads
-    const imageToUse = referenceImage || teleportData?.referenceImage;
+    // NOTE: referenceImage feature is disabled for Motia Cloud due to state size limits
+    // The AI will generate images based on location data only (no user photo overlay)
+    // referenceImage is kept client-side only for display purposes
 
     // Generate the image
     const result = await generateImage(
@@ -71,7 +72,7 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       era, 
       style, 
       mapsApiKey,
-      imageToUse, 
+      undefined, // referenceImage disabled for cloud deployment
       coordinates
     );
     

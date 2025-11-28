@@ -90,11 +90,13 @@ const App: React.FC = () => {
 
     try {
       // Initiate teleport via Motia API
+      // NOTE: referenceImage is NOT sent to backend due to Motia Cloud state size limits
+      // It's kept client-side only for display in history
       const response = await api.initiateTeleport({
         destination,
         era,
         style,
-        referenceImage,
+        // referenceImage excluded - too large for Motia Cloud state storage
         coordinates
       });
 

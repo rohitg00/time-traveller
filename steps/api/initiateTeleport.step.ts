@@ -5,7 +5,8 @@ const bodySchema = z.object({
   destination: z.string().min(1, "Destination cannot be empty"),
   era: z.string().min(1, "Era is required"),
   style: z.string().default("Photorealistic"),
-  referenceImage: z.string().optional(),
+  // NOTE: referenceImage removed due to Motia Cloud state size limits
+  // User photos are kept client-side only for display
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()
@@ -38,7 +39,7 @@ interface TeleportData {
   destination: string;
   era: string;
   style: string;
-  referenceImage?: string;
+  // NOTE: referenceImage removed due to Motia Cloud state size limits
   coordinates?: { lat: number; lng: number };
   timestamp: number;
   mapsApiKey: string;
@@ -46,7 +47,7 @@ interface TeleportData {
 
 export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger, streams, state, traceId }) => {
   try {
-    const { destination, era, style, referenceImage, coordinates } = bodySchema.parse(req.body);
+    const { destination, era, style, coordinates } = bodySchema.parse(req.body);
     
     const teleportId = `teleport-${Date.now()}`;
     
@@ -70,11 +71,13 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
     });
 
     // Store teleport request in state for event handlers to access
+    // NOTE: referenceImage is NOT stored in state due to Motia Cloud size limits
+    // The reference image is only used client-side for display
     const teleportData: TeleportData = {
       destination,
       era,
       style,
-      referenceImage,
+      // referenceImage excluded - too large for Motia state storage
       coordinates,
       timestamp: Date.now(),
       mapsApiKey: process.env.GOOGLE_API_KEY || ''
