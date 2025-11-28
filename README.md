@@ -4,14 +4,15 @@
 
 ![Time Traveller Banner](https://img.shields.io/badge/Time%20Traveller-Time%20Travel%20Redefined-00d4ff?style=for-the-badge&logo=clock&logoColor=white)
 ![Gemini Nano Banana](https://img.shields.io/badge/Gemini%203%20Pro-Nano%20Banana-ff6b6b?style=for-the-badge&logo=google&logoColor=white)
-![Motia Framework](https://img.shields.io/badge/Powered%20by-Motia-0066FF?style=for-the-badge)
+![Motia Framework](https://img.shields.io/badge/Backend-Motia%20Cloud-0066FF?style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![Open Source](https://img.shields.io/badge/Open%20Source-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
 
 **Step into any moment in history. Witness the past. Visualize the future.**
 
 *The world's first AI-powered virtual time machine that generates photorealistic 2K visualizations of any location across different eras, complete with immersive narration and historical context.*
 
-[🚀 Try Demo](#-quick-start) • [📖 Documentation](#-api-reference) • [🎯 Features](#-what-makes-time-traveller-special) • [⭐ GitHub](https://github.com/rohitg00/time-traveller)
+[🚀 Live Demo](https://time-traveller-motia.vercel.app) • [📖 Documentation](#-api-reference) • [🎯 Features](#-what-makes-time-traveller-special) • [⭐ GitHub](https://github.com/rohitg00/time-traveller)
 
 </div>
 
@@ -1024,7 +1025,7 @@ Time Traveller can be deployed using **Motia Cloud** (recommended) or **self-hos
 ![Motia Cloud](./docs/img/motia-cloud.png)
 
 1. **Start your local backend** (requires Motia v0.6.4+)
-   ```bash
+```bash
    npm run backend
    ```
 
@@ -1196,9 +1197,31 @@ volumes:
 
 ---
 
-### 🎨 Frontend Deployment
+### 🎨 Frontend Deployment (Vercel)
 
-The React frontend can be deployed separately to any static host:
+The React frontend is deployed on **Vercel** for optimal performance and global CDN distribution.
+
+**🌐 Live Demo:** [time-traveller-motia.vercel.app](https://time-traveller-motia.vercel.app)
+
+#### Deploy Your Own
+
+1. **Fork the repository** on GitHub
+
+2. **Import to Vercel:**
+   - Go to [vercel.com/new](https://vercel.com/new)
+   - Import your forked repo
+   - Vercel auto-detects the `vercel.json` configuration
+
+3. **Add Environment Variables:**
+   | Key | Value |
+   |-----|-------|
+   | `VITE_API_URL` | `https://your-project.motia.cloud` |
+   | `VITE_WS_URL` | `wss://ws-your-project.motia.cloud` |
+   | `VITE_GOOGLE_API_KEY` | Your Google Maps API key |
+
+4. **Deploy!** Vercel handles the rest automatically.
+
+#### Manual Build
 
 ```bash
 # Build frontend
@@ -1207,17 +1230,17 @@ npm run build
 # Output: frontend/dist/
 ```
 
+The project includes a `vercel.json` that configures:
+- ✅ Correct output directory (`frontend/dist`)
+- ✅ SPA rewrites for client-side routing
+- ✅ Vite framework detection
+
+#### Other Hosting Options
+
 Deploy `frontend/dist/` to:
-- **Vercel**: `vercel --prod`
-- **Netlify**: Drag & drop or CLI
+- **Netlify**: Drag & drop or connect GitHub
 - **Cloudflare Pages**: Connect GitHub repo
 - **GitHub Pages**: Use `gh-pages` package
-
-**Environment Variables for Frontend:**
-```env
-VITE_GOOGLE_API_KEY=your_google_maps_key
-VITE_API_URL=https://your-motia-cloud-url.motia.dev
-```
 
 ---
 
@@ -1251,11 +1274,11 @@ Time Traveller isn't just a tech demo—it's a powerful tool for:
 
 ## ✨ Recent Updates
 
-### ☁️ Motia Cloud Deployment
-- 🚀 **One-Click Deploy** - Deploy directly from Motia Workbench to production
-- 🔐 **Secure Environment Variables** - Encrypted secrets management
-- 📊 **Live Deployment Logs** - Watch your API endpoints and event handlers go live
-- 🌐 **Production URL** - Instant HTTPS endpoint with auto-scaling
+### ☁️ Production Deployment
+- 🚀 **Motia Cloud Backend** - One-click deploy from Workbench with auto-scaling
+- ▲ **Vercel Frontend** - Global CDN deployment with instant rollbacks
+- 🔐 **Secure Environment Variables** - Encrypted secrets on both platforms
+- 🌐 **Live Demo** - [time-traveller-motia.vercel.app](https://time-traveller-motia.vercel.app)
 
 ### UI/UX Enhancements
 - 🌟 **Interactive Starfield Background** - Mouse-responsive parallax animation

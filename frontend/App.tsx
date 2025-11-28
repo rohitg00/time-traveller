@@ -32,28 +32,37 @@ const App: React.FC = () => {
     };
     checkKey();
 
-    // Load history from Motia backend instead of localStorage
-    const loadHistory = async () => {
+    // Load history from localStorage (client-side only for privacy)
+    // Each user's history is stored locally on their device
+    const loadHistory = () => {
       try {
-        const serverHistory = await api.getHistory(10);
-        setHistory(serverHistory.map(item => ({
-          id: item.id,
-          destination: item.destination,
-          era: item.era,
-          style: item.style,
-          timestamp: item.timestamp,
-          imageData: item.imageData,
-          description: item.description,
-          mapsUri: item.mapsUri,
-          referenceImage: item.referenceImage,
-          usedStreetView: item.usedStreetView,
-        })));
+        const savedHistory = localStorage.getItem('time-traveller-history');
+        if (savedHistory) {
+          const parsed = JSON.parse(savedHistory) as TravelLogItem[];
+          setHistory(parsed.slice(0, 10)); // Keep last 10 items
+        }
       } catch (e) {
-        console.error("Failed to load history from server", e);
+        console.error("Failed to load history from localStorage", e);
       }
     };
     loadHistory();
   }, []);
+
+  // Save history to localStorage whenever it changes
+  useEffect(() => {
+    if (history.length > 0) {
+      try {
+        // Don't store referenceImage in localStorage to save space
+        const historyToSave = history.map(item => ({
+          ...item,
+          referenceImage: undefined // Remove large reference images
+        }));
+        localStorage.setItem('time-traveller-history', JSON.stringify(historyToSave));
+      } catch (e) {
+        console.error("Failed to save history to localStorage", e);
+      }
+    }
+  }, [history]);
 
   const handleSelectKey = async () => {
     if (window.aistudio) {

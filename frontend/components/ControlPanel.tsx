@@ -107,12 +107,47 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
     setDestination(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Compress image to reduce size (max 800px width, 0.7 quality)
+  const compressImage = (dataUrl: string, maxWidth: number = 800, quality: number = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Scale down if larger than maxWidth
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } else {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserImage(reader.result as string);
+      reader.onloadend = async () => {
+        const original = reader.result as string;
+        // Compress the image to reduce payload size
+        const compressed = await compressImage(original);
+        console.log(`Image compressed: ${(original.length / 1024).toFixed(0)}KB → ${(compressed.length / 1024).toFixed(0)}KB`);
+        setUserImage(compressed);
       };
       reader.readAsDataURL(file);
     }
@@ -141,15 +176,27 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
     setIsCameraActive(false);
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (videoRef.current) {
       const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
+      // Capture at a reasonable size (max 800px)
+      const maxWidth = 800;
+      let width = videoRef.current.videoWidth;
+      let height = videoRef.current.videoHeight;
+      
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0);
-        const dataUrl = canvas.toDataURL('image/jpeg');
+        ctx.drawImage(videoRef.current, 0, 0, width, height);
+        // Use lower quality for smaller file size
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        console.log(`Camera capture size: ${(dataUrl.length / 1024).toFixed(0)}KB`);
         setUserImage(dataUrl);
         stopCamera();
       }

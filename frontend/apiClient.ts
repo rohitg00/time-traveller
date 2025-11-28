@@ -77,6 +77,7 @@ export interface TeleportProgress {
   imageData?: string;
   description?: string;
   mapsUri?: string;
+  usedStreetView?: boolean;
   error?: string;
   timestamp: number;
 }
@@ -90,6 +91,7 @@ export interface HistoryItem {
   description: string;
   mapsUri?: string;
   referenceImage?: string;
+  usedStreetView?: boolean;
   timestamp: number;
 }
 
