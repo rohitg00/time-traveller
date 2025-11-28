@@ -19,7 +19,7 @@ export type TeleportProgress = z.infer<typeof teleportProgressSchema>
 
 export const config: StreamConfig = {
   name: 'teleportProgress',
-  schema: teleportProgressSchema,
+  schema: z.toJSONSchema(teleportProgressSchema),
   baseConfig: { storageType: 'default' },
 }
 
