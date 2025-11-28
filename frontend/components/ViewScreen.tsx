@@ -1,6 +1,6 @@
 import React from 'react';
 import { TeleportState, TravelLogItem } from '../types';
-import { Volume2, Loader2, VolumeX, Map, ExternalLink } from 'lucide-react';
+import { Volume2, Loader2, VolumeX, Map, ExternalLink, Info, Maximize2, Scan } from 'lucide-react';
 
 interface ViewScreenProps {
   state: TeleportState;
@@ -12,33 +12,77 @@ interface ViewScreenProps {
 export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, isAudioPlaying }) => {
   if (state === 'idle') {
     return (
-      <div className="flex-1 bg-black rounded-xl border-2 border-dashed border-cyber-800 flex items-center justify-center min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
-        <div className="text-center p-8">
-          <div className="w-20 h-20 mx-auto border border-cyber-800 rounded-full flex items-center justify-center mb-4 animate-[spin_10s_linear_infinite]">
-             <div className="w-16 h-16 border border-cyber-700 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-cyber-500 rounded-full animate-pulse"></div>
+      <div className="flex-1 bg-black rounded-xl border border-cyber-700 flex items-center justify-center min-h-[400px] lg:min-h-[600px] relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+        {/* Dynamic Perspective Grid */}
+        <div className="absolute inset-0 opacity-20" 
+             style={{
+               backgroundImage: 'linear-gradient(rgba(14, 165, 233, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 165, 233, 0.3) 1px, transparent 1px)',
+               backgroundSize: '50px 50px',
+               transform: 'perspective(500px) rotateX(60deg) translateY(0)',
+               transformOrigin: 'bottom',
+               animation: 'grid-move 20s linear infinite'
+             }}>
+        </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none"></div>
+
+        {/* Central HUD */}
+        <div className="relative z-10 text-center p-10">
+          <div className="w-64 h-64 mx-auto relative flex items-center justify-center mb-8">
+             {/* Outer Rings */}
+             <div className="absolute inset-0 border border-cyber-900/50 rounded-full"></div>
+             <div className="absolute inset-0 border-t-2 border-cyber-500 rounded-full animate-[spin_4s_linear_infinite]"></div>
+             <div className="absolute inset-4 border-b-2 border-cyber-700 rounded-full animate-[spin_6s_linear_infinite_reverse]"></div>
+             <div className="absolute inset-0 rounded-full border border-cyber-500/20 scale-110 animate-pulse"></div>
+             
+             {/* Core */}
+             <div className="w-40 h-40 bg-cyber-900/20 rounded-full backdrop-blur-sm flex items-center justify-center border border-cyber-500/30 shadow-[0_0_30px_rgba(14,165,233,0.2)]">
+                <div className="relative">
+                   <div className="w-3 h-3 bg-cyber-500 rounded-full animate-pulse shadow-[0_0_20px_rgba(14,165,233,1)]"></div>
+                   <div className="absolute inset-0 w-3 h-3 bg-cyber-500 rounded-full animate-ping opacity-75"></div>
+                </div>
              </div>
           </div>
-          <h3 className="text-xl text-slate-500 font-mono tracking-widest">VIEWPORT OFFLINE</h3>
-          <p className="text-slate-600 mt-2 text-sm">Awaiting coordinates for transmission</p>
+          <h3 className="text-3xl text-white font-mono font-bold tracking-[0.3em] mb-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">SYSTEM STANDBY</h3>
+          <p className="text-cyber-400 text-xs font-mono tracking-[0.2em] uppercase bg-cyber-900/50 py-1 px-3 rounded inline-block border border-cyber-500/30">
+            Awaiting Spacetime Coordinates
+          </p>
         </div>
-        {/* Grid lines */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        
+        {/* HUD Corner Elements */}
+        <div className="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-cyber-500 opacity-60"></div>
+        <div className="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-cyber-500 opacity-60"></div>
+        <div className="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-cyber-500 opacity-60"></div>
+        <div className="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-cyber-500 opacity-60"></div>
+        
+        <div className="absolute top-8 left-16 text-[10px] text-cyber-600 font-mono">SYS.VER.2.0.5</div>
+        <div className="absolute bottom-8 right-16 text-[10px] text-cyber-600 font-mono animate-pulse">● CONNECTION STABLE</div>
       </div>
     );
   }
 
   if (state === 'teleporting') {
     return (
-      <div className="flex-1 bg-black rounded-xl border border-cyber-500 shadow-[0_0_30px_rgba(14,165,233,0.2)] flex flex-col items-center justify-center min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
-        {/* Warp speed effect (CSS based) */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-50">
-           <div className="w-[200%] h-[200%] bg-[radial-gradient(circle,transparent_20%,#0ea5e9_120%)] animate-pulse"></div>
+      <div className="flex-1 bg-black rounded-xl border border-cyber-500 shadow-[0_0_50px_rgba(14,165,233,0.3)] flex flex-col items-center justify-center min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
+        {/* Hyperspace Effect */}
+        <div className="absolute inset-0 flex items-center justify-center">
+           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent animate-pulse"></div>
+           {/* Simulated stars streaming */}
+           <div className="w-[1px] h-[1px] bg-white shadow-[0_0_100px_2px_white] animate-[ping_0.2s_linear_infinite]"></div>
         </div>
-        <div className="z-10 text-center">
-          <Loader2 className="w-16 h-16 text-cyber-500 animate-spin mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white tracking-widest font-mono animate-pulse">TRAVERSING SPACETIME</h2>
-          <p className="text-cyber-400 mt-2 font-mono text-sm">Generating molecular reconstruction...</p>
+        
+        <div className="z-10 text-center relative bg-black/40 backdrop-blur-sm p-8 rounded-2xl border border-cyber-500/30">
+          <div className="relative mb-6 inline-block">
+             <Loader2 className="w-16 h-16 text-cyber-400 animate-spin" />
+             <div className="absolute inset-0 w-16 h-16 border-t-4 border-cyber-500 rounded-full animate-spin"></div>
+          </div>
+          <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-cyber-400 tracking-widest font-mono animate-pulse mb-2">
+            TRAVERSING SPACETIME
+          </h2>
+          <div className="h-1 w-48 bg-cyber-900 rounded-full mx-auto overflow-hidden">
+            <div className="h-full bg-cyber-500 animate-[scan_1s_linear_infinite]"></div>
+          </div>
+          <p className="text-cyber-400 mt-3 font-mono text-xs uppercase tracking-widest">Reconstructing molecular data...</p>
         </div>
       </div>
     );
@@ -46,79 +90,117 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
 
   if (state === 'arrived' && location) {
     return (
-      <div className="flex flex-col gap-4 animate-[fadeIn_0.5s_ease-out]">
+      <div className="flex flex-col gap-6 animate-[fadeIn_0.8s_ease-out]">
         
         {/* Main Viewport */}
-        <div className="relative rounded-xl overflow-hidden border border-cyber-700 shadow-2xl group bg-black aspect-video">
+        <div className="relative rounded-xl overflow-hidden border border-cyber-600 shadow-[0_0_40px_rgba(0,0,0,0.6)] group bg-black aspect-video ring-1 ring-cyber-500/50">
           
           <img 
             src={`data:image/jpeg;base64,${location.imageData}`} 
             alt={`${location.destination} in ${location.era}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
           
-          {/* Overlay Stats */}
-          <div className="absolute top-4 left-4 flex flex-col gap-1">
-            <span className="bg-black/60 backdrop-blur-sm text-cyber-500 text-xs px-2 py-1 rounded border border-cyber-500/30 font-mono">
-              LOC: {location.destination.toUpperCase()}
-            </span>
-            <span className="bg-black/60 backdrop-blur-sm text-cyber-400 text-xs px-2 py-1 rounded border border-cyber-500/30 font-mono">
-              ERA: {location.era.toUpperCase()}
-            </span>
+          {/* HUD Overlay */}
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[size:100%_4px] opacity-30"></div>
+          <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20"></div>
+
+          {/* Top HUD Bar */}
+          <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
+             <div className="flex flex-col gap-1">
+               <div className="flex items-center gap-2">
+                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                 <span className="text-white font-mono text-sm font-bold tracking-wider uppercase text-shadow-sm">
+                   {location.destination}
+                 </span>
+               </div>
+               <div className="text-cyber-400 font-mono text-xs tracking-widest uppercase pl-4 border-l border-cyber-500/50">
+                 EPOCH: {location.era}
+               </div>
+             </div>
+             
+             <div className="flex gap-2">
+                <div className="bg-black/50 backdrop-blur border border-cyber-500/30 px-2 py-1 rounded text-[10px] font-mono text-cyber-300">
+                  IMG.RES.8K
+                </div>
+             </div>
           </div>
 
-          {/* Maps Link Overlay */}
+          {/* Reference Image Inset (if exists) */}
+          {location.referenceImage && (
+            <div className="absolute bottom-4 left-4 w-24 h-24 rounded border border-cyber-500/50 overflow-hidden bg-black shadow-lg group/ref">
+               <img src={location.referenceImage} className="w-full h-full object-cover opacity-70 group-hover/ref:opacity-100 transition-opacity" alt="Reference" />
+               <div className="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] text-center text-white font-mono py-0.5">REFERENCE</div>
+            </div>
+          )}
+
+          {/* Bottom Actions */}
           {location.mapsUri && (
-            <div className="absolute bottom-4 right-4">
+            <div className="absolute bottom-4 right-4 pointer-events-auto">
               <a 
                 href={location.mapsUri} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-black/80 backdrop-blur-md text-white px-3 py-2 rounded-lg border border-cyber-500/50 hover:bg-cyber-500 hover:text-black transition-all font-mono text-xs group/btn"
+                className="flex items-center gap-2 bg-cyber-900/90 backdrop-blur-md text-white px-4 py-2 rounded-lg border border-cyber-500/50 hover:bg-cyber-500 hover:text-black hover:shadow-[0_0_20px_rgba(14,165,233,0.6)] transition-all font-mono text-xs font-bold group/btn tracking-wide"
               >
                 <Map className="w-3 h-3" />
-                <span>STREET VIEW UPLINK</span>
+                <span>OPEN STREET VIEW</span>
                 <ExternalLink className="w-3 h-3 opacity-50 group-hover/btn:opacity-100" />
               </a>
             </div>
           )}
 
-          {/* Scanline overlay */}
-          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-20"></div>
+          {/* Center Crosshair */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+             <div className="w-64 h-[1px] bg-white/50"></div>
+             <div className="h-64 w-[1px] bg-white/50 absolute"></div>
+             <div className="w-20 h-20 border border-white/30 rounded-full absolute"></div>
+          </div>
         </div>
 
-        {/* Description Panel */}
-        <div className="bg-cyber-800/50 border border-cyber-700 rounded-xl p-6 relative">
+        {/* Analysis Panel */}
+        <div className="bg-cyber-800/60 border border-cyber-700 rounded-xl p-6 relative backdrop-blur-sm shadow-lg">
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyber-500 to-transparent opacity-50"></div>
+          
           <div className="flex justify-between items-start mb-4">
-             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-               <span className="w-1.5 h-6 bg-cyber-500 rounded-sm"></span>
+             <h3 className="text-lg font-bold text-white flex items-center gap-3 font-mono tracking-wide">
+               <Scan className="w-5 h-5 text-cyber-500" />
                ENVIRONMENTAL ANALYSIS
              </h3>
              <button
                onClick={onPlayAudio}
                disabled={isAudioPlaying}
-               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
                  isAudioPlaying 
                    ? 'bg-cyber-500 text-black shadow-[0_0_15px_rgba(14,165,233,0.6)] animate-pulse'
-                   : 'bg-cyber-900 border border-cyber-600 text-cyber-400 hover:border-cyber-400 hover:text-white'
+                   : 'bg-black/50 border border-cyber-600 text-cyber-400 hover:border-cyber-400 hover:text-white hover:bg-cyber-900'
                }`}
              >
                {isAudioPlaying ? (
-                 <><VolumeX className="w-3 h-3" /> Transmitting...</>
+                 <><VolumeX className="w-4 h-4" /> ABORT AUDIO STREAM</>
                ) : (
-                 <><Volume2 className="w-3 h-3" /> Audio Guide</>
+                 <><Volume2 className="w-4 h-4" /> PLAY AUDIO GUIDE</>
                )}
              </button>
           </div>
           
-          <p className="text-slate-300 leading-relaxed font-light tracking-wide text-sm md:text-base border-l-2 border-cyber-500/20 pl-4 italic">
-            "{location.description}"
-          </p>
+          <div className="relative pl-6 border-l-2 border-cyber-500/30">
+            <p className="text-slate-300 leading-relaxed font-light tracking-wide text-sm md:text-base italic">
+              "{location.description}"
+            </p>
+            <div className="absolute top-0 left-[-5px] w-2 h-2 bg-cyber-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
+            <div className="absolute bottom-0 left-[-5px] w-2 h-2 bg-cyber-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
+          </div>
 
-          <div className="mt-4 flex items-center justify-end gap-2 text-xs font-mono text-slate-500">
-             <span>RENDER STYLE: {location.style}</span>
-             <span>ID: {location.id.slice(-6)}</span>
-             {location.mapsUri && <span className="text-green-500 ml-2">● GEO-LOCK ACTIVE</span>}
+          <div className="mt-6 pt-4 border-t border-cyber-700/50 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-500 uppercase tracking-wider">
+             <div className="flex gap-4">
+                <span><span className="text-cyber-600">RENDER:</span> {location.style}</span>
+                <span><span className="text-cyber-600">ID:</span> {location.id.slice(-6)}</span>
+             </div>
+             <div className="flex items-center gap-2">
+               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+               <span className="text-green-400">Live Data Stream Active</span>
+             </div>
           </div>
         </div>
       </div>

@@ -114,10 +114,17 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   const markerInstanceRef = useRef<any>(null);
   const leafletMapRef = useRef<any>(null);
   const leafletMarkerRef = useRef<any>(null);
+  const selectedCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const [engine, setEngine] = useState<'google' | 'leaflet'>('google');
   const [viewMode, setViewMode] = useState<'map' | 'street'>('map');
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Keep ref in sync for resize observer
+  useEffect(() => {
+    selectedCoordsRef.current = selectedCoords;
+  }, [selectedCoords]);
+
   const [streetViewAvailable, setStreetViewAvailable] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
@@ -185,10 +192,20 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
       mapInstanceRef.current.svService = svService;
 
       // Force a resize trigger
-      setTimeout(() => {
-        window.google.maps.event.trigger(map, "resize");
-        map.setCenter(DEFAULT_CENTER);
-      }, 500);
+      const resizeObserver = new ResizeObserver(() => {
+        if (mapInstanceRef.current) {
+           window.google.maps.event.trigger(mapInstanceRef.current, "resize");
+           mapInstanceRef.current.setCenter(selectedCoordsRef.current || DEFAULT_CENTER);
+        }
+      });
+      
+      if (mapContainerRef.current) {
+        resizeObserver.observe(mapContainerRef.current);
+      }
+
+      return () => {
+        resizeObserver.disconnect();
+      };
 
     } catch (e) {
       console.error("Google Maps Init Error:", e);

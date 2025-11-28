@@ -204,11 +204,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin relative">
-        <div className="p-6 h-full flex flex-col">
+        <div className="p-6 pb-0 flex flex-col h-full">
           
           {/* MANUAL TAB */}
           {activeTab === 'manual' && (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               
               {/* Destination Input */}
               <div className="space-y-2">
@@ -332,30 +332,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitDisabled}
-                className={`w-full relative group overflow-hidden rounded-lg p-4 font-bold tracking-wider transition-all mt-4 ${
-                  isSubmitDisabled
-                    ? 'bg-cyber-900 border border-cyber-800 text-slate-600 cursor-not-allowed'
-                    : 'bg-cyber-500 hover:bg-cyber-400 text-black shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:shadow-[0_0_30px_rgba(14,165,233,0.6)] cursor-pointer'
-                }`}
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  {isTeleporting ? (
-                    <>
-                      <LoaderIcon />
-                      INITIATING JUMP...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" /> ENGAGE TELEPORT
-                    </>
-                  )}
-                </span>
-              </button>
-            </form>
+            </div>
           )}
 
           {/* TERMINAL TAB */}
@@ -405,7 +382,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
           {/* MAP TAB */}
           {activeTab === 'map' && (
             <div className="h-full w-full flex flex-col relative">
-               <div className="flex-1 w-full rounded-lg overflow-hidden border border-cyber-700 relative bg-black min-h-[360px]">
+               <div className="flex-1 w-full rounded-lg overflow-hidden border border-cyber-700 relative bg-black min-h-[300px]">
                   <MapSelector onSelect={handleMapSelect} />
                </div>
                
@@ -426,25 +403,41 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                           className="w-full h-full bg-cyber-900 border border-cyber-700 rounded pl-8 pr-2 text-xs text-white placeholder-slate-600 focus:border-cyber-500 outline-none"
                         />
                      </div>
-
-                    {selectedCoords && (
-                      <button 
-                        onClick={handleSubmit}
-                        disabled={isTeleporting}
-                        className={`px-4 py-3 bg-cyber-500 hover:bg-cyber-400 text-black font-bold text-xs rounded shadow-lg flex items-center gap-2 whitespace-nowrap transition-all ${
-                          isTeleporting ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        {isTeleporting ? <LoaderIcon /> : <Send className="w-3 h-3" />}
-                        JUMP TO COORDS
-                      </button>
-                    )}
                   </div>
                </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Fixed Submit Button Footer - Always visible */}
+      {(activeTab === 'manual' || activeTab === 'map') && (
+        <div className="shrink-0 p-4 pt-2 border-t border-cyber-700/50 bg-cyber-800">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitDisabled}
+            className={`w-full relative group overflow-hidden rounded-lg p-4 font-bold tracking-wider transition-all ${
+              isSubmitDisabled
+                ? 'bg-cyber-900 border border-cyber-800 text-slate-600 cursor-not-allowed'
+                : 'bg-cyber-500 hover:bg-cyber-400 text-black shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:shadow-[0_0_30px_rgba(14,165,233,0.6)] cursor-pointer'
+            }`}
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {isTeleporting ? (
+                <>
+                  <LoaderIcon />
+                  INITIATING JUMP...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" /> {activeTab === 'map' && selectedCoords ? 'JUMP TO COORDS' : 'ENGAGE TELEPORT'}
+                </>
+              )}
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

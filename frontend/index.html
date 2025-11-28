@@ -3,25 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Time Traveller - Virtual Time Machine</title>
+    <title>Time Traveller - Temporal Displacement Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Leaflet (Backup Map System) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
-    <!-- Google Maps API - Key injected from .env at build time -->
-    <script>
-      // Load Google Maps API with key from environment variable
-      const mapsApiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-      if (mapsApiKey) {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places`;
-        script.async = true;
-        document.head.appendChild(script);
-      } else {
-        console.warn('⚠️ GOOGLE_API_KEY not set in .env - Map features will be limited to Leaflet only');
-      }
-    </script>
+    <!-- Google Maps API - Loaded dynamically in the app module -->
     
     <script>
       tailwind.config = {
@@ -44,11 +32,21 @@
             animation: {
               'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'scan': 'scan 3s linear infinite',
+              'grid-move': 'grid-move 20s linear infinite',
+              'spin-slow': 'spin 4s linear infinite',
             },
             keyframes: {
               scan: {
                 '0%': { transform: 'translateY(-100%)' },
                 '100%': { transform: 'translateY(100%)' },
+              },
+              'grid-move': {
+                '0%': { transform: 'perspective(500px) rotateX(60deg) translateY(0)' },
+                '100%': { transform: 'perspective(500px) rotateX(60deg) translateY(50px)' },
+              },
+              'spin-reverse': {
+                'from': { transform: 'rotate(360deg)' },
+                'to': { transform: 'rotate(0deg)' },
               }
             }
           },

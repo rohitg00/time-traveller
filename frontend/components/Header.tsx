@@ -1,32 +1,57 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
+import { Zap, Map, Cpu, Server } from 'lucide-react';
 
 export const Header: React.FC = () => {
   return (
-    <header className="bg-cyber-800/80 backdrop-blur-md border-b border-cyber-700 sticky top-0 z-50">
+    <header className="bg-cyber-800/80 backdrop-blur-md border-b border-cyber-700 sticky top-0 z-50 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 group cursor-pointer">
-          <div className="p-2 bg-cyber-500/10 rounded-lg border border-cyber-500/30 group-hover:border-cyber-500 group-hover:shadow-[0_0_15px_rgba(14,165,233,0.3)] transition-all duration-300">
-            <Zap className="w-6 h-6 text-cyber-500 group-hover:text-cyan-300 transition-colors" />
+        <div className="flex items-center gap-4 group cursor-pointer select-none">
+          <div className="relative">
+             <div className="absolute inset-0 bg-cyber-500/30 blur-lg rounded-full animate-pulse-fast"></div>
+             <div className="relative p-2.5 bg-black/80 rounded-xl border border-cyber-500/50 group-hover:border-cyber-400 group-hover:shadow-[0_0_20px_rgba(14,165,233,0.5)] transition-all duration-300 transform group-hover:scale-105">
+                <Zap className="w-7 h-7 text-cyber-500 group-hover:text-white transition-colors" />
+             </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tighter text-white font-mono">
-              CHRONO<span className="text-cyber-500">PORT</span>
+          <div className="flex flex-col">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-white font-mono italic transform -skew-x-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              TIME <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-400 via-cyan-300 to-cyber-accent animate-pulse">TRAVELLER</span>
             </h1>
-            <p className="text-xs text-cyber-400 tracking-widest font-mono uppercase opacity-70">
-              Virtual Displacement System
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="h-[1px] w-8 bg-cyber-500/50"></div>
+              <p className="text-[10px] text-cyber-400 tracking-[0.25em] font-mono uppercase font-bold text-shadow-glow">
+                TEMPORAL DISPLACEMENT ENGINE
+              </p>
+              <div className="h-[1px] w-8 bg-cyber-500/50"></div>
+            </div>
           </div>
         </div>
-        <div className="hidden md:flex items-center gap-4 text-sm font-mono text-slate-400">
-           <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              SYSTEM ONLINE
-           </span>
-           <span className="opacity-50">|</span>
-           <span>GEMINI CORE: ACTIVE</span>
+        
+        {/* Tech Stack Indicators */}
+        <div className="hidden lg:flex items-center gap-4 xl:gap-6">
+           <div className="flex flex-col items-end gap-1">
+             <div className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">System Integrity</div>
+             <div className="flex gap-1">
+                <div className="w-16 h-1 bg-cyber-500/20 rounded-full overflow-hidden">
+                  <div className="h-full bg-cyber-500 animate-scan"></div>
+                </div>
+                <div className="w-2 h-1 bg-green-500 rounded-full animate-pulse"></div>
+             </div>
+           </div>
+           
+           <div className="h-8 w-[1px] bg-cyber-700/50 mx-2"></div>
+
+           <TechBadge icon={<Cpu className="w-3 h-3" />} label="GEMINI 3 BANANA PRO" color="text-purple-400" glow="shadow-[0_0_10px_rgba(192,132,252,0.3)]" />
+           <TechBadge icon={<Map className="w-3 h-3" />} label="STREET VIEW API" color="text-yellow-400" glow="shadow-[0_0_10px_rgba(250,204,21,0.3)]" />
+           <TechBadge icon={<Server className="w-3 h-3" />} label="MOTIA ENGINE" color="text-green-400" glow="shadow-[0_0_10px_rgba(74,222,128,0.3)]" />
         </div>
       </div>
     </header>
   );
 };
+
+const TechBadge: React.FC<{icon: React.ReactNode, label: string, color: string, glow: string}> = ({ icon, label, color, glow }) => (
+  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 border border-white/5 backdrop-blur-sm font-mono text-[10px] tracking-wider hover:bg-white/5 transition-all cursor-help group ${glow}`}>
+    <span className={`${color} group-hover:scale-110 transition-transform`}>{icon}</span>
+    <span className="text-slate-400 font-bold group-hover:text-white transition-colors">{label}</span>
+  </div>
+);
