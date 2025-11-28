@@ -51,6 +51,13 @@
 ![Endpoint Trace](./docs/img/endpoint-trace.png)
 *Full request tracing with timeline visualization in Motia Workbench*
 
+### Motia Cloud Deployment
+![Motia Cloud](./docs/img/motia-cloud.png)
+*Deploy to Motia Cloud with one click - environment variables and flow visualization*
+
+![Motia Cloud Deploying](./docs/img/motia-cloud-deploying.png)
+*Live deployment progress showing all API endpoints, event handlers, and core resources*
+
 ---
 
 ## 🎬 What is Time Traveller?
@@ -1004,30 +1011,212 @@ const eras = [
 
 ## 🚀 Production Deployment
 
-### Build for Production
+Time Traveller can be deployed using **Motia Cloud** (recommended) or **self-hosted** with Docker.
+
+---
+
+### ☁️ Deploy to Motia Cloud (Recommended)
+
+[Motia Cloud](https://www.motia.dev/docs/deployment-guide/motia-cloud/features) is the easiest way to deploy - one-click deployment with automatic scaling, zero-downtime updates, and instant rollbacks.
+
+#### Method 1: Deploy from Workbench (One-Click)
+
+![Motia Cloud](./docs/img/motia-cloud.png)
+
+1. **Start your local backend** (requires Motia v0.6.4+)
+   ```bash
+   npm run backend
+   ```
+
+2. **Go to Motia Cloud** → [Import from Workbench](https://cloud.motia.dev)
+
+3. **Configure deployment:**
+   | Setting | Value |
+   |---------|-------|
+   | Local Port | `3000` |
+   | Project Name | `time-traveller` |
+   | Environment | `production` |
+
+4. **Add Environment Variables** (upload `.env` file or paste content):
+   | Key | Value |
+   |-----|-------|
+   | `GEMINI_API_KEY` | Your Gemini API key |
+   | `GOOGLE_API_KEY` | Your Google Maps API key |
+   | `VITE_GOOGLE_API_KEY` | Same as GOOGLE_API_KEY |
+
+5. **Click Deploy** and watch the magic happen!
+
+![Motia Cloud Deploying](./docs/img/motia-cloud-deploying.png)
+
+#### Method 2: Deploy via CLI
+
+```bash
+# Deploy with version tag
+motia cloud deploy --api-key <your-api-key> --version-name 1.0.0
+
+# Deploy with environment variables file
+motia cloud deploy --api-key <your-api-key> \
+  --version-name 1.0.0 \
+  --env-file .env.production \
+  --environment-id <env-id>
+```
+
+| Option | Alias | Description | Environment Variable |
+|--------|-------|-------------|---------------------|
+| `--api-key` | `-k` | API key for authentication | `MOTIA_API_KEY` |
+| `--version-name` | `-v` | Version tag for deployment | - |
+| `--environment-id` | `-s` | Target environment ID | `MOTIA_ENVIRONMENT_ID` |
+| `--env-file` | `-e` | Path to environment file | - |
+
+#### Deployment Progress
+
+The deployment creates:
+- 🌊 **Streams** - Real-time teleport progress
+- 💾 **State Machines** - Persistent storage
+- 🚪 **Root API Gateway** - HTTPS endpoint
+- λ **Event Handlers**:
+  - `SynthesizeSpeech` - TTS narration
+  - `GenerateLocationDetails` - Historical context
+  - `GenerateImage` - AI image generation
+  - `CompleteTeleport` - Finalization
+- 🔌 **API Endpoints**: `/teleport`, `/parse-command`, `/history`, `/audio`
+
+#### Motia Cloud Features
+
+| Feature | Description |
+|---------|-------------|
+| 🚀 **Zero-downtime deploys** | Atomic deployments with isolated message queues |
+| 🔄 **Instant rollbacks** | One-click rollback to any previous version |
+| 📊 **Observability** | Logs visualization and tracing tools |
+| 📈 **Auto-scaling** | Horizontal scaling per step |
+| 🔁 **Retry mechanisms** | 3 retries by default for event steps |
+| 🌍 **Multiple environments** | Dev, staging, production |
+
+---
+
+### 🐳 Self-Hosted Deployment (Docker)
+
+For self-hosted deployments using [motia-docker](https://www.motia.dev/docs/deployment-guide/self-hosted):
+
+> **Requires:** motia package `0.5.2-beta.101` or higher
+
+#### Quick Start
+
+```bash
+# 1. Navigate to your project
+cd /path/to/time-traveller
+
+# 2. Setup Docker files (creates Dockerfile and .dockerignore)
+npx motia@latest docker setup
+
+# 3. Build and run
+npx motia@latest docker run --project-name time-traveller
+
+# 4. Check it works
+open http://localhost:3000
+```
+
+#### Manual Docker Setup
+
+**Dockerfile:**
+```dockerfile
+# Use Motia's base image (has Node + Python ready)
+FROM motiadev/motia:latest
+
+# For AWS Lightsail or other ARM platforms, use:
+# FROM --platform=linux/arm64 motiadev/motia:latest
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy your app
+COPY . .
+
+# Expose the port
+EXPOSE 3000
+
+# Start your app
+CMD ["npm", "run", "start"]
+```
+
+**Build and run manually:**
+```bash
+# Build your image
+docker build -t time-traveller .
+
+# Run it
+docker run -it --rm -p 3000:3000 \
+  -e GEMINI_API_KEY=your_key \
+  -e GOOGLE_API_KEY=your_key \
+  time-traveller
+```
+
+#### Deploy to Cloud Platforms
+
+| Platform | Instructions |
+|----------|--------------|
+| **AWS Lightsail** | Use `FROM --platform=linux/arm64 motiadev/motia:latest` |
+| **Railway** | Connect GitHub repo - auto-detects Dockerfile |
+| **Fly.io** | Create `fly.toml` and run `fly deploy` |
+| **Render** | Create Web Service, point to repo |
+
+#### Docker Compose with Redis (Production)
+
+For multi-instance deployments with shared state:
+
+```yaml
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  time-traveller:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+volumes:
+  redis-data:
+```
+
+---
+
+### 🎨 Frontend Deployment
+
+The React frontend can be deployed separately to any static host:
 
 ```bash
 # Build frontend
 npm run build
 
-# The frontend will be in frontend/dist/
-# Serve with any static host (Vercel, Netlify, Cloudflare)
+# Output: frontend/dist/
 ```
 
-### Environment Variables
+Deploy `frontend/dist/` to:
+- **Vercel**: `vercel --prod`
+- **Netlify**: Drag & drop or CLI
+- **Cloudflare Pages**: Connect GitHub repo
+- **GitHub Pages**: Use `gh-pages` package
 
-**Production `.env`:**
+**Environment Variables for Frontend:**
 ```env
-GEMINI_API_KEY=your_production_key
-GOOGLE_API_KEY=your_production_key
-PORT=3000
-NODE_ENV=production
-```
-
-### Run Production Backend
-
-```bash
-npx motia start --port 3000
+VITE_GOOGLE_API_KEY=your_google_maps_key
+VITE_API_URL=https://your-motia-cloud-url.motia.dev
 ```
 
 ---
@@ -1062,6 +1251,12 @@ Time Traveller isn't just a tech demo—it's a powerful tool for:
 
 ## ✨ Recent Updates
 
+### ☁️ Motia Cloud Deployment
+- 🚀 **One-Click Deploy** - Deploy directly from Motia Workbench to production
+- 🔐 **Secure Environment Variables** - Encrypted secrets management
+- 📊 **Live Deployment Logs** - Watch your API endpoints and event handlers go live
+- 🌐 **Production URL** - Instant HTTPS endpoint with auto-scaling
+
 ### UI/UX Enhancements
 - 🌟 **Interactive Starfield Background** - Mouse-responsive parallax animation
 - 🎨 **Motia Blue Color Palette** - Consistent `#0066FF` accent color throughout
@@ -1071,6 +1266,7 @@ Time Traveller isn't just a tech demo—it's a powerful tool for:
 - 🏷️ **Image Source Badges** - Clear indicators showing "STREET VIEW" or "AI GENERATED"
 - ⚡ **Fixed Footer Button** - "Engage Teleport" always visible, never scrolls away
 - 🔗 **GitHub Integration** - Open source badge in header linking to repository
+- 🎯 **Custom Favicon** - Branded Time Traveller icon with Motia Blue theme
 
 ### Backend Improvements
 - 📊 **Street View Metadata** - `usedStreetView` field tracked through entire pipeline
