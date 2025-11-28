@@ -11,17 +11,17 @@
     "backend:start": "motia start --port 3000"
   },
   "dependencies": {
-    "@google/genai": "^0.13.0-beta.161",
-    "@motiadev/plugin-endpoint": "^0.13.0-beta.161",
-    "@motiadev/plugin-logs": "^0.13.0-beta.161",
-    "@motiadev/plugin-observability": "^0.13.0-beta.161",
-    "@motiadev/plugin-states": "^0.13.0-beta.161",
-    "@motiadev/stream-client-browser": "^0.13.0-beta.161",
+    "@google/genai": "1.30.0",
+    "@motiadev/plugin-endpoint": "0.13.0-beta.161",
+    "@motiadev/plugin-logs": "0.13.0-beta.161",
+    "@motiadev/plugin-observability": "0.13.0-beta.161",
+    "@motiadev/plugin-states": "0.13.0-beta.161",
+    "@motiadev/stream-client-browser": "0.13.0-beta.161",
     "lucide-react": "^0.554.0",
-    "motia": "^0.13.0-beta.161",
+    "motia": "0.13.0-beta.161",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "zod": "^3.22.4"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
