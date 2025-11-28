@@ -421,11 +421,27 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
           </div>
 
           {selectedCoords && (
-             <div className="bg-black/80 backdrop-blur-md border border-cyber-500/30 rounded-lg p-2 px-4 text-xs font-mono text-cyber-400 pointer-events-auto shadow-[0_0_15px_rgba(14,165,233,0.1)]">
-                 <div className="flex items-center gap-2">
-                     <Crosshair className="w-3 h-3" />
-                     {selectedCoords.lat.toFixed(4)}, {selectedCoords.lng.toFixed(4)}
+             <div className="flex flex-col gap-2 items-end pointer-events-auto">
+               {/* Street View Status Indicator */}
+               {!streetViewAvailable && (
+                 <div className="bg-amber-900/90 backdrop-blur-md border border-amber-500/50 rounded-lg p-2 px-3 text-[10px] font-mono text-amber-300 flex items-center gap-2 shadow-lg max-w-[200px]">
+                     <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                     <span>Street View unavailable - AI will visualize</span>
                  </div>
+               )}
+               {streetViewAvailable && (
+                 <div className="bg-green-900/90 backdrop-blur-md border border-green-500/50 rounded-lg p-2 px-3 text-[10px] font-mono text-green-300 flex items-center gap-2 shadow-lg">
+                     <Eye className="w-3 h-3" />
+                     <span>Street View available</span>
+                 </div>
+               )}
+               {/* Coordinates */}
+               <div className="bg-black/80 backdrop-blur-md border border-cyber-500/30 rounded-lg p-2 px-4 text-xs font-mono text-cyber-400 shadow-[0_0_15px_rgba(14,165,233,0.1)]">
+                   <div className="flex items-center gap-2">
+                       <Crosshair className="w-3 h-3" />
+                       {selectedCoords.lat.toFixed(4)}, {selectedCoords.lng.toFixed(4)}
+                   </div>
+               </div>
              </div>
           )}
       </div>

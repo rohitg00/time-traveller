@@ -1,20 +1,55 @@
 # 🌀 Time Traveller - Virtual Time Machine
 
-![time traveller workbench](./docs/img/workbench.png)
-
 <div align="center">
 
 ![Time Traveller Banner](https://img.shields.io/badge/Time%20Traveller-Time%20Travel%20Redefined-00d4ff?style=for-the-badge&logo=clock&logoColor=white)
 ![Gemini Nano Banana](https://img.shields.io/badge/Gemini%203%20Pro-Nano%20Banana-ff6b6b?style=for-the-badge&logo=google&logoColor=white)
-![Motia Framework](https://img.shields.io/badge/Powered%20by-Motia-8b5cf6?style=for-the-badge)
+![Motia Framework](https://img.shields.io/badge/Powered%20by-Motia-0066FF?style=for-the-badge)
+![Open Source](https://img.shields.io/badge/Open%20Source-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
 
 **Step into any moment in history. Witness the past. Visualize the future.**
 
 *The world's first AI-powered virtual time machine that generates photorealistic 2K visualizations of any location across different eras, complete with immersive narration and historical context.*
 
-[🚀 Try Demo](#-quick-start) • [📖 Documentation](#-api-reference) • [🎯 Features](#-what-makes-time-traveller-special)
+[🚀 Try Demo](#-quick-start) • [📖 Documentation](#-api-reference) • [🎯 Features](#-what-makes-time-traveller-special) • [⭐ GitHub](https://github.com/rohitg00/time-traveller)
 
 </div>
+
+---
+
+## 🖼️ Screenshots
+
+### Complete UI Experience
+![Time Traveller UI](./docs/img/entire-ui.png)
+*The full Time Traveller interface with control panel, visualization screen, and temporal archives*
+
+### Terminal Mode - Natural Language Commands
+![Terminal Mode](./docs/img/terminal.png)
+*Use natural language commands like "Take me to Paris" for instant time travel*
+
+### Orbital Map Selection
+![Orbital Map](./docs/img/street-view.png)
+*Interactive Google Maps integration with real-time Street View availability detection*
+
+### Control Panel
+![Control Panel](./docs/img/teleport%20options%20bar.png)
+*Manual controls with destination, era, traveler identity, and visual renderer options*
+
+### Temporal Archives
+![Archives](./docs/img/archives.png)
+*Browse your time travel history with thumbnail previews*
+
+### Loading Experience
+![Loading Screen](./docs/img/loading-screen.png)
+*Immersive "Traversing Spacetime" loading animation*
+
+### Motia Workbench - Backend Visualization
+![Workbench Flow](./docs/img/workbench1.png)
+*Visual workflow diagram showing all API and event steps*
+
+### Endpoint Tracing
+![Endpoint Trace](./docs/img/endpoint-trace.png)
+*Full request tracing with timeline visualization in Motia Workbench*
 
 ---
 
@@ -109,6 +144,31 @@ Visit **any time period**:
 - **Structured Logging** - JSON logs with full context
 - **Type Generation** - Auto-generated TypeScript types
 
+### 8. **🎨 Cyberpunk UI Design**
+
+Time Traveller features a stunning cyberpunk-themed interface:
+
+- **Interactive Starfield Background** - Mouse-responsive parallax star animation
+- **Motia Blue Color Palette** - Consistent `#0066FF` accent throughout
+- **HUD-Style Overlays** - Sci-fi inspired heads-up display elements
+- **Holographic Data Cards** - Animated history entries with hover effects
+- **Real-time Status Indicators** - Live connection and stream status
+- **Mobile Responsive** - Full experience on any device
+
+### 9. **📍 Smart Street View Detection**
+
+The app intelligently handles Google Street View availability:
+
+| Status | Badge | Behavior |
+|--------|-------|----------|
+| ✅ Available | 🟢 `STREET VIEW` | Uses real imagery as AI context |
+| ⚠️ Unavailable | 🟡 `AI GENERATED` | Generates visualization from location data |
+
+- **Real-time detection** when selecting coordinates on the map
+- **Clear visual indicators** showing image source
+- **Graceful fallback** with informative messages
+- **No broken experiences** - always generates beautiful results
+
 ---
 
 ## 🚀 Quick Start
@@ -167,48 +227,63 @@ npm run dev
 
 ## 🎮 How to Use
 
-### Method 1: Simple Text Command
+Time Traveller offers **three input modes** accessible via tabs:
 
-```
-Type: "Take me to Paris in 1889, Impressionist style"
-Press Enter → Watch the magic happen in real-time
-```
+### 📋 Manual Mode
+![Control Panel](./docs/img/teleport%20options%20bar.png)
 
-### Method 2: Detailed Controls
-
-1. **📍 Choose Location**
-   - Type a destination OR
-   - Click on the interactive map to select coordinates
-   - See real-time geocoding and address lookup
-
-2. **⏰ Select Era**
-   - Ancient Rome (100 AD)
-   - Medieval (1200 AD)
-   - Renaissance (1500 AD)
-   - Victorian Era (1890 AD)
-   - Modern Day
-   - Future (2100 AD)
-   - ...or type any custom era!
-
-3. **🎨 Pick Style**
+1. **📍 Target Coordinates** - Enter location name or coordinates
+2. **⏰ Temporal Epoch** - Specify the era (e.g., "1920s", "2050", "Present Day")
+3. **👤 Traveler Identity** - Upload photo or use camera to insert yourself into the scene
+4. **🎨 Visual Renderer** - Choose from 5 artistic styles:
    - Photorealistic (default)
-   - Impressionist
-   - Renaissance
-   - Baroque
-   - Cyberpunk
+   - Cyberpunk/Sci-Fi
+   - Vintage Film
+   - Oil Painting
+   - Surrealist Dream
 
-4. **🚀 Teleport!**
-   - Watch real-time progress
-   - See image generation (30% → 60%)
-   - See detail generation (60% → 100%)
-   - Enjoy the results with audio narration
+### 💻 Terminal Mode
+![Terminal Mode](./docs/img/terminal.png)
 
-### Method 3: Upload Reference Image
+Use natural language commands:
+```
+> take me to paris
+> Initiating temporal jump to designated coordinates.
+```
 
-Want to see a specific building through time?
-1. Upload a photo
-2. Specify the era
-3. AI generates what it looked like then!
+The AI understands context and extracts destination, era, and style automatically!
+
+### 🌍 Orbital Mode
+![Orbital Map](./docs/img/street-view.png)
+
+1. **Click anywhere** on the cyberpunk-styled Google Map
+2. **See real-time indicators**:
+   - 🟢 "Street View available" - Location has imagery
+   - 🟡 "Street View unavailable - AI will visualize" - No imagery, AI generates
+3. **Set the era** in the mini input below the map
+4. **Jump to Coords** - Teleport to your selected location!
+
+### 📸 Traveler Identity Feature
+
+Want to **insert yourself** into any time period?
+
+1. **Upload** a photo from your device, OR
+2. **Use Camera** to take a selfie
+3. The AI will place you naturally into the generated scene
+4. Your reference image appears in the corner of the final visualization
+
+### 🚀 The Teleport Experience
+
+Watch your time travel unfold in real-time:
+
+```
+Status: initiating       → Progress: 10%  ⏳
+Status: generating-image → Progress: 30%  🎨
+Status: generating-details → Progress: 60%  📝
+Status: completed        → Progress: 100% ✨
+```
+
+![Loading Screen](./docs/img/loading-screen.png)
 
 ---
 
@@ -502,14 +577,16 @@ time-traveller/
 │   ├── audioUtils.ts               # Audio decoding utilities
 │   ├── types.ts                    # TypeScript type definitions
 │   ├── components/                 # UI Components
-│   │   ├── ControlPanel.tsx        # Teleport controls & command input
-│   │   ├── ViewScreen.tsx          # Image & description display
-│   │   ├── MapSelector.tsx         # Interactive location picker
-│   │   ├── HistoryLog.tsx          # Travel history sidebar
-│   │   └── Header.tsx              # App header with branding
+│   │   ├── ControlPanel.tsx        # 3-tab control panel (Manual/Terminal/Orbital)
+│   │   ├── ViewScreen.tsx          # Image display with HUD overlays
+│   │   ├── MapSelector.tsx         # Google Maps with Street View detection
+│   │   ├── HistoryLog.tsx          # Holographic data cards for history
+│   │   ├── Header.tsx              # Cyberpunk header with tech badges
+│   │   ├── Starfield.tsx           # Interactive parallax star background
+│   │   └── Layout.tsx              # Responsive layout wrapper
 │   ├── vite.config.ts              # Vite configuration
 │   ├── tsconfig.json               # Frontend TypeScript config
-│   └── index.html                  # Entry point
+│   └── index.html                  # Entry point with Tailwind config
 │
 ├── ⚙️ steps/                       # Motia Backend Steps
 │   │
@@ -635,23 +712,33 @@ sequenceDiagram
 ### Access Workbench
 Open **http://localhost:3000** while backend is running
 
-### Features
+### Flow Visualization
+![Workbench Flow](./docs/img/workbench1.png)
 
-#### 🎯 **Flow Visualization**
 See your `time-traveller-flow` as an interactive graph:
-- Blue nodes = API Steps
-- Green nodes = Event Steps
-- Yellow nodes = Streams
-- Arrows show event flow
+- 🔵 **Blue nodes** = API Steps (REST endpoints)
+- 🟢 **Green nodes** = Event Steps (background processing)
+- 🟡 **Yellow nodes** = Streams (real-time updates)
+- ➡️ **Dashed lines** = Event flow connections
+
+### Endpoint Tracing
+![Endpoint Trace](./docs/img/endpoint-trace.png)
+
+Full request tracing with:
+- **Timeline visualization** - See exactly how long each step takes
+- **Parallel execution** - Watch GenerateImage and GenerateLocationDetails run simultaneously
+- **State updates** - Track data flow through streams and state
+- **Event emissions** - See when events are emitted and consumed
+
+### Features
 
 #### 📊 **Endpoints Tab**
 Auto-generated API documentation:
-- All 5 REST endpoints
-- Request/response schemas
-- Example payloads
-- Test directly from UI
+- All 5 REST endpoints with schemas
+- Test directly from UI with the "Send" button
+- View request/response bodies
 
-#### 🔍 **Logs Tab**
+#### 🔍 **Tracing Tab**
 Structured logging with full context:
 ```
 [9:15:00 PM] ABC123-456 [INFO] InitiateTeleport
@@ -663,7 +750,7 @@ Structured logging with full context:
 #### 💾 **States Tab**
 Inspect stored data:
 - `teleports` - Active teleport requests
-- `teleport-images` - Generated images
+- `teleport-images` - Generated images with Street View metadata
 - `teleport-details` - Historical descriptions
 - `teleport-audio` - Synthesized narrations
 - `teleport-history` - Complete travel log
@@ -689,9 +776,11 @@ Inspect stored data:
 | **React 19** | UI framework |
 | **TypeScript** | Type safety |
 | **Vite** | Lightning-fast dev server & bundler |
-| **Tailwind CSS** | Modern utility-first styling |
+| **Tailwind CSS** | Cyberpunk-themed styling with Motia Blue (`#0066FF`) |
 | **Lucide Icons** | Beautiful icon set |
-| **Leaflet** | Backup map system |
+| **Google Maps API** | Interactive map with real-time Street View detection |
+| **Leaflet** | Backup map system when Google unavailable |
+| **Canvas API** | Interactive starfield background animation |
 | **@motiadev/stream-client-browser** | Real-time WebSocket streams |
 
 ### AI Models
@@ -794,12 +883,25 @@ This creates `types.d.ts` with all step handlers typed.
 
 ### 🗺️ **Street View Unavailable**
 
-**Message:** `"This visualization uses AI interpretation as Street View data is not available for this location."`
+**Message:** `"Street View unavailable for this location - AI will visualize"`
 
-**This is normal!** Many locations don't have Street View (oceans, remote areas, historical sites). Time Traveller handles it gracefully:
-- Shows informative message
-- Generates beautiful AI visualization anyway
-- Uses location description for context
+**This is completely normal!** Many locations don't have Street View coverage:
+- 🌊 Oceans and remote areas
+- 🏔️ Mountains and wilderness
+- 🏗️ New developments
+- 🔒 Private roads
+
+**How Time Traveller handles it:**
+
+| Where You See It | What It Shows |
+|------------------|---------------|
+| **Map Selection** | 🟡 Real-time warning badge when you click |
+| **Generated Image** | 🟡 "AI GENERATED" badge in top-right |
+| **Analysis Panel** | ⚠️ Yellow notice explaining the fallback |
+
+The app **always generates beautiful results** - it just uses different AI approaches:
+- ✅ **With Street View**: Uses real imagery as context for the AI
+- ✅ **Without Street View**: Uses Google Search grounding + location data
 
 ### 🌐 **WebSocket Connection Failed**
 
@@ -958,6 +1060,25 @@ Time Traveller isn't just a tech demo—it's a powerful tool for:
 
 ---
 
+## ✨ Recent Updates
+
+### UI/UX Enhancements
+- 🌟 **Interactive Starfield Background** - Mouse-responsive parallax animation
+- 🎨 **Motia Blue Color Palette** - Consistent `#0066FF` accent color throughout
+- 📱 **Mobile Responsive Design** - Full experience on any device size
+- 🃏 **Holographic History Cards** - Animated entries with hover effects and thumbnails
+- 🔔 **Real-time Street View Detection** - Know before you teleport if Street View is available
+- 🏷️ **Image Source Badges** - Clear indicators showing "STREET VIEW" or "AI GENERATED"
+- ⚡ **Fixed Footer Button** - "Engage Teleport" always visible, never scrolls away
+- 🔗 **GitHub Integration** - Open source badge in header linking to repository
+
+### Backend Improvements
+- 📊 **Street View Metadata** - `usedStreetView` field tracked through entire pipeline
+- 🔄 **E2BIG Error Fix** - Large reference images now stored in state, not event payloads
+- 📝 **Enhanced Logging** - Better trace visibility in Motia Workbench
+
+---
+
 ## 🤝 Contributing
 
 Time Traveller is a showcase of Motia's capabilities. Feel free to:
@@ -966,6 +1087,8 @@ Time Traveller is a showcase of Motia's capabilities. Feel free to:
 - Extend with more eras/styles
 - Improve UI/UX
 - Share your coolest time travels!
+
+**[⭐ Star us on GitHub](https://github.com/rohitg00/time-traveller)** if you find this project useful!
 
 ---
 
@@ -985,8 +1108,10 @@ MIT License - Free to use, modify, and distribute.
 
 ---
 
-**Made with ⚡ by the Motia Community**
+**Made with ⚡ by [Rohit Ghumare](https://github.com/rohitg00) & the Motia Community**
 
-*Powered by Google Gemini Nano Banana Pro 🍌*
+*Powered by Google Gemini Nano Banana Pro 🍌 | Motia Backend Framework 💙*
+
+[![GitHub stars](https://img.shields.io/github/stars/rohitg00/time-traveller?style=social)](https://github.com/rohitg00/time-traveller)
 
 </div>

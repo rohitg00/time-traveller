@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Map, Cpu, Server } from 'lucide-react';
+import { Zap, Map, Cpu, Server, Github } from 'lucide-react';
 
 export const Header: React.FC = () => {
   return (
@@ -26,23 +26,75 @@ export const Header: React.FC = () => {
           </div>
         </div>
         
-        {/* Tech Stack Indicators */}
-        <div className="hidden lg:flex items-center gap-4 xl:gap-6">
-           <div className="flex flex-col items-end gap-1">
-             <div className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">System Integrity</div>
-             <div className="flex gap-1">
-                <div className="w-16 h-1 bg-cyber-500/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-cyber-500 animate-scan"></div>
-                </div>
-                <div className="w-2 h-1 bg-green-500 rounded-full animate-pulse"></div>
-             </div>
-           </div>
-           
-           <div className="h-8 w-[1px] bg-cyber-700/50 mx-2"></div>
+        <div className="flex items-center gap-6">
+            {/* Tech Stack Indicators */}
+            <div className="hidden lg:flex items-center gap-4 xl:gap-6">
+               <div className="flex flex-col items-end gap-1">
+                 <div className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">System Integrity</div>
+                 <div className="flex gap-1">
+                    <div className="w-16 h-1 bg-cyber-500/20 rounded-full overflow-hidden">
+                      <div className="h-full bg-cyber-500 animate-scan"></div>
+                    </div>
+                    <div className="w-2 h-1 bg-green-500 rounded-full animate-pulse"></div>
+                 </div>
+               </div>
+               
+               <div className="h-8 w-[1px] bg-cyber-700/50 mx-2"></div>
+    
+               <a
+                 href="https://ai.google.dev/gemini-api/docs/image-generation"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="hover:underline"
+               >
+                 <TechBadge
+                   icon={<Cpu className="w-3 h-3" />}
+                   label="GEMINI 3 BANANA PRO"
+                   color="text-purple-400"
+                   glow="shadow-[0_0_10px_rgba(192,132,252,0.3)]"
+                 />
+               </a>
+               <a
+                 href="https://developers.google.com/maps/documentation#maps-documentation"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="hover:underline"
+               >
+                 <TechBadge
+                   icon={<Map className="w-3 h-3" />}
+                   label="STREET VIEW API"
+                   color="text-yellow-400"
+                   glow="shadow-[0_0_10px_rgba(250,204,21,0.3)]"
+                 />
+               </a>
+               <a
+                 href="https://www.motia.dev"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="hover:underline"
+               >
+                <TechBadge
+                  icon={<Server className="w-3 h-3" />}
+                  label="MOTIA Backend Framework"
+                  color="text-cyber-500"
+                  glow="shadow-[0_0_10px_rgba(0,102,255,0.4)]"
+                />
+               </a>
+            </div>
 
-           <TechBadge icon={<Cpu className="w-3 h-3" />} label="GEMINI 3 BANANA PRO" color="text-purple-400" glow="shadow-[0_0_10px_rgba(192,132,252,0.3)]" />
-           <TechBadge icon={<Map className="w-3 h-3" />} label="STREET VIEW API" color="text-yellow-400" glow="shadow-[0_0_10px_rgba(250,204,21,0.3)]" />
-           <TechBadge icon={<Server className="w-3 h-3" />} label="MOTIA ENGINE" color="text-green-400" glow="shadow-[0_0_10px_rgba(74,222,128,0.3)]" />
+            {/* GitHub Link - Visible on all screens */}
+            <a 
+              href="https://github.com/rohitg00/time-traveller" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-slate-400 hover:text-white transition-all hover:scale-105 group/gh"
+              title="View Source on GitHub"
+            >
+              <div className="p-2 bg-cyber-900/50 rounded-lg border border-cyber-700 group-hover/gh:border-cyber-500/50 group-hover/gh:bg-cyber-800 transition-all">
+                <Github className="w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <span className="hidden md:inline text-xs font-mono font-bold tracking-wider">OPEN SOURCE</span>
+            </a>
         </div>
       </div>
     </header>

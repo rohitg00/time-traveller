@@ -1,6 +1,6 @@
 import React from 'react';
 import { TeleportState, TravelLogItem } from '../types';
-import { Volume2, Loader2, VolumeX, Map, ExternalLink, Info, Maximize2, Scan } from 'lucide-react';
+import { Volume2, Loader2, VolumeX, Map, ExternalLink, Scan, Sparkles, Camera, AlertTriangle } from 'lucide-react';
 
 interface ViewScreenProps {
   state: TeleportState;
@@ -12,7 +12,7 @@ interface ViewScreenProps {
 export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, isAudioPlaying }) => {
   if (state === 'idle') {
     return (
-      <div className="flex-1 bg-black rounded-xl border border-cyber-700 flex items-center justify-center min-h-[400px] lg:min-h-[600px] relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <div className="flex-1 bg-black rounded-xl border border-cyber-700 flex items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         {/* Dynamic Perspective Grid */}
         <div className="absolute inset-0 opacity-20" 
              style={{
@@ -63,7 +63,7 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
 
   if (state === 'teleporting') {
     return (
-      <div className="flex-1 bg-black rounded-xl border border-cyber-500 shadow-[0_0_50px_rgba(14,165,233,0.3)] flex flex-col items-center justify-center min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
+      <div className="flex-1 bg-black rounded-xl border border-cyber-500 shadow-[0_0_50px_rgba(14,165,233,0.3)] flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
         {/* Hyperspace Effect */}
         <div className="absolute inset-0 flex items-center justify-center">
            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent animate-pulse"></div>
@@ -120,6 +120,19 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
              </div>
              
              <div className="flex gap-2">
+                {/* Image Source Indicator */}
+                {location.usedStreetView === false && (
+                  <div className="bg-amber-900/80 backdrop-blur border border-amber-500/50 px-2 py-1 rounded text-[10px] font-mono text-amber-300 flex items-center gap-1" title="Street View unavailable for this location - AI visualization generated">
+                    <Sparkles className="w-3 h-3" />
+                    AI GENERATED
+                  </div>
+                )}
+                {location.usedStreetView === true && (
+                  <div className="bg-green-900/80 backdrop-blur border border-green-500/50 px-2 py-1 rounded text-[10px] font-mono text-green-300 flex items-center gap-1" title="Based on Google Street View imagery">
+                    <Camera className="w-3 h-3" />
+                    STREET VIEW
+                  </div>
+                )}
                 <div className="bg-black/50 backdrop-blur border border-cyber-500/30 px-2 py-1 rounded text-[10px] font-mono text-cyber-300">
                   IMG.RES.8K
                 </div>
@@ -191,6 +204,17 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             <div className="absolute top-0 left-[-5px] w-2 h-2 bg-cyber-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
             <div className="absolute bottom-0 left-[-5px] w-2 h-2 bg-cyber-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
           </div>
+
+          {/* Street View Unavailable Notice */}
+          {location.usedStreetView === false && (
+            <div className="mt-4 p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg flex items-start gap-3">
+              <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-amber-200/80">
+                <span className="font-bold text-amber-300">Street View Unavailable:</span> Google Street View does not have imagery for this exact location. 
+                This visualization was generated using AI based on location data and nearby landmarks.
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 pt-4 border-t border-cyber-700/50 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-500 uppercase tracking-wider">
              <div className="flex gap-4">

@@ -43,6 +43,7 @@ interface HistoryItem {
   description: string;
   mapsUri?: string;
   referenceImage?: string;
+  usedStreetView?: boolean;
   timestamp: number;
 }
 
@@ -94,6 +95,7 @@ export const handler: Handlers['CompleteTeleport'] = async (input, { logger, str
       imageData: imageState.imageData,
       description: finalDescription,
       mapsUri: detailsState.mapsUri,
+      usedStreetView: imageState.usedStreetView,
       timestamp: Date.now()
     });
 
@@ -107,6 +109,7 @@ export const handler: Handlers['CompleteTeleport'] = async (input, { logger, str
       description: finalDescription,
       mapsUri: detailsState.mapsUri,
       referenceImage: teleportData.referenceImage,
+      usedStreetView: imageState.usedStreetView,
       timestamp: Date.now()
     };
     

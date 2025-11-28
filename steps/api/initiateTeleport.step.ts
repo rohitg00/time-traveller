@@ -90,7 +90,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
         destination,
         era,
         style,
-        referenceImage,
+        // referenceImage removed to avoid E2BIG error, fetched from state
         coordinates
       }
     });

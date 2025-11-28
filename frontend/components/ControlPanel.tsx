@@ -177,7 +177,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
   const isSubmitDisabled = isTeleporting || !destination.trim();
 
   return (
-    <div className="bg-cyber-800 border border-cyber-700 rounded-xl shadow-xl relative overflow-hidden group flex flex-col h-[600px]">
+    <div className="bg-cyber-800 border border-cyber-700 rounded-xl shadow-xl relative overflow-hidden group flex flex-col h-[500px] md:h-[600px]">
       {/* Decorative scanline */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-500 to-transparent opacity-30"></div>
 
@@ -343,8 +343,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                      <div key={i} className={`${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
                         <span className={`inline-block px-3 py-2 rounded-lg ${
                           msg.role === 'user' 
-                            ? 'bg-cyber-900 border border-cyber-700 text-cyber-100' 
-                            : 'text-green-400'
+                            ? 'bg-cyber-900 border border-cyber-700 text-white' 
+                            : 'text-cyber-400 font-bold'
                         }`}>
                            {msg.role === 'ai' && <span className="mr-2 opacity-50">&gt;</span>}
                            {msg.text}
@@ -352,8 +352,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                      </div>
                    ))}
                    {isProcessingChat && (
-                     <div className="text-left text-green-400 animate-pulse">
-                       &gt; Analyzing request...
+                     <div className="text-left text-cyber-500 animate-pulse">
+                       &gt; Analyzing request<span className="animate-pulse">_</span>
                      </div>
                    )}
                    <div ref={chatEndRef} />

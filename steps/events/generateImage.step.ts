@@ -30,6 +30,7 @@ interface TeleportData {
   era: string;
   style: string;
   mapsApiKey: string;
+  referenceImage?: string;
 }
 
 interface ImageData {
@@ -57,9 +58,12 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       timestamp: Date.now()
     });
 
-    // Retrieve Maps API key from state
+    // Retrieve data from state
     const teleportData = await state.get<TeleportData>('teleports', teleportId);
     const mapsApiKey = teleportData?.mapsApiKey || process.env.GOOGLE_API_KEY || '';
+    
+    // Use referenceImage from input OR state to avoid E2BIG errors with large payloads
+    const imageToUse = referenceImage || teleportData?.referenceImage;
 
     // Generate the image
     const result = await generateImage(
@@ -67,7 +71,7 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       era, 
       style, 
       mapsApiKey,
-      referenceImage, 
+      imageToUse, 
       coordinates
     );
     

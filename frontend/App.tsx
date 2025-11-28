@@ -7,6 +7,7 @@ import { ControlPanel } from './components/ControlPanel';
 import { ViewScreen } from './components/ViewScreen';
 import { HistoryLog } from './components/HistoryLog';
 import { Header } from './components/Header';
+import { Starfield } from './components/Starfield';
 import { AlertCircle, Lock, Zap } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -45,6 +46,7 @@ const App: React.FC = () => {
           description: item.description,
           mapsUri: item.mapsUri,
           referenceImage: item.referenceImage,
+          usedStreetView: item.usedStreetView,
         })));
       } catch (e) {
         console.error("Failed to load history from server", e);
@@ -105,6 +107,7 @@ const App: React.FC = () => {
               description: progress.description,
               mapsUri: progress.mapsUri,
               referenceImage: referenceImage,
+              usedStreetView: progress.usedStreetView,
             };
 
             setCurrentLocation(newItem);
@@ -167,6 +170,7 @@ const App: React.FC = () => {
             description: progress.description,
             mapsUri: progress.mapsUri,
             referenceImage: referenceImage,
+            usedStreetView: progress.usedStreetView,
           };
 
           setCurrentLocation(newItem);
@@ -244,7 +248,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-900 text-slate-200 flex flex-col font-sans selection:bg-cyber-500 selection:text-white relative">
+    <div className="min-h-screen text-slate-200 flex flex-col font-sans selection:bg-cyber-500 selection:text-white relative overflow-x-hidden">
+      <Starfield />
       
       {/* API Key Modal Overlay */}
       {!hasApiKey && (
@@ -277,10 +282,10 @@ const App: React.FC = () => {
 
       <Header />
       
-      <main className="flex-1 container mx-auto p-4 md:p-6 lg:p-8 flex flex-col lg:flex-row gap-6">
+      <main className="flex-1 container mx-auto px-3 py-4 md:p-6 lg:p-8 flex flex-col lg:flex-row gap-4 lg:gap-6">
         
         {/* Left Panel: Controls & History */}
-        <div className="w-full lg:w-1/3 flex flex-col gap-6">
+        <div className="w-full lg:w-1/3 flex flex-col gap-4 lg:gap-6 order-2 lg:order-1">
           <ControlPanel 
             onTeleport={handleTeleport} 
             isTeleporting={teleportState === 'teleporting'} 
@@ -293,7 +298,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Right Panel: Visualizer */}
-        <div className="w-full lg:w-2/3 flex flex-col">
+        <div className="w-full lg:w-2/3 flex flex-col order-1 lg:order-2 mb-4 lg:mb-0">
           {error && (
             <div className="mb-4 p-4 bg-red-900/20 border border-red-500/50 rounded-lg flex items-center gap-3 text-red-200 animate-pulse">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />

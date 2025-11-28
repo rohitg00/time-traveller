@@ -11,12 +11,14 @@ export interface TravelLogItem {
   description: string;
   mapsUri?: string; // Link to Google Maps/Street View
   referenceImage?: string; // The user photo used for this generation
+  usedStreetView?: boolean; // Whether Street View imagery was used
 }
 
 export interface TeleportResult {
   imageData: string;
   description: string;
   mapsUri?: string;
+  usedStreetView?: boolean;
 }
 
 export enum LocationStyle {
