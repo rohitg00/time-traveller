@@ -61,7 +61,7 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
     // Retrieve data from state
     const teleportData = await state.get<TeleportData>('teleports', teleportId);
     const mapsApiKey = teleportData?.mapsApiKey || process.env.GOOGLE_API_KEY || '';
-    
+
     // Reference image URL from Supabase (if uploaded)
     const referenceImageUrl = teleportData?.referenceImageUrl;
     

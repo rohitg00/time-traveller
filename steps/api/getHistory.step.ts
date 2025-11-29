@@ -1,6 +1,7 @@
 import { ApiRouteConfig, Handlers } from 'motia';
 import { z } from 'zod';
 import { authRequired } from '../middlewares/auth.middleware';
+import { getHistory as getHistoryFromSupabase, isSupabaseConfigured } from '../../services/supabase/historyService';
 
 const historyItemSchema = z.object({
   id: z.string(),
@@ -8,11 +9,9 @@ const historyItemSchema = z.object({
   era: z.string(),
   style: z.string(),
   imageUrl: z.string().optional(), // URL from Supabase
-  imageData: z.string().optional(), // Fallback for backwards compatibility
   description: z.string(),
   mapsUri: z.string().optional(),
   referenceImageUrl: z.string().optional(), // URL from Supabase
-  referenceImage: z.string().optional(), // Fallback for backwards compatibility
   usedStreetView: z.boolean().optional(),
   timestamp: z.number()
 });
@@ -39,23 +38,7 @@ export const config: ApiRouteConfig = {
   }
 };
 
-interface HistoryItem {
-  id: string;
-  destination: string;
-  era: string;
-  style: string;
-  imageUrl?: string; // URL from Supabase
-  imageData?: string; // Fallback for backwards compatibility
-  description: string;
-  mapsUri?: string;
-  referenceImageUrl?: string; // URL from Supabase
-  referenceImage?: string; // Fallback for backwards compatibility
-  usedStreetView?: boolean;
-  timestamp: number;
-  userId?: string; // Added for filtering
-}
-
-export const handler: Handlers['GetHistory'] = async (req, { logger, state, traceId }) => {
+export const handler: Handlers['GetHistory'] = async (req, { logger, traceId }) => {
   try {
     // Get userId from auth middleware
     const userId = req.userId;
@@ -71,24 +54,26 @@ export const handler: Handlers['GetHistory'] = async (req, { logger, state, trac
     
     logger.info('Fetching teleport history for user', { traceId, userId, limit });
     
-    // Get user-specific history items
-    const userHistoryGroup = `teleport-history-${userId}`;
-    const history = await state.getGroup<HistoryItem>(userHistoryGroup);
-    
-    // Sort by timestamp (most recent first) and limit
-    const sortedHistory = history
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
+    // Get history from Supabase (more reliable than Motia state for persistent data)
+    if (!isSupabaseConfigured()) {
+      logger.warn('Supabase not configured, returning empty history');
+      return {
+        status: 200,
+        body: { history: [] }
+      };
+    }
+
+    const history = await getHistoryFromSupabase(userId, limit);
     
     logger.info('History fetched successfully', { 
       traceId, 
       userId, 
-      count: sortedHistory.length 
+      count: history.length 
     });
     
     return {
       status: 200,
-      body: { history: sortedHistory }
+      body: { history }
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

@@ -1,5 +1,6 @@
 import { EventConfig, Handlers } from 'motia';
 import { z } from 'zod';
+import { saveHistory, isSupabaseConfigured } from '../../services/supabase/historyService';
 
 const inputSchema = z.object({
   teleportId: z.string()
@@ -11,7 +12,6 @@ export const config: EventConfig = {
   description: 'Completes the teleportation sequence when both image and details are ready',
   subscribes: ['image-generated', 'location-details-generated'],
   emits: [],
-  // @ts-expect-error - Zod schema compatible at runtime, TypeScript strictness issue
   input: inputSchema,
   flows: ['time-traveller-flow']
 };
@@ -33,19 +33,6 @@ interface TeleportData {
   style: string;
   referenceImageUrl?: string; // URL from Supabase
   userId: string; // User who initiated the teleport
-}
-
-interface HistoryItem {
-  id: string;
-  destination: string;
-  era: string;
-  style: string;
-  imageUrl: string; // URL instead of base64
-  description: string;
-  mapsUri?: string;
-  referenceImageUrl?: string; // URL instead of base64
-  usedStreetView?: boolean;
-  timestamp: number;
 }
 
 type CompleteTeleportInput = z.infer<typeof inputSchema>;
@@ -101,29 +88,32 @@ export const handler: Handlers['CompleteTeleport'] = async (input, { logger, str
       timestamp: Date.now()
     });
 
-    // Store in history for quick retrieval (URLs only)
-    const historyItem: HistoryItem = {
-      id: teleportId,
-      destination: teleportData.destination,
-      era: teleportData.era,
-      style: teleportData.style,
-      imageUrl: imageState.imageUrl, // URL instead of base64
-      description: finalDescription,
-      mapsUri: detailsState.mapsUri,
-      referenceImageUrl: teleportData.referenceImageUrl, // URL instead of base64
-      usedStreetView: imageState.usedStreetView,
-      timestamp: Date.now()
-    };
-    
-    // Store in user-specific history group for data isolation
+    // Store in Supabase for persistent history (more reliable than Motia state)
     const userId = teleportData.userId;
-    if (userId) {
-      await state.set(`teleport-history-${userId}`, teleportId, historyItem);
-      logger.info('History stored for user', { teleportId, userId });
+    if (userId && isSupabaseConfigured()) {
+      try {
+        await saveHistory({
+          id: teleportId,
+          user_id: userId,
+          destination: teleportData.destination,
+          era: teleportData.era,
+          style: teleportData.style,
+          image_url: imageState.imageUrl,
+          description: finalDescription,
+          maps_uri: detailsState.mapsUri,
+          reference_image_url: teleportData.referenceImageUrl,
+          used_street_view: imageState.usedStreetView,
+        });
+        logger.info('History stored in Supabase for user', { teleportId, userId });
+      } catch (historyError) {
+        logger.warn('Failed to store history in Supabase', { 
+          teleportId, 
+          userId,
+          error: historyError instanceof Error ? historyError.message : 'Unknown error'
+        });
+      }
     } else {
-      // Fallback to global history (for backwards compatibility)
-      await state.set('teleport-history', teleportId, historyItem);
-      logger.warn('No userId found, storing in global history', { teleportId });
+      logger.warn('No userId or Supabase not configured, history not stored', { teleportId });
     }
     
     logger.info('Teleport completed successfully', { traceId, teleportId });

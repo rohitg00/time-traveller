@@ -115,7 +115,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
     };
     
     await state.set('teleports', teleportId, teleportData);
-    
+
     // Also store in user-specific group for easy retrieval
     await state.set(`user-teleports-${userId}`, teleportId, { teleportId, timestamp: Date.now() });
 

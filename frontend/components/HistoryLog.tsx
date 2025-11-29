@@ -60,16 +60,16 @@ export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onSelect, curre
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-1 relative z-10">
+            <div className="flex justify-between items-start mb-1 relative z-10">
                     <span className={`font-bold font-mono text-xs truncate pr-2 ${currentId === item.id ? 'text-cyber-400' : 'text-slate-200 group-hover:text-white'}`}>
-                        {item.destination}
-                    </span>
+                {item.destination}
+              </span>
                     <span className="text-[9px] text-slate-500 font-mono shrink-0 bg-black/50 px-1.5 py-0.5 rounded border border-cyber-900">
-                        {new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-end relative z-10">
+                {new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+              </span>
+            </div>
+            
+            <div className="flex justify-between items-end relative z-10">
                         <div className="flex flex-col gap-0.5">
                             <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
                                 <Clock className="w-3 h-3 opacity-50" /> {item.era}
@@ -77,9 +77,9 @@ export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onSelect, curre
                             <span className="text-[9px] text-cyber-600 uppercase tracking-wider">{item.style}</span>
                         </div>
                         
-                        {currentId !== item.id && (
+               {currentId !== item.id && (
                             <ChevronRight className="w-3 h-3 text-cyber-700 group-hover:text-cyber-400 transform group-hover:translate-x-1 transition-all" />
-                        )}
+               )}
                         {currentId === item.id && (
                             <div className="flex gap-0.5 items-end">
                                 <div className="w-0.5 h-1 bg-cyber-500 animate-[pulse_1s_ease-in-out_infinite]"></div>

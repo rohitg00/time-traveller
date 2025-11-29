@@ -112,7 +112,7 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                  <span className="text-white font-mono text-sm font-bold tracking-wider uppercase text-shadow-sm">
                    {location.destination}
-                 </span>
+            </span>
                </div>
                <div className="text-cyber-400 font-mono text-xs tracking-widest uppercase pl-4 border-l border-cyber-500/50">
                  EPOCH: {location.era}
@@ -199,8 +199,8 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
           
           <div className="relative pl-6 border-l-2 border-cyber-500/30">
             <p className="text-slate-300 leading-relaxed font-light tracking-wide text-sm md:text-base italic">
-              "{location.description}"
-            </p>
+            "{location.description}"
+          </p>
             <div className="absolute top-0 left-[-5px] w-2 h-2 bg-cyber-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
             <div className="absolute bottom-0 left-[-5px] w-2 h-2 bg-cyber-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
           </div>

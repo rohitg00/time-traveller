@@ -37,29 +37,30 @@ export const handler: Handlers['SynthesizeSpeech'] = async (input, { logger, sta
     
     logger.info('Speech synthesized successfully', { traceId, teleportId });
     
-    // Upload to Supabase if configured (production), otherwise store in state (local dev)
-    let audioState: AudioData;
-    
+    // Upload to Supabase (production) - this also stores the URL in teleport_audio table
     if (isSupabaseConfigured()) {
       try {
         logger.info('Uploading audio to Supabase', { teleportId });
         const audioUrl = await uploadAudio(teleportId, audioData);
-        audioState = { audioUrl };
         logger.info('Audio uploaded successfully', { teleportId, audioUrl });
+        // No need to store in Motia state - URL is stored in Supabase database
       } catch (uploadError) {
-        logger.warn('Failed to upload audio to Supabase, storing in state', { 
+        logger.warn('Failed to upload audio to Supabase', { 
           teleportId, 
           error: uploadError instanceof Error ? uploadError.message : 'Unknown error'
         });
-        // Fallback to state storage (may fail due to size limits)
-        audioState = { audioData };
+        // Try to store in state as fallback (may fail due to size limits)
+        try {
+          await state.set('teleport-audio', teleportId, { audioData } as AudioData);
+        } catch {
+          logger.warn('Failed to store audio in state as well', { teleportId });
+        }
       }
     } else {
       // Local development - store in state
-      audioState = { audioData };
+      const audioState: AudioData = { audioData };
+      await state.set('teleport-audio', teleportId, audioState);
     }
-    
-    await state.set('teleport-audio', teleportId, audioState);
 
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Speech synthesis failed';

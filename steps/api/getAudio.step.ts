@@ -1,5 +1,6 @@
 import { ApiRouteConfig, Handlers } from 'motia';
 import { z } from 'zod';
+import { getAudioUrl, isSupabaseConfigured } from '../../services/supabase/storageService';
 
 export const config: ApiRouteConfig = {
   name: 'GetAudio',
@@ -31,9 +32,23 @@ export const handler: Handlers['GetAudio'] = async (req, { logger, state, traceI
   try {
     logger.info('Fetching teleport audio', { traceId, teleportId });
     
+    // First try to get from Supabase database (most reliable in production)
+    if (isSupabaseConfigured()) {
+      const audioUrl = await getAudioUrl(teleportId);
+      if (audioUrl) {
+        logger.info('Audio URL found in Supabase', { traceId, teleportId });
+        return {
+          status: 200,
+          body: { audioUrl }
+        };
+      }
+    }
+    
+    // Fallback to Motia state (for local dev or if Supabase lookup fails)
     const audioState = await state.get<AudioState>('teleport-audio', teleportId);
     
     if (!audioState || (!audioState.audioData && !audioState.audioUrl)) {
+      logger.warn('Audio not found', { traceId, teleportId });
       return {
         status: 404,
         body: { error: 'Audio not found or not yet generated' }
