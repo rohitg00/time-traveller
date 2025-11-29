@@ -310,9 +310,15 @@ const AppContent: React.FC = () => {
       
       throw new Error('No audio data available');
 
-    } catch {
+    } catch (err) {
       setIsAudioPlaying(false);
-      setError("Audio synthesis subsystem failure or not yet ready.");
+      // Show more specific error message for debugging
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+        setError("Audio not yet ready. Please wait a moment and try again.");
+      } else {
+        setError("Audio synthesis subsystem failure or not yet ready.");
+      }
     }
   };
 
