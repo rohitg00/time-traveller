@@ -267,10 +267,18 @@ const AppContent: React.FC = () => {
       
       // Handle URL-based audio (from Supabase)
       if (audioResponse.audioUrl) {
-        const audio = new Audio(audioResponse.audioUrl);
-        audio.onended = () => setIsAudioPlaying(false);
+        // Fetch the audio as a blob to avoid CORS issues with direct playback
+        const audioBlob = await fetch(audioResponse.audioUrl).then(r => r.blob());
+        const audioBlobUrl = URL.createObjectURL(audioBlob);
+        
+        const audio = new Audio(audioBlobUrl);
+        audio.onended = () => {
+          setIsAudioPlaying(false);
+          URL.revokeObjectURL(audioBlobUrl);
+        };
         audio.onerror = () => {
           setIsAudioPlaying(false);
+          URL.revokeObjectURL(audioBlobUrl);
           setError("Audio playback failed.");
         };
         await audio.play();
