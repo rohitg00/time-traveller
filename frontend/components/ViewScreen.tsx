@@ -6,10 +6,11 @@ interface ViewScreenProps {
   state: TeleportState;
   location: TravelLogItem | null;
   onPlayAudio: () => void;
+  onStopAudio: () => void;
   isAudioPlaying: boolean;
 }
 
-export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, isAudioPlaying }) => {
+export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, onStopAudio, isAudioPlaying }) => {
   if (state === 'idle') {
     return (
       <div className="flex-1 bg-black rounded-xl border border-cyber-700 flex items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
@@ -180,12 +181,11 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
                <Scan className="w-5 h-5 text-cyber-500" />
                ENVIRONMENTAL ANALYSIS
              </h3>
-             <button
-               onClick={onPlayAudio}
-               disabled={isAudioPlaying}
+            <button 
+               onClick={isAudioPlaying ? onStopAudio : onPlayAudio}
                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
                  isAudioPlaying 
-                   ? 'bg-cyber-500 text-black shadow-[0_0_15px_rgba(14,165,233,0.6)] animate-pulse'
+                   ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.6)] hover:bg-red-500'
                    : 'bg-black/50 border border-cyber-600 text-cyber-400 hover:border-cyber-400 hover:text-white hover:bg-cyber-900'
                }`}
              >

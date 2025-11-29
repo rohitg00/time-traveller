@@ -21,6 +21,7 @@ const AppContent: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [audioSource, setAudioSource] = useState<AudioBufferSourceNode | null>(null);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [weatherCondition, setWeatherCondition] = useState<string | undefined>(undefined);
 
@@ -117,6 +118,14 @@ const AppContent: React.FC = () => {
     setIsAudioPlaying(false);
     
     // Stop any playing audio
+    if (audioSource) {
+      try {
+        audioSource.stop();
+      } catch {
+        // Ignore if already stopped
+      }
+      setAudioSource(null);
+    }
     if (audioContext && audioContext.state === 'running') {
       audioContext.close();
       setAudioContext(null);
@@ -287,7 +296,9 @@ const AppContent: React.FC = () => {
         source.connect(ctx.destination);
         source.onended = () => {
           setIsAudioPlaying(false);
+          setAudioSource(null);
         };
+        setAudioSource(source);
         source.start();
         return;
       }
@@ -310,7 +321,9 @@ const AppContent: React.FC = () => {
         source.connect(ctx.destination);
         source.onended = () => {
           setIsAudioPlaying(false);
+          setAudioSource(null);
         };
+        setAudioSource(source);
         source.start();
         return;
       }
@@ -329,14 +342,26 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleSelectFromHistory = (item: TravelLogItem) => {
-    setCurrentLocation(item);
-    setTeleportState('arrived');
-    setIsAudioPlaying(false);
-     if (audioContext) {
+  const handleStopAudio = () => {
+    if (audioSource) {
+      try {
+        audioSource.stop();
+      } catch {
+        // Ignore if already stopped
+      }
+      setAudioSource(null);
+    }
+    if (audioContext) {
       audioContext.close();
       setAudioContext(null);
     }
+    setIsAudioPlaying(false);
+  };
+
+  const handleSelectFromHistory = (item: TravelLogItem) => {
+    setCurrentLocation(item);
+    setTeleportState('arrived');
+    handleStopAudio();
   };
 
   // Show auth loading state
@@ -430,6 +455,7 @@ const AppContent: React.FC = () => {
             state={teleportState} 
             location={currentLocation}
             onPlayAudio={handlePlayAudio}
+            onStopAudio={handleStopAudio}
             isAudioPlaying={isAudioPlaying}
           />
         </div>
