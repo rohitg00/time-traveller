@@ -96,18 +96,18 @@ export const Header: React.FC = () => {
                </a>
             </div>
 
-            {/* GitHub Link - Responsive, hidden on very small screens */}
+            {/* GitHub Link - Always visible on all screens */}
             <a 
               href="https://github.com/rohitg00/time-traveller" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 md:gap-2 text-slate-400 hover:text-white transition-all hover:scale-105 group/gh"
-              title="View Source on GitHub"
+              className="flex items-center gap-1.5 md:gap-2 text-slate-400 hover:text-white transition-all hover:scale-105 group/gh"
+              title="View Source on GitHub - Open Source"
             >
               <div className="p-1.5 md:p-2 bg-cyber-900/50 rounded-md md:rounded-lg border border-cyber-700 group-hover/gh:border-cyber-500/50 group-hover/gh:bg-cyber-800 transition-all">
-                <Github className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
+                <Github className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <span className="hidden xl:inline text-xs font-mono font-bold tracking-wider">OPEN SOURCE</span>
+              <span className="hidden sm:inline text-[10px] sm:text-xs font-mono font-bold tracking-wider">OPEN SOURCE</span>
             </a>
 
             {/* Auth Button */}
