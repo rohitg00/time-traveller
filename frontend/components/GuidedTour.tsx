@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  X, ChevronRight, ChevronLeft, MapPin, Terminal, Globe, 
-  Camera, Send, Clock, History, Download, Volume2, Sparkles 
+  X, ChevronRight, ChevronLeft, Sparkles, Globe, Camera, Rocket
 } from 'lucide-react';
 
 interface GuidedTourProps {
@@ -12,69 +11,46 @@ interface TourStep {
   title: string;
   description: string;
   icon: React.ReactNode;
-  tip?: string;
+  features: string[];
+  highlight: string;
 }
 
 const tourSteps: TourStep[] = [
   {
-    title: "Welcome, Time Traveller!",
-    description: "You're about to experience any location across time using AI-powered visualization. This quick tour will show you how to navigate the Temporal Displacement Engine.",
-    icon: <Sparkles className="w-8 h-8" />,
-    tip: "You can restart this tour anytime from the settings."
+    title: "Choose Your Destination",
+    description: "Travel anywhere in the universe across any time period. Use Manual mode for quick input, Terminal for natural language commands, or Orbital to pick coordinates on an interactive map.",
+    icon: <Globe className="w-10 h-10" />,
+    features: [
+      "🌍 Earth locations (Paris, Tokyo, Pyramids of Giza)",
+      "🚀 Space & planets (Mars Colony, Moon Base, Saturn Rings)",
+      "🏛️ Historical sites (Ancient Rome, Medieval Castles)",
+      "🔮 Future worlds (Year 3000, Cyberpunk Cities)",
+    ],
+    highlight: "Try: 'Eiffel Tower in 1920' or coordinates '35.6762, 139.6503' for Tokyo"
   },
   {
-    title: "Manual Mode",
-    description: "In Manual mode, enter your destination coordinates (like 'Kyoto, Japan' or 'Mars Colony'), select a time period, and choose a visual style for your journey.",
-    icon: <MapPin className="w-8 h-8" />,
-    tip: "Try entering coordinates like '48.8584, 2.2945' for the Eiffel Tower!"
+    title: "Add Your Photo",
+    description: "Upload a selfie or take a photo to be placed into your destination! The AI will seamlessly integrate you into any location, era, or world you choose.",
+    icon: <Camera className="w-10 h-10" />,
+    features: [
+      "📸 Upload from device or take a live photo",
+      "🎭 Get inserted into historical scenes",
+      "👽 Appear on alien planets",
+      "🎨 Choose visual styles: Realistic, Cyberpunk, Oil Painting & more",
+    ],
+    highlight: "Click the profile icon next to 'Engage Teleport' to add your photo"
   },
   {
-    title: "Terminal Mode",
-    description: "Use natural language commands in Terminal mode. Just type something like 'Take me to Paris in the 1920s' and the AI will parse your request and initiate the teleport.",
-    icon: <Terminal className="w-8 h-8" />,
-    tip: "The AI understands complex requests like 'Show me Tokyo during cherry blossom season'."
-  },
-  {
-    title: "Orbital Mode",
-    description: "Click anywhere on the interactive map to select coordinates. You can also search for addresses, pincodes, or place names. The system will check Street View availability in real-time.",
-    icon: <Globe className="w-8 h-8" />,
-    tip: "Green indicator = Street View available, Yellow = AI will generate the view."
-  },
-  {
-    title: "Traveler Identity",
-    description: "Upload your photo or take a selfie to be inserted into the generated images! Click the profile icon next to the Engage Teleport button.",
-    icon: <Camera className="w-8 h-8" />,
-    tip: "Your photo will appear in the generated destination images."
-  },
-  {
-    title: "Engage Teleport",
-    description: "Once you've set your destination and time period, click 'Engage Teleport' to start your journey. The AI will generate a unique visualization of your destination.",
-    icon: <Send className="w-8 h-8" />,
-    tip: "Generation typically takes 10-30 seconds depending on complexity."
-  },
-  {
-    title: "Audio Guide",
-    description: "After arriving at your destination, click 'Play Audio Guide' to hear an AI-narrated description of your location. The voice describes what you see, hear, and smell.",
-    icon: <Volume2 className="w-8 h-8" />,
-    tip: "The audio is generated using Gemini's text-to-speech technology."
-  },
-  {
-    title: "Download Images",
-    description: "Love your generated image? Click the download button on the image to save it to your device. Share your time-travel adventures with friends!",
-    icon: <Download className="w-8 h-8" />,
-    tip: "Images are saved in high resolution (8K quality)."
-  },
-  {
-    title: "Temporal Archives",
-    description: "All your journeys are saved in the Temporal Archives. Click on any past journey to revisit it, or use it as inspiration for new adventures.",
-    icon: <History className="w-8 h-8" />,
-    tip: "Your history is private and stored securely in your account."
-  },
-  {
-    title: "Ready for Adventure!",
-    description: "You're all set to explore time and space! Start by selecting a destination in Manual, Terminal, or Orbital mode. Have an amazing journey, Time Traveller!",
-    icon: <Sparkles className="w-8 h-8" />,
-    tip: "Pro tip: Try combining Street View locations with different time periods for stunning results."
+    title: "Explore & Download",
+    description: "After teleporting, explore your AI-generated destination with audio narration, download high-resolution images, and revisit past journeys in your Temporal Archives.",
+    icon: <Rocket className="w-10 h-10" />,
+    features: [
+      "🔊 AI audio guide describes your surroundings",
+      "💾 Download 8K images to share with friends",
+      "📚 All journeys saved in Temporal Archives",
+      "🗺️ Open locations in Google Street View",
+    ],
+    highlight: "Your history is private and stored securely in your account"
   }
 ];
 
@@ -109,10 +85,10 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
         onClick={handleSkip}
       />
       
-      <div className="relative max-w-lg w-full bg-cyber-800 border border-cyber-500 rounded-2xl shadow-[0_0_100px_rgba(14,165,233,0.3)] overflow-hidden animate-[fadeIn_0.3s_ease-out]">
-        <div className="absolute top-0 left-0 w-full h-1 bg-cyber-900">
+      <div className="relative max-w-xl w-full bg-cyber-800 border border-cyber-500 rounded-2xl shadow-[0_0_100px_rgba(14,165,233,0.3)] overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-cyber-900">
           <div 
-            className="h-full bg-gradient-to-r from-cyber-500 to-cyber-400 transition-all duration-300"
+            className="h-full bg-gradient-to-r from-cyber-500 to-cyber-400 transition-all duration-500 ease-out"
             style={{ width: `${((currentStep + 1) / tourSteps.length) * 100}%` }}
           />
         </div>
@@ -125,41 +101,58 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
           <X className="w-5 h-5" />
         </button>
 
-        <div className="p-8 pt-10">
-          <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-cyber-500/20 rounded-2xl flex items-center justify-center text-cyber-400 border border-cyber-500/50 shadow-[0_0_30px_rgba(14,165,233,0.2)]">
+        <div className="p-6 sm:p-8 pt-10">
+          <div className="text-center mb-2">
+            <span className="text-xs font-mono text-cyber-500 tracking-widest">
+              STEP {currentStep + 1} OF {tourSteps.length}
+            </span>
+          </div>
+
+          <div className="flex justify-center mb-5">
+            <div className="w-20 h-20 bg-gradient-to-br from-cyber-500/30 to-cyber-accent/20 rounded-2xl flex items-center justify-center text-cyber-400 border border-cyber-500/50 shadow-[0_0_40px_rgba(14,165,233,0.3)] animate-pulse">
               {step.icon}
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold text-white text-center mb-4 font-mono tracking-wide">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3 font-mono tracking-wide">
             {step.title}
           </h2>
 
-          <p className="text-slate-300 text-center leading-relaxed mb-6">
+          <p className="text-slate-300 text-center leading-relaxed mb-5 text-sm sm:text-base">
             {step.description}
           </p>
 
-          {step.tip && (
-            <div className="bg-cyber-900/50 border border-cyber-700 rounded-lg p-4 mb-6">
-              <p className="text-xs text-cyber-400 font-mono flex items-start gap-2">
-                <Sparkles className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                <span><strong>TIP:</strong> {step.tip}</span>
-              </p>
+          <div className="bg-black/40 border border-cyber-700/50 rounded-xl p-4 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {step.features.map((feature, index) => (
+                <div 
+                  key={index}
+                  className="text-xs sm:text-sm text-slate-300 py-1.5 px-2 rounded bg-cyber-900/30 border border-cyber-800/50"
+                >
+                  {feature}
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
-          <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="bg-cyber-500/10 border border-cyber-500/30 rounded-lg p-3 mb-6">
+            <p className="text-xs text-cyber-300 font-mono flex items-start gap-2">
+              <Sparkles className="w-4 h-4 flex-shrink-0 mt-0.5 text-cyber-400" />
+              <span><strong className="text-cyber-400">TIP:</strong> {step.highlight}</span>
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 mb-5">
             {tourSteps.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentStep(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   index === currentStep 
-                    ? 'bg-cyber-500 w-6' 
+                    ? 'bg-cyber-500 w-8' 
                     : index < currentStep 
-                      ? 'bg-cyber-500/50' 
-                      : 'bg-cyber-800 border border-cyber-700'
+                      ? 'bg-cyber-500/60 w-2' 
+                      : 'bg-cyber-800 border border-cyber-700 w-2'
                 }`}
                 aria-label={`Go to step ${index + 1}`}
               />
@@ -172,8 +165,8 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
               disabled={isFirstStep}
               className={`flex-1 py-3 px-4 rounded-lg font-bold font-mono tracking-wide transition-all flex items-center justify-center gap-2 ${
                 isFirstStep
-                  ? 'bg-cyber-900 text-slate-600 cursor-not-allowed'
-                  : 'bg-cyber-900 border border-cyber-700 text-white hover:border-cyber-500'
+                  ? 'bg-cyber-900/50 text-slate-600 cursor-not-allowed'
+                  : 'bg-cyber-900 border border-cyber-700 text-white hover:border-cyber-500 hover:bg-cyber-800'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -182,19 +175,23 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
             
             <button
               onClick={handleNext}
-              className="flex-1 py-3 px-4 bg-cyber-500 hover:bg-cyber-400 text-black font-bold font-mono tracking-wide rounded-lg transition-all shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:shadow-[0_0_30px_rgba(14,165,233,0.6)] flex items-center justify-center gap-2"
+              className="flex-[2] py-3 px-4 bg-gradient-to-r from-cyber-500 to-cyber-400 hover:from-cyber-400 hover:to-cyber-300 text-black font-bold font-mono tracking-wide rounded-lg transition-all shadow-[0_0_25px_rgba(14,165,233,0.5)] hover:shadow-[0_0_35px_rgba(14,165,233,0.7)] flex items-center justify-center gap-2"
             >
-              {isLastStep ? "Start Exploring!" : "Next"}
-              {!isLastStep && <ChevronRight className="w-4 h-4" />}
+              {isLastStep ? (
+                <>
+                  <Rocket className="w-4 h-4" />
+                  Start Time Travelling!
+                </>
+              ) : (
+                <>
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
-
-          <p className="text-center text-xs text-slate-600 mt-4 font-mono">
-            Step {currentStep + 1} of {tourSteps.length}
-          </p>
         </div>
       </div>
     </div>
   );
 };
-
