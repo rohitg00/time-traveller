@@ -1,6 +1,6 @@
 import React from 'react';
 import { TeleportState, TravelLogItem, getImageSrc } from '../types';
-import { Volume2, Loader2, VolumeX, Map, ExternalLink, Scan, Sparkles, Camera, AlertTriangle } from 'lucide-react';
+import { Volume2, Loader2, VolumeX, Map, ExternalLink, Scan, Sparkles, Camera, AlertTriangle, Download } from 'lucide-react';
 
 interface ViewScreenProps {
   state: TeleportState;
@@ -11,6 +11,34 @@ interface ViewScreenProps {
 }
 
 export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, onStopAudio, isAudioPlaying }) => {
+  const handleDownloadImage = async () => {
+    if (!location?.imageData) return;
+    
+    try {
+      const imageUrl = getImageSrc(location.imageData);
+      
+      if (imageUrl.startsWith('http')) {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `time-traveller-${location.destination.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${location.era.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `time-traveller-${location.destination.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${location.era.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+    }
+  };
   if (state === 'idle') {
     return (
       <div className="flex-1 bg-black rounded-xl border border-cyber-700 flex items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
@@ -134,8 +162,17 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             </div>
           )}
 
-          {location.mapsUri && (
-            <div className="absolute bottom-4 right-4 pointer-events-auto">
+          <div className="absolute bottom-4 right-4 pointer-events-auto flex gap-2">
+            <button
+              onClick={handleDownloadImage}
+              className="flex items-center gap-2 bg-cyber-900/90 backdrop-blur-md text-white px-4 py-2 rounded-lg border border-cyber-500/50 hover:bg-cyber-500 hover:text-black hover:shadow-[0_0_20px_rgba(14,165,233,0.6)] transition-all font-mono text-xs font-bold group/btn tracking-wide"
+              title="Download image"
+            >
+              <Download className="w-3 h-3" />
+              <span className="hidden sm:inline">DOWNLOAD</span>
+            </button>
+            
+            {location.mapsUri && (
               <a 
                 href={location.mapsUri} 
                 target="_blank" 
@@ -143,11 +180,11 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
                 className="flex items-center gap-2 bg-cyber-900/90 backdrop-blur-md text-white px-4 py-2 rounded-lg border border-cyber-500/50 hover:bg-cyber-500 hover:text-black hover:shadow-[0_0_20px_rgba(14,165,233,0.6)] transition-all font-mono text-xs font-bold group/btn tracking-wide"
               >
                 <Map className="w-3 h-3" />
-                <span>OPEN STREET VIEW</span>
+                <span className="hidden sm:inline">OPEN STREET VIEW</span>
                 <ExternalLink className="w-3 h-3 opacity-50 group-hover/btn:opacity-100" />
               </a>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
              <div className="w-64 h-[1px] bg-white/50"></div>

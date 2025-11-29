@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { TeleportState, TravelLogItem } from './types';
 import * as api from './apiClient';
 import { decodeAudioData, decodeBase64 } from './audioUtils';
@@ -9,6 +10,7 @@ import { HistoryLog } from './components/HistoryLog';
 import { Header } from './components/Header';
 import { Starfield } from './components/Starfield';
 import { AuthBanner } from './components/AuthBanner';
+import { GuidedTour } from './components/GuidedTour';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AlertCircle, Lock, Zap } from 'lucide-react';
 
@@ -24,6 +26,19 @@ const AppContent: React.FC = () => {
   const [audioSource, setAudioSource] = useState<AudioBufferSourceNode | null>(null);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [weatherCondition, setWeatherCondition] = useState<string | undefined>(undefined);
+  const [showTour, setShowTour] = useState<boolean>(false);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('time-traveller-tour-completed');
+    if (!hasSeenTour && !authLoading && (user || !isAuthConfigured)) {
+      setTimeout(() => setShowTour(true), 1000);
+    }
+  }, [authLoading, user, isAuthConfigured]);
+
+  const handleTourComplete = () => {
+    setShowTour(false);
+    localStorage.setItem('time-traveller-tour-completed', 'true');
+  };
 
   useEffect(() => {
     const checkKey = async () => {
@@ -415,15 +430,17 @@ const AppContent: React.FC = () => {
         </div>
 
       </main>
+      
+      {showTour && <GuidedTour onComplete={handleTourComplete} />}
     </div>
   );
 };
 
-// Wrapper component that provides auth context
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <AppContent />
+      <Analytics />
     </AuthProvider>
   );
 };
