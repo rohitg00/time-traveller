@@ -1,6 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client from environment variables
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_KEY || '';
 
@@ -43,9 +42,6 @@ export interface HistoryItemResponse {
   timestamp: number;
 }
 
-/**
- * Saves a teleport history item to Supabase
- */
 export async function saveHistory(item: HistoryItem): Promise<void> {
   const client = getSupabaseClient();
   
@@ -69,9 +65,6 @@ export async function saveHistory(item: HistoryItem): Promise<void> {
   }
 }
 
-/**
- * Gets teleport history for a user
- */
 export async function getHistory(userId: string, limit: number = 10): Promise<HistoryItemResponse[]> {
   const client = getSupabaseClient();
   
@@ -86,7 +79,6 @@ export async function getHistory(userId: string, limit: number = 10): Promise<Hi
     throw new Error(`Failed to get history: ${error.message}`);
   }
   
-  // Convert to response format
   return (data || []).map((item: HistoryItem) => ({
     id: item.id,
     destination: item.destination,
@@ -101,9 +93,6 @@ export async function getHistory(userId: string, limit: number = 10): Promise<Hi
   }));
 }
 
-/**
- * Deletes a history item
- */
 export async function deleteHistoryItem(id: string, userId: string): Promise<void> {
   const client = getSupabaseClient();
   
@@ -118,9 +107,6 @@ export async function deleteHistoryItem(id: string, userId: string): Promise<voi
   }
 }
 
-/**
- * Check if Supabase is properly configured
- */
 export function isSupabaseConfigured(): boolean {
   return !!process.env.SUPABASE_URL && !!process.env.SUPABASE_KEY;
 }

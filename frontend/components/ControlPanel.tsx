@@ -18,15 +18,12 @@ type Tab = 'manual' | 'terminal' | 'map';
 export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTeleporting, onWeatherUpdate }) => {
   const [activeTab, setActiveTab] = useState<Tab>('manual');
   
-  // Manual State
   const [destination, setDestination] = useState('');
   const [era, setEra] = useState('');
   const [style, setStyle] = useState<string>(LocationStyle.REALISTIC);
   const [userImage, setUserImage] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
-  
-  // Terminal State
   const [chatInput, setChatInput] = useState('');
   const [chatLog, setChatLog] = useState<{role: 'user' | 'ai', text: string}[]>([
     { role: 'ai', text: 'Time Traveller NavSystem v9.2 online. Awaiting command.' }
@@ -35,7 +32,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom of chat
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatLog]);
@@ -45,23 +41,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
     
     let targetEra = era;
     
-    // Auto-fill Era if missing (common when using Map tab)
     if (!targetEra.trim()) {
        targetEra = "Present Day";
        setEra("Present Day");
     }
 
     if (destination && targetEra && !isTeleporting) {
-      // Determine if we should use the map coordinates
       let coordsToUse = undefined;
-      
       const coordString = selectedCoords ? `${selectedCoords.lat.toFixed(6)}, ${selectedCoords.lng.toFixed(6)}` : '';
       
-      // Prioritize selected coordinates if we are on the map tab OR if the input matches the selected coords
       if ((activeTab === 'map' && selectedCoords) || (destination === coordString && selectedCoords)) {
         coordsToUse = selectedCoords;
       } else {
-        // Try to parse manually entered coordinates
         const coordMatch = destination.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
         if (coordMatch) {
           coordsToUse = { lat: parseFloat(coordMatch[1]), lng: parseFloat(coordMatch[3]) };
@@ -88,11 +79,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
       setChatLog(prev => [...prev, { role: 'ai', text: result.reply }]);
 
       if (result.isJump && result.params) {
-        // Auto-populate manual fields for visibility
         setDestination(result.params.destination);
         setEra(result.params.era);
-        
-        // Trigger teleport
         onTeleport(result.params.destination, result.params.era, result.params.style, userImage || undefined);
       }
     } catch (e) {
@@ -112,10 +100,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
 
   return (
     <div className="bg-cyber-800 border border-cyber-700 rounded-xl shadow-xl relative overflow-hidden group flex flex-col h-[500px] md:h-[600px]">
-      {/* Decorative scanline */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-500 to-transparent opacity-30"></div>
 
-      {/* Tabs */}
       <div className="flex border-b border-cyber-700 bg-cyber-900/50 shrink-0">
         <button 
           onClick={() => setActiveTab('manual')}
@@ -139,12 +125,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
 
       <div className="flex-1 overflow-y-auto scrollbar-thin relative">
         <div className="p-6 pb-0 flex flex-col h-full">
-          
-          {/* MANUAL TAB */}
           {activeTab === 'manual' && (
             <div className="space-y-6">
-              
-              {/* Destination Input */}
               <div className="space-y-2">
                 <label className="text-xs text-cyber-400 font-mono uppercase tracking-wider flex items-center gap-2">
                   <MapPin className="w-3 h-3" /> Target Coordinates
@@ -160,7 +142,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                 />
               </div>
 
-              {/* Era Input */}
               <div className="space-y-2">
                 <label className="text-xs text-cyber-400 font-mono uppercase tracking-wider flex items-center gap-2">
                   <Clock className="w-3 h-3" /> Temporal Epoch
@@ -176,7 +157,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                 />
               </div>
 
-              {/* Style Selector */}
               <div className="space-y-2">
                 <label className="text-xs text-cyber-400 font-mono uppercase tracking-wider flex items-center gap-2">
                   <Palette className="w-3 h-3" /> Visual Renderer
@@ -203,7 +183,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
             </div>
           )}
 
-          {/* TERMINAL TAB */}
           {activeTab === 'terminal' && (
              <div className="h-full flex flex-col">
                 <div className="flex-1 bg-black/50 rounded-lg p-4 font-mono text-xs md:text-sm overflow-y-auto border border-cyber-800 space-y-3 mb-4">
@@ -247,14 +226,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
              </div>
           )}
 
-          {/* MAP TAB */}
           {activeTab === 'map' && (
             <div className="h-full w-full flex flex-col relative">
                <div className="flex-1 w-full rounded-lg overflow-hidden border border-cyber-700 relative bg-black min-h-[250px]">
                   <MapSelector onSelect={handleMapSelect} />
                </div>
                
-               {/* Location Intelligence Panel */}
                {selectedCoords && (
                  <div className="mt-3 shrink-0 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-cyber-700 scrollbar-track-transparent">
                    <LocationInfo coordinates={selectedCoords} onWeatherUpdate={onWeatherUpdate} />
@@ -267,7 +244,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                   </p>
                   
                   <div className="flex gap-2 items-stretch">
-                     {/* Mini Era Input for Map Mode */}
                      <div className="relative flex-1">
                         <Clock className="w-3 h-3 text-cyber-500 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input 
@@ -285,10 +261,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
         </div>
       </div>
 
-      {/* Fixed Submit Button Footer - Always visible */}
       {(activeTab === 'manual' || activeTab === 'map' || activeTab === 'terminal') && (
         <div className="shrink-0 p-4 pt-2 border-t border-cyber-700/50 bg-cyber-800 flex gap-3 items-center">
-          {/* Traveler Identity - Always accessible */}
           <div className="shrink-0">
              <TravelerIdentity 
                userImage={userImage} 

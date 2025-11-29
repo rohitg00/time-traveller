@@ -14,7 +14,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
   if (state === 'idle') {
     return (
       <div className="flex-1 bg-black rounded-xl border border-cyber-700 flex items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-        {/* Dynamic Perspective Grid */}
         <div className="absolute inset-0 opacity-20" 
              style={{
                backgroundImage: 'linear-gradient(rgba(14, 165, 233, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 165, 233, 0.3) 1px, transparent 1px)',
@@ -27,16 +26,13 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
         
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none"></div>
 
-        {/* Central HUD */}
         <div className="relative z-10 text-center p-10">
           <div className="w-64 h-64 mx-auto relative flex items-center justify-center mb-8">
-             {/* Outer Rings */}
              <div className="absolute inset-0 border border-cyber-900/50 rounded-full"></div>
              <div className="absolute inset-0 border-t-2 border-cyber-500 rounded-full animate-[spin_4s_linear_infinite]"></div>
              <div className="absolute inset-4 border-b-2 border-cyber-700 rounded-full animate-[spin_6s_linear_infinite_reverse]"></div>
              <div className="absolute inset-0 rounded-full border border-cyber-500/20 scale-110 animate-pulse"></div>
              
-             {/* Core */}
              <div className="w-40 h-40 bg-cyber-900/20 rounded-full backdrop-blur-sm flex items-center justify-center border border-cyber-500/30 shadow-[0_0_30px_rgba(14,165,233,0.2)]">
                 <div className="relative">
                    <div className="w-3 h-3 bg-cyber-500 rounded-full animate-pulse shadow-[0_0_20px_rgba(14,165,233,1)]"></div>
@@ -50,7 +46,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
           </p>
         </div>
         
-        {/* HUD Corner Elements */}
         <div className="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-cyber-500 opacity-60"></div>
         <div className="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-cyber-500 opacity-60"></div>
         <div className="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-cyber-500 opacity-60"></div>
@@ -65,10 +60,8 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
   if (state === 'teleporting') {
     return (
       <div className="flex-1 bg-black rounded-xl border border-cyber-500 shadow-[0_0_50px_rgba(14,165,233,0.3)] flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
-        {/* Hyperspace Effect */}
         <div className="absolute inset-0 flex items-center justify-center">
            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent animate-pulse"></div>
-           {/* Simulated stars streaming */}
            <div className="w-[1px] h-[1px] bg-white shadow-[0_0_100px_2px_white] animate-[ping_0.2s_linear_infinite]"></div>
         </div>
         
@@ -92,21 +85,16 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
   if (state === 'arrived' && location) {
     return (
       <div className="flex flex-col gap-6 animate-[fadeIn_0.8s_ease-out]">
-        
-        {/* Main Viewport */}
         <div className="relative rounded-xl overflow-hidden border border-cyber-600 shadow-[0_0_40px_rgba(0,0,0,0.6)] group bg-black aspect-video ring-1 ring-cyber-500/50">
-          
           <img 
             src={getImageSrc(location.imageData)} 
             alt={`${location.destination} in ${location.era}`}
             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
           
-          {/* HUD Overlay */}
           <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[size:100%_4px] opacity-30"></div>
           <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20"></div>
 
-          {/* Top HUD Bar */}
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
              <div className="flex flex-col gap-1">
                <div className="flex items-center gap-2">
@@ -121,7 +109,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
              </div>
              
              <div className="flex gap-2">
-                {/* Image Source Indicator */}
                 {location.usedStreetView === false && (
                   <div className="bg-amber-900/80 backdrop-blur border border-amber-500/50 px-2 py-1 rounded text-[10px] font-mono text-amber-300 flex items-center gap-1" title="Street View unavailable for this location - AI visualization generated">
                     <Sparkles className="w-3 h-3" />
@@ -140,7 +127,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
              </div>
           </div>
 
-          {/* Reference Image Inset (if exists) */}
           {location.referenceImage && (
             <div className="absolute bottom-4 left-4 w-24 h-24 rounded border border-cyber-500/50 overflow-hidden bg-black shadow-lg group/ref">
                <img src={getImageSrc(location.referenceImage)} className="w-full h-full object-cover opacity-70 group-hover/ref:opacity-100 transition-opacity" alt="Reference" />
@@ -148,7 +134,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             </div>
           )}
 
-          {/* Bottom Actions */}
           {location.mapsUri && (
             <div className="absolute bottom-4 right-4 pointer-events-auto">
               <a 
@@ -164,7 +149,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             </div>
           )}
 
-          {/* Center Crosshair */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
              <div className="w-64 h-[1px] bg-white/50"></div>
              <div className="h-64 w-[1px] bg-white/50 absolute"></div>
@@ -172,7 +156,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
           </div>
         </div>
 
-        {/* Analysis Panel */}
         <div className="bg-cyber-800/60 border border-cyber-700 rounded-xl p-6 relative backdrop-blur-sm shadow-lg">
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyber-500 to-transparent opacity-50"></div>
           
@@ -205,7 +188,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             <div className="absolute bottom-0 left-[-5px] w-2 h-2 bg-cyber-500 rounded-full shadow-[0_0_10px_rgba(14,165,233,0.8)]"></div>
           </div>
 
-          {/* Street View Unavailable Notice */}
           {location.usedStreetView === false && (
             <div className="mt-4 p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg flex items-start gap-3">
               <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />

@@ -22,8 +22,8 @@ export const config: ApiRouteConfig = {
 };
 
 interface AudioState {
-  audioData?: string; // base64 for local dev
-  audioUrl?: string;  // URL from Supabase for production
+  audioData?: string;
+  audioUrl?: string;
 }
 
 export const handler: Handlers['GetAudio'] = async (req, { logger, state, traceId }) => {
@@ -32,7 +32,6 @@ export const handler: Handlers['GetAudio'] = async (req, { logger, state, traceI
   try {
     logger.info('Fetching teleport audio', { traceId, teleportId });
     
-    // First try to get from Supabase database (most reliable in production)
     if (isSupabaseConfigured()) {
       const audioUrl = await getAudioUrl(teleportId);
       if (audioUrl) {
@@ -44,7 +43,6 @@ export const handler: Handlers['GetAudio'] = async (req, { logger, state, traceI
       }
     }
     
-    // Fallback to Motia state (for local dev or if Supabase lookup fails)
     const audioState = await state.get<AudioState>('teleport-audio', teleportId);
     
     if (!audioState || (!audioState.audioData && !audioState.audioUrl)) {
@@ -55,7 +53,6 @@ export const handler: Handlers['GetAudio'] = async (req, { logger, state, traceI
       };
     }
     
-    // Return both if available, frontend will handle appropriately
     return {
       status: 200,
       body: { 

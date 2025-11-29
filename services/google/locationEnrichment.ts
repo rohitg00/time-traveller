@@ -1,8 +1,3 @@
-/**
- * Location Enrichment Service
- * Uses Google APIs to get weather, air quality, and nearby places
- */
-
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || '';
 
 export interface WeatherData {
@@ -71,9 +66,6 @@ export async function getWeather(lat: number, lng: number): Promise<WeatherData 
   }
 }
 
-/**
- * Get air quality for a location using Google Air Quality API
- */
 export async function getAirQuality(lat: number, lng: number): Promise<AirQualityData | null> {
   if (!GOOGLE_API_KEY) return null;
   
@@ -122,9 +114,6 @@ export async function getAirQuality(lat: number, lng: number): Promise<AirQualit
   }
 }
 
-/**
- * Get nearby places using Google Places API (New)
- */
 export async function getNearbyPlaces(lat: number, lng: number): Promise<NearbyPlace[]> {
   if (!GOOGLE_API_KEY) return [];
   
@@ -168,9 +157,6 @@ export async function getNearbyPlaces(lat: number, lng: number): Promise<NearbyP
   }
 }
 
-/**
- * Get all location enrichment data
- */
 export async function getLocationEnrichment(lat: number, lng: number): Promise<LocationEnrichment> {
   const [weather, airQuality, nearbyPlaces] = await Promise.all([
     getWeather(lat, lng),

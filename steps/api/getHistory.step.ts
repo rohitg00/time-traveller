@@ -8,10 +8,10 @@ const historyItemSchema = z.object({
   destination: z.string(),
   era: z.string(),
   style: z.string(),
-  imageUrl: z.string().optional(), // URL from Supabase
+  imageUrl: z.string().optional(),
   description: z.string(),
   mapsUri: z.string().optional(),
-  referenceImageUrl: z.string().optional(), // URL from Supabase
+  referenceImageUrl: z.string().optional(),
   usedStreetView: z.boolean().optional(),
   timestamp: z.number()
 });
@@ -24,7 +24,7 @@ export const config: ApiRouteConfig = {
   description: 'Gets the teleportation history for the authenticated user',
   emits: [],
   flows: ['time-traveller-flow'],
-  middleware: [authRequired], // Auth required - only show user's own data
+  middleware: [authRequired],
   queryParams: [
     { name: 'limit', description: 'Maximum number of items to return' }
   ],
@@ -40,7 +40,6 @@ export const config: ApiRouteConfig = {
 
 export const handler: Handlers['GetHistory'] = async (req, { logger, traceId }) => {
   try {
-    // Get userId from auth middleware
     const userId = req.userId;
     if (!userId) {
       logger.warn('GetHistory: No userId in request');
@@ -54,7 +53,6 @@ export const handler: Handlers['GetHistory'] = async (req, { logger, traceId }) 
     
     logger.info('Fetching teleport history for user', { traceId, userId, limit });
     
-    // Get history from Supabase (more reliable than Motia state for persistent data)
     if (!isSupabaseConfigured()) {
       logger.warn('Supabase not configured, returning empty history');
       return {

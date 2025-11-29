@@ -19,7 +19,6 @@ export async function generateLocationDetails(destination: string, era: string):
 
     const description = response.text || "No description available.";
     
-    // Extract Maps URI from grounding metadata
     let mapsUri: string | undefined;
     const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
     

@@ -14,7 +14,6 @@ declare global {
   }
 }
 
-// Cyberpunk / Dark Map Style for Google Maps
 const MAP_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#050b14" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -101,7 +100,6 @@ const MAP_STYLE = [
   },
 ];
 
-// Seattle coordinates
 const DEFAULT_CENTER = { lat: 47.5763831, lng: -122.4211769 };
 
 export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
@@ -120,7 +118,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   const [viewMode, setViewMode] = useState<'map' | 'street'>('map');
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Keep ref in sync for resize observer
   useEffect(() => {
     selectedCoordsRef.current = selectedCoords;
   }, [selectedCoords]);
@@ -136,9 +133,7 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
 
-  // --- GOOGLE MAPS INIT ---
   useEffect(() => {
-    // Poll for script load
     const interval = setInterval(() => {
       if (window.google && window.google.maps) {
         setIsScriptLoaded(true);
@@ -146,7 +141,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
       }
     }, 200);
 
-    // Global auth failure handler
     window.gm_authFailure = () => {
       setErrorMsg("Maps API Key Rejected");
     };
@@ -157,14 +151,11 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   useEffect(() => {
     if (engine !== 'google' || !isScriptLoaded || !mapContainerRef.current) return;
     
-    // Cleanup previous instance if retrying
     if (retryTrigger > 0 && mapContainerRef.current) {
-        // mapInstanceRef.current = null; // Handled below by check
     }
 
-    if (mapInstanceRef.current && retryTrigger === 0) return; // Already initialized
+    if (mapInstanceRef.current && retryTrigger === 0) return;
 
-    // Reset if retrying
     if (retryTrigger > 0) {
       if (mapContainerRef.current) mapContainerRef.current.innerHTML = '';
       mapInstanceRef.current = null;
@@ -183,7 +174,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
         streetViewControl: false,
       });
 
-      // Map Click Listener
       map.addListener("click", (e: any) => {
         if (!e.latLng) return;
         const lat = e.latLng.lat();
@@ -193,11 +183,9 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
 
       mapInstanceRef.current = map;
 
-      // Initialize Street View Service
       const svService = new window.google.maps.StreetViewService();
       mapInstanceRef.current.svService = svService;
 
-      // Force a resize trigger
       const resizeObserver = new ResizeObserver(() => {
         if (mapInstanceRef.current) {
            window.google.maps.event.trigger(mapInstanceRef.current, "resize");
@@ -218,7 +206,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
     }
   }, [isScriptLoaded, engine, retryTrigger]);
 
-  // --- GOOGLE PANORAMA INIT ---
   useEffect(() => {
     if (engine !== 'google' || !isScriptLoaded || !panoramaContainerRef.current) return;
     if (panoramaInstanceRef.current && retryTrigger === 0) return;
@@ -244,11 +231,9 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
 
       panoramaInstanceRef.current = panorama;
     } catch {
-      // Street View init error - continue without it
     }
   }, [isScriptLoaded, engine, retryTrigger]);
 
-  // --- LEAFLET INIT (BACKUP) ---
   useEffect(() => {
     if (engine !== 'leaflet' || !leafletContainerRef.current) return;
     if (leafletMapRef.current) return;
@@ -261,7 +246,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
         attributionControl: false
       });
 
-      // Dark Matter Tile Layer
       window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap &copy; CARTO',
         subdomains: 'abcd',
@@ -274,7 +258,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
 
       leafletMapRef.current = map;
       
-      // Force resize
       setTimeout(() => {
         map.invalidateSize();
       }, 100);
@@ -288,7 +271,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
     onSelect(newCoords);
     setErrorMsg(null);
 
-    // Update Marker
     if (mapInstanceRef.current) {
       if (markerInstanceRef.current) {
         markerInstanceRef.current.setPosition(newCoords);
@@ -308,7 +290,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
       }
     }
 
-    // Check Street View
     const svService = mapInstanceRef.current?.svService;
     if (svService) {
       svService.getPanorama({ location: newCoords, radius: 2000 }, (data: any, status: any) => {
@@ -361,7 +342,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
       setRetryTrigger(prev => prev + 1);
   };
 
-  // Search by address, pincode, or place name
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     
@@ -370,7 +350,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
     
     try {
       if (engine === 'google' && window.google?.maps?.Geocoder) {
-        // Use Google Geocoder
         const geocoder = new window.google.maps.Geocoder();
         
         geocoder.geocode({ address: searchQuery }, (results: any, status: any) => {
@@ -389,13 +368,12 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
             
             // Select this location
             handleGoogleSelect(lat, lng);
-            setSearchQuery(''); // Clear search after success
+            setSearchQuery('');
           } else {
             setSearchError('Location not found. Try a different search.');
           }
         });
       } else {
-        // Fallback to Nominatim (OpenStreetMap) for Leaflet
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`
         );
@@ -411,7 +389,7 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
           }
           
           handleLeafletSelect(lat, lng);
-          setSearchQuery(''); // Clear search after success
+          setSearchQuery('');
         } else {
           setSearchError('Location not found. Try a different search.');
         }
@@ -428,7 +406,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
     }
   };
 
-  // Use browser geolocation to get current location
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
       setSearchError('Geolocation not supported by your browser');
@@ -445,7 +422,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
         
         setIsLocating(false);
         
-        // Center map on location
         if (engine === 'google' && mapInstanceRef.current) {
           mapInstanceRef.current.setCenter({ lat, lng });
           mapInstanceRef.current.setZoom(15);
@@ -477,7 +453,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
 
   return (
     <div className="relative w-full h-full bg-black">
-      {/* Map Containers */}
       {engine === 'google' && (
           <>
             <div ref={mapContainerRef} className={`w-full h-full absolute inset-0 transition-opacity ${viewMode === 'map' ? 'opacity-100 z-10' : 'opacity-0 z-0'}`} />
@@ -489,14 +464,12 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
           <div ref={leafletContainerRef} className="w-full h-full absolute inset-0 z-10" />
       )}
 
-      {/* Loading Overlay */}
       {(!isScriptLoaded && engine === 'google') && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80">
               <Loader2 className="w-8 h-8 text-cyber-500 animate-spin" />
           </div>
       )}
 
-      {/* Error Overlay */}
       {errorMsg && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-6 text-center">
               <ShieldAlert className="w-12 h-12 text-red-500 mb-4" />
@@ -522,7 +495,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
           </div>
       )}
 
-      {/* Search Bar */}
       <div className="absolute top-4 left-4 right-4 z-40 pointer-events-none">
         <div className="max-w-md mx-auto pointer-events-auto">
           <div className="relative">
@@ -573,7 +545,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
         </div>
       </div>
 
-      {/* Controls Overlay */}
       <div className="absolute bottom-4 left-4 right-4 z-30 flex justify-between items-end pointer-events-none">
           <div className="pointer-events-auto flex flex-col gap-2">
              {engine === 'google' && streetViewAvailable && !errorMsg && (
@@ -592,7 +563,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
 
           {selectedCoords && (
              <div className="flex flex-col gap-2 items-end pointer-events-auto">
-               {/* Street View Status Indicator */}
                {!streetViewAvailable && (
                  <div className="bg-amber-900/90 backdrop-blur-md border border-amber-500/50 rounded-lg p-2 px-3 text-[10px] font-mono text-amber-300 flex items-center gap-2 shadow-lg max-w-[200px]">
                      <AlertTriangle className="w-3 h-3 flex-shrink-0" />
@@ -605,7 +575,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
                      <span>Street View available</span>
                  </div>
                )}
-               {/* Coordinates */}
                <div className="bg-black/80 backdrop-blur-md border border-cyber-500/30 rounded-lg p-2 px-4 text-xs font-mono text-cyber-400 shadow-[0_0_15px_rgba(14,165,233,0.1)]">
                  <div className="flex items-center gap-2">
                      <Crosshair className="w-3 h-3" />

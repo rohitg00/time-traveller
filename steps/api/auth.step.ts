@@ -1,9 +1,3 @@
-/**
- * Authentication API Step
- * Exchanges Supabase auth token for app JWT
- * Based on ChessArena.ai implementation: https://github.com/MotiaDev/chessarena-ai
- */
-
 import { ApiRouteConfig, Handlers } from 'motia';
 import { z } from 'zod';
 import { 
@@ -12,7 +6,6 @@ import {
   User 
 } from '../../services/supabase/authService';
 
-// User schema for response
 const userSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -51,7 +44,6 @@ export const handler: Handlers['Auth'] = async (req, { logger, state }) => {
   try {
     const { authToken } = req.body;
 
-    // Verify the Supabase token
     const user = await verifySupabaseToken(authToken);
 
     if (!user) {
@@ -64,10 +56,8 @@ export const handler: Handlers['Auth'] = async (req, { logger, state }) => {
 
     logger.info('Auth: User verified', { userId: user.id, email: user.email });
 
-    // Store user in state for future reference
     await state.set('users', user.id, user);
 
-    // Create app JWT
     const accessToken = createAccessToken(user.id, user.email, user.name);
 
     logger.info('Auth: Token exchange successful', { userId: user.id });

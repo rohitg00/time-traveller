@@ -1,8 +1,3 @@
-/**
- * Authentication Context
- * Provides Supabase auth state and methods throughout the app
- */
-
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { createClient, SupabaseClient, User as SupabaseUser, Session } from '@supabase/supabase-js';
 
@@ -62,7 +57,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthConfigured = !!(supabaseUrl && supabaseAnonKey);
 
-  // Exchange Supabase token for app JWT
   const exchangeToken = async (supabaseToken: string): Promise<{ accessToken: string; user: AppUser } | null> => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth`, {
@@ -84,29 +78,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Initialize auth state
   useEffect(() => {
     if (!supabase) {
       setLoading(false);
       return;
     }
 
-    // Check for PKCE code in URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    
-    // Check for hash fragment (legacy implicit flow)
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessTokenInUrl = hashParams.get('access_token');
     
     if (code) {
-      // Clean up URL immediately to prevent double-execution
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Exchange the code for a session
       supabase.auth.exchangeCodeForSession(code).then(async ({ data, error }) => {
         if (error) {
-          // Handle "code already used" errors from React Strict Mode
           if (error.message.includes('code') && error.message.includes('verifier')) {
             const { data: sessionData } = await supabase.auth.getSession();
             if (sessionData.session) {
@@ -146,12 +133,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
     
-    // Clear hash fragment if present
     if (accessTokenInUrl) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Get initial session
     supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
       setSession(initialSession);
       setSupabaseUser(initialSession?.user ?? null);
@@ -164,8 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem('tt_access_token', result.accessToken);
           localStorage.setItem('tt_user', JSON.stringify(result.user));
         }
-      } else {
-        // Try to restore from localStorage
+        } else {
         const storedToken = localStorage.getItem('tt_access_token');
         const storedUser = localStorage.getItem('tt_user');
         if (storedToken && storedUser) {
@@ -177,10 +161,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
     });
 
-    // Track sign-in state to ignore spurious events
     let isSigningIn = false;
     
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (event === 'SIGNED_IN' && newSession?.access_token) {
         isSigningIn = true;

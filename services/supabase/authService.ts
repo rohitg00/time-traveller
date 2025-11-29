@@ -1,8 +1,3 @@
-/**
- * Supabase Authentication Service
- * Based on ChessArena.ai implementation: https://github.com/MotiaDev/chessarena-ai
- */
-
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
 
@@ -11,9 +6,6 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 let supabaseAdmin: SupabaseClient | null = null;
 
-/**
- * Get Supabase admin client (uses service role key for server-side operations)
- */
 function getSupabaseAdmin(): SupabaseClient {
   if (!supabaseAdmin) {
     if (!supabaseUrl || !supabaseServiceRoleKey) {
@@ -24,9 +16,6 @@ function getSupabaseAdmin(): SupabaseClient {
   return supabaseAdmin;
 }
 
-/**
- * User data structure
- */
 export interface User {
   id: string;
   email: string;
@@ -34,18 +23,12 @@ export interface User {
   avatarUrl?: string;
 }
 
-/**
- * Token data embedded in JWT
- */
 export interface TokenData {
-  sub: string; // User ID
+  sub: string;
   email?: string;
   name?: string;
 }
 
-/**
- * Verify a Supabase auth token and return user data
- */
 export async function verifySupabaseToken(authToken: string): Promise<User | null> {
   try {
     const supabase = getSupabaseAdmin();
@@ -67,9 +50,6 @@ export async function verifySupabaseToken(authToken: string): Promise<User | nul
   }
 }
 
-/**
- * Create a JWT access token for the user
- */
 export function createAccessToken(userId: string, email?: string, name?: string): string {
   const jwtSecret = process.env.JWT_SECRET;
   const jwtExpiration = process.env.JWT_EXPIRATION || '30d';
@@ -87,9 +67,6 @@ export function createAccessToken(userId: string, email?: string, name?: string)
   return jwt.sign(tokenData, jwtSecret, { expiresIn: jwtExpiration as any });
 }
 
-/**
- * Verify a JWT access token and return token data
- */
 export function verifyAccessToken(token: string): TokenData | null {
   const jwtSecret = process.env.JWT_SECRET;
   
@@ -105,9 +82,6 @@ export function verifyAccessToken(token: string): TokenData | null {
   }
 }
 
-/**
- * Check if auth is properly configured
- */
 export function isAuthConfigured(): boolean {
   return !!(
     process.env.SUPABASE_URL && 

@@ -32,16 +32,13 @@ export const handler: Handlers['GenerateLocationDetails'] = async (input, { emit
   try {
     logger.info('Generating location details', { traceId, teleportId, destination });
     
-    // Generate location details with Google Maps grounding
     const { description, mapsUri } = await generateLocationDetails(destination, era);
     
     logger.info('Location details generated', { traceId, teleportId });
     
-    // Store in state
     const details: LocationDetails = { description, mapsUri };
     await state.set('teleport-details', teleportId, details);
 
-    // Emit event to trigger TTS synthesis (non-blocking)
     await emit({
       topic: 'synthesize-speech',
       data: {
@@ -50,7 +47,6 @@ export const handler: Handlers['GenerateLocationDetails'] = async (input, { emit
       }
     });
 
-    // Emit event for completion check
     await emit({
       topic: 'location-details-generated',
       data: { teleportId }

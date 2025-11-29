@@ -47,6 +47,7 @@
 | 🗺️ **Street View Integration** | Real Google Maps imagery as AI context |
 | 🌦️ **Location Intelligence** | Weather, air quality, nearby places |
 | 🔐 **Secure Auth** | Google/GitHub OAuth via Supabase |
+| 🔒 **Private History** | Your travel history is only visible to you |
 | 👤 **Traveler Insertion** | Insert yourself into any scene |
 | 🎨 **5 Art Styles** | Photorealistic, Cyberpunk, Renaissance, Impressionist, Baroque |
 | 🕰️ **Any Era** | Ancient Rome to 2150+ |
@@ -243,14 +244,39 @@ time-traveller/
 
 ---
 
+## 🔒 Privacy & Data Storage
+
+Your data is **private and secure**. Here's how we handle it:
+
+| Data Type | Storage | Access |
+|-----------|---------|--------|
+| **Travel History** | Supabase Database | Only you (authenticated) |
+| **Generated Images** | Supabase Storage | Only you (via your history) |
+| **Audio Narrations** | Supabase Storage | Only you (via your history) |
+| **Reference Photos** | Supabase Storage | Only you (linked to your teleport) |
+
+### How It Works
+
+- **User Isolation**: Each user's history is stored with their unique `userId`
+- **Authenticated Access**: History API requires valid JWT token
+- **No Cross-User Access**: You cannot see other users' travels, and they cannot see yours
+- **Secure Storage**: All images and audio are stored in private Supabase buckets
+- **No Data Sharing**: Your uploaded photos and generated content are never shared
+
+> 💡 **Note**: When not logged in, history is stored locally in your browser's localStorage and is completely private to your device.
+
+---
+
 ## ✨ What's New
 
-- 🔐 **Supabase Auth** - Google/GitHub OAuth
+- 🔐 **Supabase Auth** - Google/GitHub OAuth with user isolation
+- 🔒 **Private History** - Each user only sees their own travels
 - 🌦️ **Location Intelligence** - Weather, AQI, nearby places
 - 🔍 **Address Search** - Search by pincode/address
 - 👤 **Traveler Insertion** - Insert yourself into scenes
-- ☁️ **Cloud Storage** - Images stored in Supabase
+- ☁️ **Cloud Storage** - Images stored securely in Supabase
 - 🌈 **Weather Animations** - Dynamic background effects
+- 🎙️ **Audio Playback** - Play/abort audio narration controls
 
 ---
 

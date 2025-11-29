@@ -1,9 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Helper to get a fresh instance with the latest key
 export const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Helper to fetch Google Street View Static Image
 export async function getStreetViewImage(lat: number, lng: number, mapsApiKey: string): Promise<{data: string, mimeType: string} | null> {
   const url = `https://maps.googleapis.com/maps/api/streetview?size=640x360&location=${lat},${lng}&fov=90&heading=0&pitch=0&key=${mapsApiKey}`;
   
@@ -14,7 +12,6 @@ export async function getStreetViewImage(lat: number, lng: number, mapsApiKey: s
     const contentType = response.headers.get('content-type') || 'image/jpeg';
     if (!contentType.startsWith('image/')) return null;
 
-    // Use Node.js Buffer instead of browser FileReader
     const arrayBuffer = await response.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     
@@ -59,31 +56,25 @@ export async function generateImage(
   let usedStreetView = false;
   let fallbackMessage: string | undefined;
   
-  // 1. Try to fetch Street View context if coordinates exist
   const hasCoordinates = coordinates || destination.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
   
   if (coordinates) {
     streetViewData = await getStreetViewImage(coordinates.lat, coordinates.lng, mapsApiKey);
   } else {
-    // Try to parse coordinates from destination string if it looks like lat/lng
     const coordMatch = destination.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
     if (coordMatch) {
       streetViewData = await getStreetViewImage(parseFloat(coordMatch[1]), parseFloat(coordMatch[3]), mapsApiKey);
     }
   }
 
-  // Track if street view was used and provide fallback message if not
   if (streetViewData) {
     usedStreetView = true;
   } else if (hasCoordinates) {
-    // User provided coordinates but no street view available
     fallbackMessage = "Street View unavailable for exact coordinates. Generating AI visualization based on location description and nearby landmarks.";
   }
 
-  // 2. Build the Multi-modal prompt
   let promptText = "";
 
-  // CASE A: We have a Street View Image (Context)
   if (streetViewData) {
     parts.push({
       inlineData: {
@@ -94,7 +85,6 @@ export async function generateImage(
     promptText += `The first image provided is the REFERENCE LOCATION (real-world street view). `;
   }
 
-  // CASE B: We have a User Image (Subject)
   if (referenceImage) {
     const userMimeType = getMimeTypeFromDataUrl(referenceImage);
     const userBase64 = referenceImage.split(',')[1] || referenceImage;
@@ -108,7 +98,6 @@ export async function generateImage(
     promptText += `The ${streetViewData ? 'second' : 'first'} image provided is the TRAVELER (user). `;
   }
 
-  // Construct instruction
   promptText += `\n\nGenerate a photorealistic, ${style} image of `;
   
   if (streetViewData && referenceImage) {
@@ -151,7 +140,6 @@ export async function generateImage(
     return null;
   };
 
-  // Attempt 1: High Quality (Gemini 3 Pro - Nano Banana Pro)
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
@@ -170,10 +158,8 @@ export async function generateImage(
       return { imageData: data, usedStreetView, fallbackMessage };
     }
   } catch {
-    // Primary model failed, try fallback
   }
 
-  // Attempt 2: Fallback (Gemini 2.5 Flash Image)
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -190,7 +176,6 @@ export async function generateImage(
       return { imageData: data, usedStreetView, fallbackMessage };
     }
   } catch {
-    // Fallback model also failed
   }
 
   throw new Error("Visual sensors failed to render destination. Both Primary and Auxiliary cores failed.");

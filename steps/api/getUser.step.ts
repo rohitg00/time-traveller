@@ -1,8 +1,3 @@
-/**
- * Get User API Step
- * Returns the current authenticated user's data
- */
-
 import { ApiRouteConfig, Handlers } from 'motia';
 import { z } from 'zod';
 import { authRequired } from '../middlewares/auth.middleware';
@@ -52,7 +47,6 @@ export const handler: Handlers['GetUser'] = async (req, { logger, state }) => {
   logger.info('GetUser: Fetching user data', { userId });
 
   try {
-    // Get user from state
     const user = await state.get<{
       id: string;
       email: string;

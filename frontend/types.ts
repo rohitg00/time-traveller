@@ -7,16 +7,13 @@ export interface TravelLogItem {
   era: string;
   style: string;
   timestamp: number;
-  imageData: string; // URL from Supabase or Base64 (fallback)
+  imageData: string;
   description: string;
-  mapsUri?: string; // Link to Google Maps/Street View
-  referenceImage?: string; // URL from Supabase or Base64 (user photo)
-  usedStreetView?: boolean; // Whether Street View imagery was used
+  mapsUri?: string;
+  referenceImage?: string;
+  usedStreetView?: boolean;
 }
 
-/**
- * Helper to get proper image source (handles both URLs and base64)
- */
 export function getImageSrc(imageData: string | undefined): string {
   if (!imageData) return '';
   if (imageData.startsWith('http')) return imageData;
