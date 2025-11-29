@@ -267,21 +267,28 @@ const AppContent: React.FC = () => {
       
       // Handle URL-based audio (from Supabase)
       if (audioResponse.audioUrl) {
-        // Fetch the audio as a blob to avoid CORS issues with direct playback
-        const audioBlob = await fetch(audioResponse.audioUrl).then(r => r.blob());
-        const audioBlobUrl = URL.createObjectURL(audioBlob);
+        // Fetch the audio as array buffer for AudioContext decoding
+        const audioArrayBuffer = await fetch(audioResponse.audioUrl).then(r => r.arrayBuffer());
         
-        const audio = new Audio(audioBlobUrl);
-        audio.onended = () => {
+        // Gemini TTS returns raw PCM at 24kHz - need to decode with AudioContext
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+        setAudioContext(ctx);
+        
+        // Decode the audio data
+        const audioBuffer = await decodeAudioData(
+          new Uint8Array(audioArrayBuffer),
+          ctx,
+          24000,
+          1
+        );
+
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.onended = () => {
           setIsAudioPlaying(false);
-          URL.revokeObjectURL(audioBlobUrl);
         };
-        audio.onerror = () => {
-          setIsAudioPlaying(false);
-          URL.revokeObjectURL(audioBlobUrl);
-          setError("Audio playback failed.");
-        };
-        await audio.play();
+        source.start();
         return;
       }
       
