@@ -10,8 +10,6 @@ const loadGoogleMapsApi = () => {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places`;
     script.async = true;
     document.head.appendChild(script);
-  } else {
-    console.warn('⚠️ GOOGLE_API_KEY not set in .env - Map features will be limited to Leaflet only');
   }
 };
 

@@ -1,12 +1,13 @@
 import { ApiRouteConfig, Handlers } from 'motia';
 import { z } from 'zod';
+import { uploadReferenceImage, isSupabaseConfigured } from '../../services/supabase/storageService';
+import { authRequired } from '../middlewares/auth.middleware';
 
 const bodySchema = z.object({
   destination: z.string().min(1, "Destination cannot be empty"),
   era: z.string().min(1, "Era is required"),
   style: z.string().default("Photorealistic"),
-  // NOTE: referenceImage removed due to Motia Cloud state size limits
-  // User photos are kept client-side only for display
+  referenceImage: z.string().optional(), // Re-enabled with Supabase storage
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()
@@ -18,9 +19,10 @@ export const config: ApiRouteConfig = {
   type: 'api',
   path: '/teleport',
   method: 'POST',
-  description: 'Initiates a teleportation sequence to a destination',
+  description: 'Initiates a teleportation sequence to a destination (requires auth)',
   emits: ['generate-image', 'generate-location-details'],
   flows: ['time-traveller-flow'],
+  middleware: [authRequired], // Auth required for data isolation
   // @ts-expect-error Zod schema type strictness - works at runtime
   bodySchema,
   responseSchema: {
@@ -31,7 +33,9 @@ export const config: ApiRouteConfig = {
       message: z.string()
     }),
     // @ts-expect-error Zod schema type strictness - works at runtime
-    400: z.object({ error: z.string() })
+    400: z.object({ error: z.string() }),
+    // @ts-expect-error Zod schema type strictness - works at runtime
+    401: z.object({ error: z.string() })
   }
 };
 
@@ -39,27 +43,55 @@ interface TeleportData {
   destination: string;
   era: string;
   style: string;
-  // NOTE: referenceImage removed due to Motia Cloud state size limits
+  referenceImageUrl?: string; // URL instead of base64
   coordinates?: { lat: number; lng: number };
   timestamp: number;
   mapsApiKey: string;
+  userId: string; // User who initiated the teleport
 }
 
 export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger, streams, state, traceId }) => {
   try {
-    const { destination, era, style, coordinates } = bodySchema.parse(req.body);
+    // Get userId from auth middleware
+    const userId = req.userId;
+    if (!userId) {
+      logger.warn('InitiateTeleport: No userId in request');
+      return {
+        status: 401,
+        body: { error: 'Unauthorized - User not authenticated' }
+      };
+    }
+
+    const { destination, era, style, referenceImage, coordinates } = bodySchema.parse(req.body);
     
-    const teleportId = `teleport-${Date.now()}`;
+    // Include userId in teleportId for easier filtering
+    const teleportId = `teleport-${userId}-${Date.now()}`;
     
     logger.info('Initiating teleport sequence', { 
       traceId,
       teleportId, 
       destination, 
       era, 
-      style 
+      style,
+      hasReferenceImage: !!referenceImage
     });
     
-    // Create initial progress stream entry
+    // Upload reference image to Supabase if provided
+    let referenceImageUrl: string | undefined;
+    if (referenceImage && isSupabaseConfigured()) {
+      try {
+        logger.info('Uploading reference image to Supabase', { teleportId });
+        referenceImageUrl = await uploadReferenceImage(teleportId, referenceImage);
+        logger.info('Reference image uploaded successfully', { teleportId, referenceImageUrl });
+      } catch (uploadError) {
+        logger.warn('Failed to upload reference image, continuing without it', { 
+          teleportId, 
+          error: uploadError instanceof Error ? uploadError.message : 'Unknown error'
+        });
+      }
+    }
+    
+    // Create initial progress stream entry (small data only - no images)
     await streams.teleportProgress.set('active', teleportId, {
       id: teleportId,
       destination,
@@ -70,22 +102,24 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       timestamp: Date.now()
     });
 
-    // Store teleport request in state for event handlers to access
-    // NOTE: referenceImage is NOT stored in state due to Motia Cloud size limits
-    // The reference image is only used client-side for display
+    // Store teleport request in state (URLs only, no base64)
     const teleportData: TeleportData = {
       destination,
       era,
       style,
-      // referenceImage excluded - too large for Motia state storage
+      referenceImageUrl, // URL instead of base64
       coordinates,
       timestamp: Date.now(),
-      mapsApiKey: process.env.GOOGLE_API_KEY || ''
+      mapsApiKey: process.env.GOOGLE_API_KEY || '',
+      userId // Store userId for data isolation
     };
     
     await state.set('teleports', teleportId, teleportData);
+    
+    // Also store in user-specific group for easy retrieval
+    await state.set(`user-teleports-${userId}`, teleportId, { teleportId, timestamp: Date.now() });
 
-    // Emit events for parallel processing
+    // Emit events for parallel processing (no large data in emit)
     await emit({
       topic: 'generate-image',
       data: {
@@ -93,8 +127,8 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
         destination,
         era,
         style,
-        // referenceImage removed to avoid E2BIG error, fetched from state
         coordinates
+        // referenceImageUrl is fetched from state
       }
     });
 
@@ -126,4 +160,3 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
     };
   }
 };
-

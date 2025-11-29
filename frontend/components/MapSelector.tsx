@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Crosshair, Eye, Map as MapIcon, RefreshCw, AlertTriangle, Loader2, Globe, ShieldAlert, Zap } from 'lucide-react';
+import { Crosshair, Eye, Map as MapIcon, RefreshCw, AlertTriangle, Loader2, Globe, ShieldAlert, Zap, Search, Navigation } from 'lucide-react';
 
 interface MapSelectorProps {
   onSelect: (coords: { lat: number; lng: number }) => void;
@@ -129,6 +129,12 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [retryTrigger, setRetryTrigger] = useState(0);
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   // --- GOOGLE MAPS INIT ---
   useEffect(() => {
@@ -208,8 +214,7 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
       };
 
     } catch (e) {
-      console.error("Google Maps Init Error:", e);
-      setErrorMsg("Map System Failure: " + (e as any).message);
+      setErrorMsg("Map System Failure: " + (e as Error).message);
     }
   }, [isScriptLoaded, engine, retryTrigger]);
 
@@ -238,8 +243,8 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
       });
 
       panoramaInstanceRef.current = panorama;
-    } catch (e) {
-      console.error("Street View Init Error:", e);
+    } catch {
+      // Street View init error - continue without it
     }
   }, [isScriptLoaded, engine, retryTrigger]);
 
@@ -356,6 +361,120 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
       setRetryTrigger(prev => prev + 1);
   };
 
+  // Search by address, pincode, or place name
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    
+    setIsSearching(true);
+    setSearchError(null);
+    
+    try {
+      if (engine === 'google' && window.google?.maps?.Geocoder) {
+        // Use Google Geocoder
+        const geocoder = new window.google.maps.Geocoder();
+        
+        geocoder.geocode({ address: searchQuery }, (results: any, status: any) => {
+          setIsSearching(false);
+          
+          if (status === 'OK' && results && results.length > 0) {
+            const location = results[0].geometry.location;
+            const lat = location.lat();
+            const lng = location.lng();
+            
+            // Center map on result
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.setCenter({ lat, lng });
+              mapInstanceRef.current.setZoom(15);
+            }
+            
+            // Select this location
+            handleGoogleSelect(lat, lng);
+            setSearchQuery(''); // Clear search after success
+          } else {
+            setSearchError('Location not found. Try a different search.');
+          }
+        });
+      } else {
+        // Fallback to Nominatim (OpenStreetMap) for Leaflet
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`
+        );
+        const data = await response.json();
+        setIsSearching(false);
+        
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          
+          if (leafletMapRef.current) {
+            leafletMapRef.current.setView([lat, lng], 15);
+          }
+          
+          handleLeafletSelect(lat, lng);
+          setSearchQuery(''); // Clear search after success
+        } else {
+          setSearchError('Location not found. Try a different search.');
+        }
+      }
+    } catch {
+      setIsSearching(false);
+      setSearchError('Search failed. Please try again.');
+    }
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // Use browser geolocation to get current location
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setSearchError('Geolocation not supported by your browser');
+      return;
+    }
+    
+    setIsLocating(true);
+    setSearchError(null);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        setIsLocating(false);
+        
+        // Center map on location
+        if (engine === 'google' && mapInstanceRef.current) {
+          mapInstanceRef.current.setCenter({ lat, lng });
+          mapInstanceRef.current.setZoom(15);
+          handleGoogleSelect(lat, lng);
+        } else if (engine === 'leaflet' && leafletMapRef.current) {
+          leafletMapRef.current.setView([lat, lng], 15);
+          handleLeafletSelect(lat, lng);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setSearchError('Location access denied. Please enable location permissions.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setSearchError('Location unavailable. Please try again.');
+            break;
+          case error.TIMEOUT:
+            setSearchError('Location request timed out. Please try again.');
+            break;
+          default:
+            setSearchError('Failed to get location. Please try again.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   return (
     <div className="relative w-full h-full bg-black">
       {/* Map Containers */}
@@ -402,6 +521,57 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
               </div>
           </div>
       )}
+
+      {/* Search Bar */}
+      <div className="absolute top-4 left-4 right-4 z-40 pointer-events-none">
+        <div className="max-w-md mx-auto pointer-events-auto">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder="Search address, pincode, city..."
+              className="w-full bg-black/90 backdrop-blur-md border border-cyber-500/50 rounded-lg py-2.5 pl-10 pr-20 text-sm text-white placeholder-slate-500 font-mono focus:outline-none focus:border-cyber-400 focus:ring-1 focus:ring-cyber-400/50 shadow-lg"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyber-500" />
+            <button
+              onClick={handleSearch}
+              disabled={isSearching || !searchQuery.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-cyber-500 hover:bg-cyber-400 disabled:bg-cyber-900 disabled:text-slate-500 text-black text-xs font-bold rounded transition-colors"
+            >
+              {isSearching ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                'GO'
+              )}
+            </button>
+          </div>
+          {searchError && (
+            <div className="mt-2 bg-red-900/90 backdrop-blur-md border border-red-500/50 rounded-lg p-2 px-3 text-[10px] font-mono text-red-300 flex items-center gap-2">
+              <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+              <span>{searchError}</span>
+            </div>
+          )}
+          <div className="mt-2 flex items-center justify-center gap-3">
+            <span className="text-[10px] text-slate-500 font-mono">
+              Try: "E17 4GA, London" or "Tokyo Tower"
+            </span>
+            <button
+              onClick={handleUseMyLocation}
+              disabled={isLocating}
+              className="flex items-center gap-1 px-2 py-1 bg-cyber-900/80 border border-cyber-500/50 rounded text-[10px] font-mono text-cyber-400 hover:text-white hover:border-cyber-400 transition-colors disabled:opacity-50"
+            >
+              {isLocating ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Navigation className="w-3 h-3" />
+              )}
+              {isLocating ? 'LOCATING...' : 'USE MY LOCATION'}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Controls Overlay */}
       <div className="absolute bottom-4 left-4 right-4 z-30 flex justify-between items-end pointer-events-none">

@@ -53,8 +53,7 @@ export async function parseTravelCommand(
       } : undefined
     };
 
-  } catch (e) {
-    console.error("Command parsing failed", e);
+  } catch {
     return { isJump: false, reply: "Command signal interrupted. Please retry." };
   }
 }

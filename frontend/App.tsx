@@ -8,9 +8,13 @@ import { ViewScreen } from './components/ViewScreen';
 import { HistoryLog } from './components/HistoryLog';
 import { Header } from './components/Header';
 import { Starfield } from './components/Starfield';
+import { AuthBanner } from './components/AuthBanner';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AlertCircle, Lock, Zap } from 'lucide-react';
 
-const App: React.FC = () => {
+// Main app content that uses auth
+const AppContent: React.FC = () => {
+  const { user, loading: authLoading, isAuthConfigured } = useAuth();
   const [teleportState, setTeleportState] = useState<TeleportState>('idle');
   const [currentLocation, setCurrentLocation] = useState<TravelLogItem | null>(null);
   const [history, setHistory] = useState<TravelLogItem[]>([]);
@@ -18,6 +22,7 @@ const App: React.FC = () => {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
+  const [weatherCondition, setWeatherCondition] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // Check for API Key selection on load
@@ -31,25 +36,54 @@ const App: React.FC = () => {
       }
     };
     checkKey();
+  }, []);
 
-    // Load history from localStorage (client-side only for privacy)
-    // Each user's history is stored locally on their device
-    const loadHistory = () => {
+  // Load history - from server if authenticated, from localStorage if not
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (authLoading) return; // Wait for auth to load
+      
+      if (user && isAuthConfigured) {
+        // Authenticated: load from server (user-specific data)
+        try {
+          const serverHistory = await api.getHistory(10);
+          // Convert server format to local format
+          const formattedHistory: TravelLogItem[] = serverHistory.map(item => ({
+            ...item,
+            imageData: item.imageUrl || item.imageData || '', // Handle both URL and base64
+            referenceImage: item.referenceImageUrl || item.referenceImage,
+          }));
+          setHistory(formattedHistory);
+        } catch {
+          // Fallback to localStorage
+          loadLocalHistory();
+        }
+      } else {
+        // Not authenticated: use localStorage
+        loadLocalHistory();
+      }
+    };
+
+    const loadLocalHistory = () => {
       try {
         const savedHistory = localStorage.getItem('time-traveller-history');
         if (savedHistory) {
           const parsed = JSON.parse(savedHistory) as TravelLogItem[];
           setHistory(parsed.slice(0, 10)); // Keep last 10 items
         }
-      } catch (e) {
-        console.error("Failed to load history from localStorage", e);
+      } catch {
+        // Failed to load from localStorage
       }
     };
-    loadHistory();
-  }, []);
 
-  // Save history to localStorage whenever it changes
+    loadHistory();
+  }, [user, authLoading, isAuthConfigured]);
+
+  // Save history to localStorage whenever it changes (only if not authenticated)
   useEffect(() => {
+    // If authenticated, history is stored on server
+    if (user && isAuthConfigured) return;
+    
     if (history.length > 0) {
       try {
         // Don't store referenceImage in localStorage to save space
@@ -58,11 +92,11 @@ const App: React.FC = () => {
           referenceImage: undefined // Remove large reference images
         }));
         localStorage.setItem('time-traveller-history', JSON.stringify(historyToSave));
-      } catch (e) {
-        console.error("Failed to save history to localStorage", e);
+      } catch {
+        // Failed to save to localStorage
       }
     }
-  }, [history]);
+  }, [history, user, isAuthConfigured]);
 
   const handleSelectKey = async () => {
     if (window.aistudio) {
@@ -71,8 +105,8 @@ const App: React.FC = () => {
         // Assume success if no error thrown, or check return if supported
         setHasApiKey(true);
         setError(null);
-      } catch (e) {
-        console.error("Key selection cancelled or failed", e);
+      } catch {
+        // Key selection cancelled or failed
       }
     }
   };
@@ -90,13 +124,12 @@ const App: React.FC = () => {
 
     try {
       // Initiate teleport via Motia API
-      // NOTE: referenceImage is NOT sent to backend due to Motia Cloud state size limits
-      // It's kept client-side only for display in history
+      // referenceImage is now sent and uploaded to Supabase on the backend
       const response = await api.initiateTeleport({
         destination,
         era,
         style,
-        // referenceImage excluded - too large for Motia Cloud state storage
+        referenceImage, // Re-enabled - uploaded to Supabase
         coordinates
       });
 
@@ -107,17 +140,19 @@ const App: React.FC = () => {
         teleportId,
         (progress) => {
           // Update UI based on progress
-          if (progress.status === 'completed' && progress.imageData && progress.description) {
+          // Handle both imageUrl (Supabase) and imageData (fallback) 
+          const imageSource = progress.imageUrl || progress.imageData;
+          if (progress.status === 'completed' && imageSource && progress.description) {
             const newItem: TravelLogItem = {
               id: progress.id,
               destination: progress.destination,
               era: progress.era,
               style: progress.style,
               timestamp: progress.timestamp,
-              imageData: progress.imageData,
+              imageData: imageSource, // URL or base64
               description: progress.description,
               mapsUri: progress.mapsUri,
-              referenceImage: referenceImage,
+              referenceImage: progress.referenceImageUrl || referenceImage, // URL from Supabase or local
               usedStreetView: progress.usedStreetView,
             };
 
@@ -133,8 +168,7 @@ const App: React.FC = () => {
             unsubscribe();
           }
         },
-        (error) => {
-          console.error('Stream error:', error);
+        () => {
           // Fallback to polling if stream fails
           pollTeleportProgress(teleportId, referenceImage);
         }
@@ -147,15 +181,22 @@ const App: React.FC = () => {
         }
       }, 3000);
 
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      
+      // Handle auth errors
+      if (message.includes('sign in')) {
+        setError(message);
+        setTeleportState('error');
+        return;
+      }
       
       // If unauthorized, it might be the key. Prompt to re-select.
-      if (err.message && (err.message.includes('403') || err.message.includes('Permission denied') || err.message.includes('not found'))) {
+      if (message.includes('403') || message.includes('Permission denied') || message.includes('not found')) {
          setHasApiKey(false);
          setError("Authorization Link Severed. Please reconnect ID key.");
       } else {
-         setError(err.message || "Teleportation malfunction. Coordinates invalid.");
+         setError(message || "Teleportation malfunction. Coordinates invalid.");
       }
       setTeleportState('error');
     }
@@ -170,17 +211,19 @@ const App: React.FC = () => {
       try {
         const progress = await api.getTeleportProgress(teleportId);
         
-        if (progress.status === 'completed' && progress.imageData && progress.description) {
+        // Handle both imageUrl (Supabase) and imageData (fallback)
+        const imageSource = progress.imageUrl || progress.imageData;
+        if (progress.status === 'completed' && imageSource && progress.description) {
           const newItem: TravelLogItem = {
             id: progress.id,
             destination: progress.destination,
             era: progress.era,
             style: progress.style,
             timestamp: progress.timestamp,
-            imageData: progress.imageData,
+            imageData: imageSource, // URL or base64
             description: progress.description,
             mapsUri: progress.mapsUri,
-            referenceImage: referenceImage,
+            referenceImage: progress.referenceImageUrl || referenceImage, // URL from Supabase or local
             usedStreetView: progress.usedStreetView,
           };
 
@@ -203,7 +246,6 @@ const App: React.FC = () => {
           setTeleportState('error');
         }
       } catch (err: unknown) {
-        console.error('Polling error:', err);
         const message = err instanceof Error ? err.message : 'Unknown error';
         setError(message);
         setTeleportState('error');
@@ -241,8 +283,7 @@ const App: React.FC = () => {
       };
       source.start();
 
-    } catch (e) {
-      console.error("Speech synthesis failed", e);
+    } catch {
       setIsAudioPlaying(false);
       setError("Audio synthesis subsystem failure or not yet ready.");
     }
@@ -258,11 +299,38 @@ const App: React.FC = () => {
     }
   };
 
+  // Show auth loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen text-slate-200 flex flex-col font-sans selection:bg-cyber-500 selection:text-white relative overflow-x-hidden">
+        <Starfield weatherCondition={weatherCondition} />
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-cyber-500/30 border-t-cyber-500 rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-slate-400 font-mono">INITIALIZING TEMPORAL SYSTEMS...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth banner if auth is configured but user is not signed in
+  if (isAuthConfigured && !user) {
+    return (
+      <div className="min-h-screen text-slate-200 flex flex-col font-sans selection:bg-cyber-500 selection:text-white relative overflow-x-hidden">
+        <Starfield weatherCondition={weatherCondition} />
+        <Header />
+        <AuthBanner />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen text-slate-200 flex flex-col font-sans selection:bg-cyber-500 selection:text-white relative overflow-x-hidden">
-      <Starfield />
+      <Starfield weatherCondition={weatherCondition} />
       
-      {/* API Key Modal Overlay */}
+      {/* API Key Modal Overlay (for AI Studio wrapper) */}
       {!hasApiKey && (
         <div className="fixed inset-0 z-[100] bg-cyber-900/95 backdrop-blur-md flex items-center justify-center p-4">
            <div className="max-w-md w-full bg-cyber-800 border border-cyber-500 rounded-2xl shadow-[0_0_50px_rgba(14,165,233,0.2)] p-8 text-center">
@@ -300,6 +368,7 @@ const App: React.FC = () => {
           <ControlPanel 
             onTeleport={handleTeleport} 
             isTeleporting={teleportState === 'teleporting'} 
+            onWeatherUpdate={setWeatherCondition}
           />
           <HistoryLog 
             history={history} 
@@ -327,6 +396,15 @@ const App: React.FC = () => {
 
       </main>
     </div>
+  );
+};
+
+// Wrapper component that provides auth context
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 

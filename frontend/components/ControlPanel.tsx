@@ -3,16 +3,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { LocationStyle } from '../types';
 import { Send, MapPin, Clock, Palette, Camera, Upload, X, User, Circle, Terminal, Globe, Sliders } from 'lucide-react';
 import { MapSelector } from './MapSelector';
+import { LocationInfo } from './LocationInfo';
+import { TravelerIdentity } from './TravelerIdentity';
 import * as api from '../apiClient';
 
 interface ControlPanelProps {
   onTeleport: (dest: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }) => void;
   isTeleporting: boolean;
+  onWeatherUpdate?: (condition: string) => void;
 }
 
 type Tab = 'manual' | 'terminal' | 'map';
 
-export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTeleporting }) => {
+export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTeleporting, onWeatherUpdate }) => {
   const [activeTab, setActiveTab] = useState<Tab>('manual');
   
   // Manual State
@@ -30,9 +33,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
   ]);
   const [isProcessingChat, setIsProcessingChat] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom of chat
@@ -107,119 +107,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
     setDestination(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
   };
 
-  // Compress image to reduce size (max 800px width, 0.7 quality)
-  const compressImage = (dataUrl: string, maxWidth: number = 800, quality: number = 0.7): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        
-        // Scale down if larger than maxWidth
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        } else {
-          resolve(dataUrl);
-        }
-      };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
-    });
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const original = reader.result as string;
-        // Compress the image to reduce payload size
-        const compressed = await compressImage(original);
-        console.log(`Image compressed: ${(original.length / 1024).toFixed(0)}KB → ${(compressed.length / 1024).toFixed(0)}KB`);
-        setUserImage(compressed);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const triggerFileUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      streamRef.current = stream;
-      setIsCameraActive(true);
-    } catch (err) {
-      console.error("Camera access denied:", err);
-      alert("Could not access camera. Please check permissions.");
-    }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    setIsCameraActive(false);
-  };
-
-  const capturePhoto = async () => {
-    if (videoRef.current) {
-      const canvas = document.createElement('canvas');
-      // Capture at a reasonable size (max 800px)
-      const maxWidth = 800;
-      let width = videoRef.current.videoWidth;
-      let height = videoRef.current.videoHeight;
-      
-      if (width > maxWidth) {
-        height = (height * maxWidth) / width;
-        width = maxWidth;
-      }
-      
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0, width, height);
-        // Use lower quality for smaller file size
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        console.log(`Camera capture size: ${(dataUrl.length / 1024).toFixed(0)}KB`);
-        setUserImage(dataUrl);
-        stopCamera();
-      }
-    }
-  };
-
-  const clearImage = () => {
-    setUserImage(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  useEffect(() => {
-    return () => {
-      stopCamera();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isCameraActive && videoRef.current && streamRef.current) {
-      videoRef.current.srcObject = streamRef.current;
-    }
-  }, [isCameraActive]);
-
   const styles = Object.values(LocationStyle);
   const isSubmitDisabled = isTeleporting || !destination.trim();
 
@@ -287,72 +174,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                   required
                   disabled={isTeleporting}
                 />
-              </div>
-
-              {/* Traveler Identity (Image Upload / Camera) */}
-              <div className="space-y-2">
-                <label className="text-xs text-cyber-400 font-mono uppercase tracking-wider flex items-center gap-2">
-                  <User className="w-3 h-3" /> Traveler Identity
-                </label>
-                
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleFileChange} 
-                  accept="image/*" 
-                  className="hidden" 
-                />
-
-                {isCameraActive ? (
-                  <div className="relative bg-black rounded-lg overflow-hidden border border-cyber-500">
-                    <video ref={videoRef} autoPlay playsInline className="w-full h-48 object-cover transform scale-x-[-1]" />
-                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
-                      <button type="button" onClick={capturePhoto} className="p-2 bg-white rounded-full text-black hover:bg-gray-200 shadow-lg z-10">
-                        <Circle className="w-6 h-6 fill-current" />
-                      </button>
-                      <button type="button" onClick={stopCamera} className="p-2 bg-red-500/80 rounded-full text-white hover:bg-red-600 shadow-lg z-10">
-                        <X className="w-6 h-6" />
-                      </button>
-                    </div>
-                  </div>
-                ) : !userImage ? (
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={triggerFileUpload}
-                      disabled={isTeleporting}
-                      className="flex-1 py-3 px-4 bg-cyber-900 border border-dashed border-cyber-600 rounded-lg hover:border-cyber-400 hover:bg-cyber-800 transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white"
-                    >
-                      <Upload className="w-4 h-4" />
-                      <span className="text-xs md:text-sm font-mono">UPLOAD</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={startCamera}
-                      disabled={isTeleporting}
-                      className="flex-1 py-3 px-4 bg-cyber-900 border border-dashed border-cyber-600 rounded-lg hover:border-cyber-400 hover:bg-cyber-800 transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white"
-                    >
-                      <Camera className="w-4 h-4" />
-                      <span className="text-xs md:text-sm font-mono">CAMERA</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="relative group/image">
-                    <div className="w-full h-32 bg-black rounded-lg overflow-hidden border border-cyber-500/50 relative">
-                      <img src={userImage} alt="Traveler" className="w-full h-full object-cover opacity-80" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-3">
-                          <span className="text-xs font-mono text-cyber-300">● IDENTITY VERIFIED</span>
-                      </div>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={clearImage}
-                      className="absolute top-2 right-2 bg-black/80 text-white p-1 rounded-full hover:bg-red-500 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* Style Selector */}
@@ -429,11 +250,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
           {/* MAP TAB */}
           {activeTab === 'map' && (
             <div className="h-full w-full flex flex-col relative">
-               <div className="flex-1 w-full rounded-lg overflow-hidden border border-cyber-700 relative bg-black min-h-[300px]">
+               <div className="flex-1 w-full rounded-lg overflow-hidden border border-cyber-700 relative bg-black min-h-[250px]">
                   <MapSelector onSelect={handleMapSelect} />
                </div>
                
-               <div className="mt-4 flex flex-col gap-2 shrink-0">
+               {/* Location Intelligence Panel */}
+               {selectedCoords && (
+                 <div className="mt-3 shrink-0 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-cyber-700 scrollbar-track-transparent">
+                   <LocationInfo coordinates={selectedCoords} onWeatherUpdate={onWeatherUpdate} />
+                 </div>
+               )}
+               
+               <div className="mt-3 flex flex-col gap-2 shrink-0">
                   <p className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
                     <span className="text-cyber-500">⚠ WARNING:</span> Orbital targeting system active.
                   </p>
@@ -458,13 +286,22 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
       </div>
 
       {/* Fixed Submit Button Footer - Always visible */}
-      {(activeTab === 'manual' || activeTab === 'map') && (
-        <div className="shrink-0 p-4 pt-2 border-t border-cyber-700/50 bg-cyber-800">
+      {(activeTab === 'manual' || activeTab === 'map' || activeTab === 'terminal') && (
+        <div className="shrink-0 p-4 pt-2 border-t border-cyber-700/50 bg-cyber-800 flex gap-3 items-center">
+          {/* Traveler Identity - Always accessible */}
+          <div className="shrink-0">
+             <TravelerIdentity 
+               userImage={userImage} 
+               onImageChange={setUserImage} 
+               isTeleporting={isTeleporting} 
+             />
+          </div>
+
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitDisabled}
-            className={`w-full relative group overflow-hidden rounded-lg p-4 font-bold tracking-wider transition-all ${
+            className={`flex-1 relative group overflow-hidden rounded-lg p-4 font-bold tracking-wider transition-all ${
               isSubmitDisabled
                 ? 'bg-cyber-900 border border-cyber-800 text-slate-600 cursor-not-allowed'
                 : 'bg-cyber-500 hover:bg-cyber-400 text-black shadow-[0_0_20px_rgba(14,165,233,0.4)] hover:shadow-[0_0_30px_rgba(14,165,233,0.6)] cursor-pointer'

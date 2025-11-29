@@ -19,8 +19,7 @@ export async function getStreetViewImage(lat: number, lng: number, mapsApiKey: s
     const base64 = Buffer.from(arrayBuffer).toString('base64');
     
     return { data: base64, mimeType: contentType };
-  } catch (error) {
-    console.warn("Could not retrieve street view data:", error);
+  } catch {
     return null;
   }
 }
@@ -79,7 +78,6 @@ export async function generateImage(
   } else if (hasCoordinates) {
     // User provided coordinates but no street view available
     fallbackMessage = "Street View unavailable for exact coordinates. Generating AI visualization based on location description and nearby landmarks.";
-    console.log(fallbackMessage);
   }
 
   // 2. Build the Multi-modal prompt
@@ -155,7 +153,6 @@ export async function generateImage(
 
   // Attempt 1: High Quality (Gemini 3 Pro - Nano Banana Pro)
   try {
-    console.log(`Engaging Gemini 3 Pro (Nano Banana Pro) with ${parts.length} inputs...`);
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
       contents: { parts: parts },
@@ -170,16 +167,14 @@ export async function generateImage(
 
     const data = extractImage(response);
     if (data) {
-      console.log("Gemini 3 Pro generation successful.");
       return { imageData: data, usedStreetView, fallbackMessage };
     }
-  } catch (error) {
-    console.warn("Gemini 3 Pro (Primary) failed.", error);
+  } catch {
+    // Primary model failed, try fallback
   }
 
   // Attempt 2: Fallback (Gemini 2.5 Flash Image)
   try {
-    console.log("Engaging Fallback: Gemini 2.5 Flash Image...");
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { parts: parts },
@@ -194,8 +189,8 @@ export async function generateImage(
     if (data) {
       return { imageData: data, usedStreetView, fallbackMessage };
     }
-  } catch (error) {
-    console.error("Fallback image generation failed:", error);
+  } catch {
+    // Fallback model also failed
   }
 
   throw new Error("Visual sensors failed to render destination. Both Primary and Auxiliary cores failed.");

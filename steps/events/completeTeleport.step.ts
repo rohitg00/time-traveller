@@ -17,7 +17,7 @@ export const config: EventConfig = {
 };
 
 interface ImageState {
-  imageData: string;
+  imageUrl: string; // URL from Supabase instead of base64
   usedStreetView: boolean;
   fallbackMessage?: string;
 }
@@ -31,7 +31,8 @@ interface TeleportData {
   destination: string;
   era: string;
   style: string;
-  referenceImage?: string;
+  referenceImageUrl?: string; // URL from Supabase
+  userId: string; // User who initiated the teleport
 }
 
 interface HistoryItem {
@@ -39,10 +40,10 @@ interface HistoryItem {
   destination: string;
   era: string;
   style: string;
-  imageData: string;
+  imageUrl: string; // URL instead of base64
   description: string;
   mapsUri?: string;
-  referenceImage?: string;
+  referenceImageUrl?: string; // URL instead of base64
   usedStreetView?: boolean;
   timestamp: number;
 }
@@ -84,7 +85,7 @@ export const handler: Handlers['CompleteTeleport'] = async (input, { logger, str
       finalDescription = `[Note: ${imageState.fallbackMessage}]\n\n${detailsState.description}`;
     }
 
-    // Update final stream state to completed
+    // Update final stream state to completed (URLs only - no large data)
     await streams.teleportProgress.set('active', teleportId, {
       id: teleportId,
       destination: teleportData.destination,
@@ -92,28 +93,38 @@ export const handler: Handlers['CompleteTeleport'] = async (input, { logger, str
       style: teleportData.style,
       status: 'completed',
       progress: 100,
-      imageData: imageState.imageData,
+      imageUrl: imageState.imageUrl, // URL instead of base64
       description: finalDescription,
       mapsUri: detailsState.mapsUri,
+      referenceImageUrl: teleportData.referenceImageUrl, // URL instead of base64
       usedStreetView: imageState.usedStreetView,
       timestamp: Date.now()
     });
 
-    // Store in history for quick retrieval
+    // Store in history for quick retrieval (URLs only)
     const historyItem: HistoryItem = {
       id: teleportId,
       destination: teleportData.destination,
       era: teleportData.era,
       style: teleportData.style,
-      imageData: imageState.imageData,
+      imageUrl: imageState.imageUrl, // URL instead of base64
       description: finalDescription,
       mapsUri: detailsState.mapsUri,
-      referenceImage: teleportData.referenceImage,
+      referenceImageUrl: teleportData.referenceImageUrl, // URL instead of base64
       usedStreetView: imageState.usedStreetView,
       timestamp: Date.now()
     };
     
-    await state.set('teleport-history', teleportId, historyItem);
+    // Store in user-specific history group for data isolation
+    const userId = teleportData.userId;
+    if (userId) {
+      await state.set(`teleport-history-${userId}`, teleportId, historyItem);
+      logger.info('History stored for user', { teleportId, userId });
+    } else {
+      // Fallback to global history (for backwards compatibility)
+      await state.set('teleport-history', teleportId, historyItem);
+      logger.warn('No userId found, storing in global history', { teleportId });
+    }
     
     logger.info('Teleport completed successfully', { traceId, teleportId });
 
@@ -137,4 +148,3 @@ export const handler: Handlers['CompleteTeleport'] = async (input, { logger, str
     }
   }
 };
-

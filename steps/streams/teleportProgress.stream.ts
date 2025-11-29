@@ -8,9 +8,12 @@ export const teleportProgressSchema = z.object({
   style: z.string(),
   status: z.enum(['initiating', 'generating-image', 'generating-details', 'synthesizing-audio', 'completed', 'error']),
   progress: z.number().min(0).max(100),
-  imageData: z.string().optional(),
+  imageData: z.string().optional(), // Fallback for base64
+  imageUrl: z.string().optional(), // URL from Supabase
   description: z.string().optional(),
   mapsUri: z.string().optional(),
+  referenceImageUrl: z.string().optional(), // URL from Supabase
+  usedStreetView: z.boolean().optional(),
   error: z.string().optional(),
   timestamp: z.number()
 })

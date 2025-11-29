@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0066FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003399;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="banana" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE135;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#bg)" stroke="#0066FF" stroke-width="2"/>
+  
+  <!-- Inner glow ring -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="#3385FF" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Nano Banana character - stylized banana with tech elements -->
+  <g transform="translate(25, 20)">
+    <!-- Main banana body -->
+    <path d="M35 10 Q50 5 48 25 Q45 45 30 55 Q15 60 10 50 Q5 40 15 25 Q25 10 35 10" 
+          fill="url(#banana)" stroke="#E6B800" stroke-width="1"/>
+    
+    <!-- Banana highlight -->
+    <path d="M30 15 Q40 12 38 28 Q35 40 25 48" 
+          fill="none" stroke="#FFF5CC" stroke-width="2" opacity="0.6"/>
+    
+    <!-- Tech eye (left) -->
+    <circle cx="25" cy="30" r="5" fill="#0066FF"/>
+    <circle cx="25" cy="30" r="3" fill="#00CCFF"/>
+    <circle cx="26" cy="29" r="1" fill="white"/>
+    
+    <!-- Tech eye (right) -->
+    <circle cx="38" cy="28" r="5" fill="#0066FF"/>
+    <circle cx="38" cy="28" r="3" fill="#00CCFF"/>
+    <circle cx="39" cy="27" r="1" fill="white"/>
+    
+    <!-- Smile -->
+    <path d="M26 40 Q32 46 38 38" fill="none" stroke="#0066FF" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Tech antenna -->
+    <line x1="35" y1="10" x2="42" y2="2" stroke="#0066FF" stroke-width="2"/>
+    <circle cx="42" cy="2" r="2" fill="#00CCFF"/>
+  </g>
+  
+  <!-- Orbital rings -->
+  <ellipse cx="50" cy="50" rx="35" ry="10" fill="none" stroke="#3385FF" stroke-width="0.5" opacity="0.4" transform="rotate(-20 50 50)"/>
+  <ellipse cx="50" cy="50" rx="40" ry="8" fill="none" stroke="#3385FF" stroke-width="0.5" opacity="0.3" transform="rotate(30 50 50)"/>
+</svg>
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TeleportState, TravelLogItem } from '../types';
+import { TeleportState, TravelLogItem, getImageSrc } from '../types';
 import { Volume2, Loader2, VolumeX, Map, ExternalLink, Scan, Sparkles, Camera, AlertTriangle } from 'lucide-react';
 
 interface ViewScreenProps {
@@ -96,7 +96,7 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
         <div className="relative rounded-xl overflow-hidden border border-cyber-600 shadow-[0_0_40px_rgba(0,0,0,0.6)] group bg-black aspect-video ring-1 ring-cyber-500/50">
           
           <img 
-            src={`data:image/jpeg;base64,${location.imageData}`} 
+            src={getImageSrc(location.imageData)} 
             alt={`${location.destination} in ${location.era}`}
             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
@@ -142,7 +142,7 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
           {/* Reference Image Inset (if exists) */}
           {location.referenceImage && (
             <div className="absolute bottom-4 left-4 w-24 h-24 rounded border border-cyber-500/50 overflow-hidden bg-black shadow-lg group/ref">
-               <img src={location.referenceImage} className="w-full h-full object-cover opacity-70 group-hover/ref:opacity-100 transition-opacity" alt="Reference" />
+               <img src={getImageSrc(location.referenceImage)} className="w-full h-full object-cover opacity-70 group-hover/ref:opacity-100 transition-opacity" alt="Reference" />
                <div className="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] text-center text-white font-mono py-0.5">REFERENCE</div>
             </div>
           )}

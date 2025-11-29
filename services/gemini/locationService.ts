@@ -37,8 +37,7 @@ export async function generateLocationDetails(destination: string, era: string):
     }
 
     return { description, mapsUri };
-  } catch (error) {
-    console.error("Location details error:", error);
+  } catch {
     return { description: "Data link to destination history corrupted. Visuals only." };
   }
 }

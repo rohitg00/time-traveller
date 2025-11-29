@@ -1,5 +1,5 @@
 import React from 'react';
-import { TravelLogItem } from '../types';
+import { TravelLogItem, getImageSrc } from '../types';
 import { History, ChevronRight, Database, Clock, MapPin } from 'lucide-react';
 
 interface HistoryLogProps {
@@ -51,7 +51,7 @@ export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onSelect, curre
                 {/* Mini Thumbnail */}
                 <div className={`w-12 h-12 rounded border overflow-hidden shrink-0 ${currentId === item.id ? 'border-cyber-500' : 'border-cyber-700 group-hover:border-cyber-500/50'}`}>
                     {item.imageData ? (
-                        <img src={`data:image/jpeg;base64,${item.imageData}`} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+                        <img src={getImageSrc(item.imageData)} alt="" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     ) : (
                         <div className="w-full h-full bg-cyber-900 flex items-center justify-center">
                             <div className="w-1 h-1 bg-cyber-500 rounded-full animate-ping"></div>

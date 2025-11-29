@@ -8,19 +8,22 @@ import { EventHandler, ApiRouteHandler, ApiResponse, MotiaStream, CronHandler } 
 
 declare module 'motia' {
   interface FlowContextStateStreams {
-    'teleportProgress': MotiaStream<{ id: string; destination: string; era: string; style: string; status: 'initiating' | 'generating-image' | 'generating-details' | 'synthesizing-audio' | 'completed' | 'error'; progress: number; imageData?: string; description?: string; mapsUri?: string; error?: string; timestamp: number }>
+    'teleportProgress': MotiaStream<{ id: string; destination: string; era: string; style: string; status: 'initiating' | 'generating-image' | 'generating-details' | 'synthesizing-audio' | 'completed' | 'error'; progress: number; imageData?: string; imageUrl?: string; description?: string; mapsUri?: string; referenceImageUrl?: string; usedStreetView?: boolean; error?: string; timestamp: number }>
   }
 
   interface Handlers {
     'SynthesizeSpeech': EventHandler<{ teleportId: string; text: string }, never>
     'GenerateLocationDetails': EventHandler<{ teleportId: string; destination: string; era: string }, { topic: 'location-details-generated'; data: { teleportId: string } } | { topic: 'synthesize-speech'; data: { teleportId: string; text: string } }>
-    'GenerateImage': EventHandler<{ teleportId: string; destination: string; era: string; style: string; referenceImage?: string; coordinates?: { lat: number; lng: number } }, { topic: 'image-generated'; data: { teleportId: string } }>
+    'GenerateImage': EventHandler<{ teleportId: string; destination: string; era: string; style: string; coordinates?: { lat: number; lng: number } }, { topic: 'image-generated'; data: { teleportId: string } }>
     'CompleteTeleport': EventHandler<{ teleportId: string }, never>
     'ParseTravelCommand': ApiRouteHandler<{ message: string; history: Array<string> }, ApiResponse<200, { isJump: boolean; reply: string; params?: { destination: string; era: string; style: string } }> | ApiResponse<400, { error: string }>, never>
-    'InitiateTeleport': ApiRouteHandler<{ destination: string; era: string; style: string; referenceImage?: string; coordinates?: { lat: number; lng: number } }, ApiResponse<201, { teleportId: string; status: string; message: string }> | ApiResponse<400, { error: string }>, { topic: 'generate-image'; data: { teleportId: string; destination: string; era: string; style: string; referenceImage?: string; coordinates?: { lat: number; lng: number } } } | { topic: 'generate-location-details'; data: { teleportId: string; destination: string; era: string } }>
+    'InitiateTeleport': ApiRouteHandler<{ destination: string; era: string; style: string; referenceImage?: string; coordinates?: { lat: number; lng: number } }, ApiResponse<201, { teleportId: string; status: string; message: string }> | ApiResponse<400, { error: string }> | ApiResponse<401, { error: string }>, { topic: 'generate-image'; data: { teleportId: string; destination: string; era: string; style: string; coordinates?: { lat: number; lng: number } } } | { topic: 'generate-location-details'; data: { teleportId: string; destination: string; era: string } }>
+    'GetUser': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { user: { id: string; email: string; name: string; avatarUrl?: string } }> | ApiResponse<401, { error: string }> | ApiResponse<404, { error: string }> | ApiResponse<500, { error: string }>, never>
     'GetTeleportProgress': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { id: string; destination: string; era: string; style: string; status: string; progress: number; imageData?: string; description?: string; mapsUri?: string; error?: string; timestamp: number }> | ApiResponse<404, { error: string }>, never>
-    'GetHistory': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { history: Array<{ id: string; destination: string; era: string; style: string; imageData: string; description: string; mapsUri?: string; referenceImage?: string; timestamp: number }> }>, never>
+    'GetLocationInfo': ApiRouteHandler<Record<string, unknown>, unknown, never>
+    'GetHistory': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { history: Array<{ id: string; destination: string; era: string; style: string; imageData: string; description: string; mapsUri?: string; referenceImage?: string; usedStreetView?: boolean; timestamp: number }> }> | ApiResponse<401, { error: string }>, never>
     'GetAudio': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { audioData: string }> | ApiResponse<404, { error: string }>, never>
+    'Auth': ApiRouteHandler<{ authToken: string }, ApiResponse<200, { accessToken: string; user: { id: string; email: string; name: string; avatarUrl?: string } }> | ApiResponse<401, { error: string }> | ApiResponse<500, { error: string }>, never>
   }
     
 }

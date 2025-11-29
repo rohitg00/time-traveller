@@ -26,7 +26,6 @@ export async function synthesizeSpeech(text: string): Promise<string> {
 
     return base64Audio;
   } catch (error) {
-    console.error("TTS Error:", error);
     throw error;
   }
 }

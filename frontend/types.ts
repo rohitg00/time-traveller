@@ -7,11 +7,21 @@ export interface TravelLogItem {
   era: string;
   style: string;
   timestamp: number;
-  imageData: string; // Base64
+  imageData: string; // URL from Supabase or Base64 (fallback)
   description: string;
   mapsUri?: string; // Link to Google Maps/Street View
-  referenceImage?: string; // The user photo used for this generation
+  referenceImage?: string; // URL from Supabase or Base64 (user photo)
   usedStreetView?: boolean; // Whether Street View imagery was used
+}
+
+/**
+ * Helper to get proper image source (handles both URLs and base64)
+ */
+export function getImageSrc(imageData: string | undefined): string {
+  if (!imageData) return '';
+  if (imageData.startsWith('http')) return imageData;
+  if (imageData.startsWith('data:')) return imageData;
+  return `data:image/jpeg;base64,${imageData}`;
 }
 
 export interface TeleportResult {

@@ -1,13 +1,13 @@
 import { EventConfig, Handlers } from 'motia';
 import { z } from 'zod';
 import { generateImage } from '../../services/gemini/imageService';
+import { uploadGeneratedImage, isSupabaseConfigured } from '../../services/supabase/storageService';
 
 const inputSchema = z.object({
   teleportId: z.string(),
   destination: z.string(),
   era: z.string(),
   style: z.string(),
-  // NOTE: referenceImage removed due to Motia Cloud state size limits
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()
@@ -30,11 +30,11 @@ interface TeleportData {
   era: string;
   style: string;
   mapsApiKey: string;
-  // NOTE: referenceImage is no longer stored in state due to Motia Cloud size limits
+  referenceImageUrl?: string; // URL from Supabase
 }
 
 interface ImageData {
-  imageData: string;
+  imageUrl: string; // URL instead of base64
   usedStreetView: boolean;
   fallbackMessage?: string;
 }
@@ -62,17 +62,37 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
     const teleportData = await state.get<TeleportData>('teleports', teleportId);
     const mapsApiKey = teleportData?.mapsApiKey || process.env.GOOGLE_API_KEY || '';
     
-    // NOTE: referenceImage feature is disabled for Motia Cloud due to state size limits
-    // The AI will generate images based on location data only (no user photo overlay)
-    // referenceImage is kept client-side only for display purposes
+    // Reference image URL from Supabase (if uploaded)
+    const referenceImageUrl = teleportData?.referenceImageUrl;
+    
+    // Fetch reference image from Supabase URL and convert to base64
+    let referenceImageBase64: string | undefined;
+    if (referenceImageUrl) {
+      try {
+        logger.info('Fetching reference image from Supabase', { teleportId, referenceImageUrl });
+        const response = await fetch(referenceImageUrl);
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          const base64 = Buffer.from(arrayBuffer).toString('base64');
+          const contentType = response.headers.get('content-type') || 'image/jpeg';
+          referenceImageBase64 = `data:${contentType};base64,${base64}`;
+          logger.info('Reference image fetched successfully', { teleportId });
+        }
+      } catch (fetchError) {
+        logger.warn('Failed to fetch reference image, continuing without it', { 
+          teleportId, 
+          error: fetchError instanceof Error ? fetchError.message : 'Unknown error'
+        });
+      }
+    }
 
-    // Generate the image
+    // Generate the image (returns base64)
     const result = await generateImage(
       destination, 
       era, 
       style, 
       mapsApiKey,
-      undefined, // referenceImage disabled for cloud deployment
+      referenceImageBase64, // Pass the fetched reference image
       coordinates
     );
     
@@ -83,7 +103,27 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       hasFallbackMessage: !!result.fallbackMessage 
     });
     
-    // Update stream with image data and any fallback message
+    // Upload generated image to Supabase
+    let imageUrl: string;
+    if (isSupabaseConfigured()) {
+      try {
+        logger.info('Uploading generated image to Supabase', { teleportId });
+        imageUrl = await uploadGeneratedImage(teleportId, result.imageData);
+        logger.info('Generated image uploaded successfully', { teleportId, imageUrl });
+      } catch (uploadError) {
+        logger.error('Failed to upload generated image', { 
+          teleportId, 
+          error: uploadError instanceof Error ? uploadError.message : 'Unknown error'
+        });
+        throw new Error('Failed to store generated image');
+      }
+    } else {
+      // Fallback: store base64 directly (will fail on Motia Cloud due to size limits)
+      logger.warn('Supabase not configured, using base64 fallback (may fail on cloud)', { teleportId });
+      imageUrl = result.imageData;
+    }
+    
+    // Update stream with image URL (small data)
     await streams.teleportProgress.set('active', teleportId, {
       id: teleportId,
       destination,
@@ -91,13 +131,13 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       style,
       status: 'generating-details',
       progress: 60,
-      imageData: result.imageData,
+      imageUrl, // URL instead of base64
       timestamp: Date.now()
     });
 
-    // Store in state with metadata
+    // Store in state with metadata (URL only)
     const storedImage: ImageData = { 
-      imageData: result.imageData,
+      imageUrl,
       usedStreetView: result.usedStreetView,
       fallbackMessage: result.fallbackMessage
     };
@@ -125,4 +165,3 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
     });
   }
 };
-

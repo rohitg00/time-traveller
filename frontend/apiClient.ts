@@ -7,6 +7,29 @@ import { Stream } from '@motiadev/stream-client-browser';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
 
+/**
+ * Get the auth token from localStorage
+ */
+function getAuthToken(): string | null {
+  return localStorage.getItem('tt_access_token');
+}
+
+/**
+ * Get headers with auth token if available
+ */
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  const token = getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  return headers;
+}
+
 // Lazy singleton stream connection
 let streamInstance: Stream | null = null;
 let isConnecting = false;
@@ -24,15 +47,9 @@ function getStream(): Stream {
 
   try {
     isConnecting = true;
-    console.log('[Stream] Initializing connection to:', WS_URL);
-    
-    // Initialize stream connection (callback handled internally)
     streamInstance = new Stream(WS_URL);
-    
-    console.log('[Stream] WebSocket connection initialized');
     return streamInstance;
   } catch (error) {
-    console.warn('[Stream] Failed to initialize:', error);
     streamInstance = null;
     throw error;
   } finally {
@@ -45,8 +62,7 @@ export function resetStream(): void {
   if (streamInstance) {
     try {
       streamInstance.close();
-      console.log('[Stream] Connection closed');
-    } catch (e) {
+    } catch {
       // Ignore errors during close
     }
     streamInstance = null;
@@ -57,8 +73,7 @@ export interface TeleportRequest {
   destination: string;
   era: string;
   style: string;
-  // NOTE: referenceImage is NOT sent to backend due to Motia Cloud state size limits
-  // The reference image is kept client-side only for display in the history
+  referenceImage?: string; // Re-enabled - will be uploaded to Supabase
   coordinates?: { lat: number; lng: number };
 }
 
@@ -75,9 +90,11 @@ export interface TeleportProgress {
   style: string;
   status: 'initiating' | 'generating-image' | 'generating-details' | 'synthesizing-audio' | 'completed' | 'error';
   progress: number;
-  imageData?: string;
+  imageUrl?: string; // URL from Supabase instead of base64
+  imageData?: string; // Fallback for local dev (base64)
   description?: string;
   mapsUri?: string;
+  referenceImageUrl?: string; // URL from Supabase
   usedStreetView?: boolean;
   error?: string;
   timestamp: number;
@@ -88,10 +105,12 @@ export interface HistoryItem {
   destination: string;
   era: string;
   style: string;
-  imageData: string;
+  imageUrl?: string; // URL from Supabase
+  imageData?: string; // Fallback for local dev (base64)
   description: string;
   mapsUri?: string;
-  referenceImage?: string;
+  referenceImageUrl?: string; // URL from Supabase
+  referenceImage?: string; // Client-side only (local storage)
   usedStreetView?: boolean;
   timestamp: number;
 }
@@ -102,18 +121,20 @@ export interface AudioResponse {
 
 /**
  * Initiates a new teleportation sequence
+ * Requires authentication for data isolation
  */
 export async function initiateTeleport(request: TeleportRequest): Promise<TeleportResponse> {
   const response = await fetch(`${API_BASE_URL}/teleport`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(request),
   });
 
   if (!response.ok) {
     const error = await response.json();
+    if (response.status === 401) {
+      throw new Error('Please sign in to start a teleport journey');
+    }
     throw new Error(error.error || 'Failed to initiate teleport');
   }
 
@@ -136,12 +157,23 @@ export async function getTeleportProgress(teleportId: string): Promise<TeleportP
 }
 
 /**
- * Gets the teleportation history
+ * Gets the teleportation history for the authenticated user
+ * Requires authentication - returns only user's own data
  */
 export async function getHistory(limit: number = 10): Promise<HistoryItem[]> {
-  const response = await fetch(`${API_BASE_URL}/history?limit=${limit}`);
+  const token = getAuthToken();
+  if (!token) {
+    return [];
+  }
+
+  const response = await fetch(`${API_BASE_URL}/history?limit=${limit}`, {
+    headers: getAuthHeaders(),
+  });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      return [];
+    }
     const error = await response.json();
     throw new Error(error.error || 'Failed to get history');
   }
@@ -217,32 +249,69 @@ export function subscribeTeleportProgress(
       if (!items) return;
       const progress = items.find(item => item.id === teleportId);
       if (progress) {
-        console.log('[Stream] Progress update received:', progress.status, progress.progress + '%');
         onUpdate(progress);
       }
     };
 
     subscription.addChangeListener(changeListener as never);
 
-    console.log('[Stream] Subscribed to teleport:', teleportId);
-
     // Return cleanup function
     return () => {
       if (subscription) {
         try {
           subscription.close();
-          console.log('[Stream] Unsubscribed from teleport:', teleportId);
-        } catch (e) {
-          // Ignore cleanup errors - connection might already be closed
+        } catch {
+          // Ignore cleanup errors
         }
       }
     };
   } catch (error) {
-    console.warn('[Stream] WebSocket unavailable, falling back to polling:', error);
-    // Notify caller to use polling fallback
     onError?.(error as Error);
-    // Return no-op cleanup
     return () => {};
   }
 }
 
+// Location Enrichment Types
+export interface WeatherData {
+  temperature: number;
+  feelsLike: number;
+  humidity: number;
+  description: string;
+  icon: string;
+  windSpeed: number;
+  uvIndex?: number;
+}
+
+export interface AirQualityData {
+  aqi: number;
+  category: string;
+  dominantPollutant: string;
+  healthRecommendation: string;
+  color: string;
+}
+
+export interface NearbyPlace {
+  name: string;
+  type: string;
+  rating?: number;
+  address?: string;
+}
+
+export interface LocationEnrichment {
+  weather?: WeatherData;
+  airQuality?: AirQualityData;
+  nearbyPlaces?: NearbyPlace[];
+}
+
+/**
+ * Gets weather, air quality, and nearby places for a location
+ */
+export async function getLocationInfo(lat: number, lng: number): Promise<LocationEnrichment> {
+  const response = await fetch(`${API_BASE_URL}/location/info?lat=${lat}&lng=${lng}`);
+
+  if (!response.ok) {
+    return {};
+  }
+
+  return response.json();
+}

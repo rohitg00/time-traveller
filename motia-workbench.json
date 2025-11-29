@@ -3,8 +3,8 @@
     "id": "time-traveller-flow",
     "config": {
       "steps/events/synthesizeSpeech.step.ts": {
-        "x": 1077,
-        "y": 372
+        "x": 700,
+        "y": 374
       },
       "steps/events/generateLocationDetails.step.ts": {
         "x": 350,
@@ -15,28 +15,40 @@
         "y": 54
       },
       "steps/events/completeTeleport.step.ts": {
-        "x": 1076,
-        "y": 56
+        "x": 700,
+        "y": 54
       },
       "steps/api/parseTravelCommand.step.ts": {
-        "x": -374,
-        "y": 110
+        "x": 10,
+        "y": 0
       },
       "steps/api/initiateTeleport.step.ts": {
-        "x": -729,
-        "y": 170
+        "x": 0,
+        "y": 204
+      },
+      "steps/api/getUser.step.ts": {
+        "x": 45,
+        "y": 544
       },
       "steps/api/getTeleportProgress.step.ts": {
-        "x": -724,
-        "y": -28
+        "x": 4,
+        "y": 748
+      },
+      "steps/api/getLocationInfo.step.ts": {
+        "x": 0,
+        "y": 952
       },
       "steps/api/getHistory.step.ts": {
-        "x": -329,
-        "y": 354
+        "x": 0,
+        "y": 1176
       },
       "steps/api/getAudio.step.ts": {
-        "x": -727,
-        "y": 505
+        "x": 0,
+        "y": 1400
+      },
+      "steps/api/auth.step.ts": {
+        "x": 4,
+        "y": 1624
       }
     }
   }
