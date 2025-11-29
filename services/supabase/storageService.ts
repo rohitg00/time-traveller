@@ -17,6 +17,7 @@ function getSupabaseClient(): SupabaseClient {
 }
 
 const BUCKET_NAME = 'time-traveller-images';
+const AUDIO_BUCKET_NAME = 'time-traveller-audio';
 
 /**
  * Uploads a base64 image to Supabase Storage and returns the public URL
@@ -98,6 +99,42 @@ export async function deleteImages(teleportId: string): Promise<void> {
   await client.storage
     .from(BUCKET_NAME)
     .remove(filePaths);
+}
+
+/**
+ * Uploads a base64 audio file to Supabase Storage and returns the public URL
+ */
+export async function uploadAudio(
+  teleportId: string,
+  base64Data: string
+): Promise<string> {
+  const client = getSupabaseClient();
+  
+  // Convert base64 to buffer
+  const buffer = Buffer.from(base64Data, 'base64');
+  
+  // Generate unique filename
+  const timestamp = Date.now();
+  const filename = `${teleportId}/audio-${timestamp}.wav`;
+  
+  // Upload to Supabase Storage
+  const { error } = await client.storage
+    .from(AUDIO_BUCKET_NAME)
+    .upload(filename, buffer, {
+      contentType: 'audio/wav',
+      upsert: true
+    });
+  
+  if (error) {
+    throw new Error(`Failed to upload audio: ${error.message}`);
+  }
+  
+  // Get public URL
+  const { data: urlData } = client.storage
+    .from(AUDIO_BUCKET_NAME)
+    .getPublicUrl(filename);
+  
+  return urlData.publicUrl;
 }
 
 /**

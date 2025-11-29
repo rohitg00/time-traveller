@@ -261,27 +261,46 @@ const AppContent: React.FC = () => {
 
     try {
       setIsAudioPlaying(true);
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-      setAudioContext(ctx);
       
       // Get audio from Motia backend
-      const { audioData } = await api.getAudio(currentLocation.id);
+      const audioResponse = await api.getAudio(currentLocation.id);
       
-      // Decode and play audio
-      const audioBuffer = await decodeAudioData(
-        decodeBase64(audioData),
-        ctx,
-        24000,
-        1
-      );
+      // Handle URL-based audio (from Supabase)
+      if (audioResponse.audioUrl) {
+        const audio = new Audio(audioResponse.audioUrl);
+        audio.onended = () => setIsAudioPlaying(false);
+        audio.onerror = () => {
+          setIsAudioPlaying(false);
+          setError("Audio playback failed.");
+        };
+        await audio.play();
+        return;
+      }
+      
+      // Handle base64 audio (local dev)
+      if (audioResponse.audioData) {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+        setAudioContext(ctx);
+        
+        // Decode and play audio
+        const audioBuffer = await decodeAudioData(
+          decodeBase64(audioResponse.audioData),
+          ctx,
+          24000,
+          1
+        );
 
-      const source = ctx.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(ctx.destination);
-      source.onended = () => {
-        setIsAudioPlaying(false);
-      };
-      source.start();
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.onended = () => {
+          setIsAudioPlaying(false);
+        };
+        source.start();
+        return;
+      }
+      
+      throw new Error('No audio data available');
 
     } catch {
       setIsAudioPlaying(false);

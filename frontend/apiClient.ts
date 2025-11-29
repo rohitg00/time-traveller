@@ -116,7 +116,8 @@ export interface HistoryItem {
 }
 
 export interface AudioResponse {
-  audioData: string;
+  audioData?: string; // base64 for local dev
+  audioUrl?: string;  // URL from Supabase for production
 }
 
 /**

@@ -7,10 +7,12 @@ const historyItemSchema = z.object({
   destination: z.string(),
   era: z.string(),
   style: z.string(),
-  imageData: z.string(),
+  imageUrl: z.string().optional(), // URL from Supabase
+  imageData: z.string().optional(), // Fallback for backwards compatibility
   description: z.string(),
   mapsUri: z.string().optional(),
-  referenceImage: z.string().optional(),
+  referenceImageUrl: z.string().optional(), // URL from Supabase
+  referenceImage: z.string().optional(), // Fallback for backwards compatibility
   usedStreetView: z.boolean().optional(),
   timestamp: z.number()
 });
@@ -42,10 +44,12 @@ interface HistoryItem {
   destination: string;
   era: string;
   style: string;
-  imageData: string;
+  imageUrl?: string; // URL from Supabase
+  imageData?: string; // Fallback for backwards compatibility
   description: string;
   mapsUri?: string;
-  referenceImage?: string;
+  referenceImageUrl?: string; // URL from Supabase
+  referenceImage?: string; // Fallback for backwards compatibility
   usedStreetView?: boolean;
   timestamp: number;
   userId?: string; // Added for filtering

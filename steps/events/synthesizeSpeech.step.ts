@@ -1,6 +1,7 @@
 import { EventConfig, Handlers } from 'motia';
 import { z } from 'zod';
 import { synthesizeSpeech } from '../../services/gemini/ttsService';
+import { uploadAudio, isSupabaseConfigured } from '../../services/supabase/storageService';
 
 const inputSchema = z.object({
   teleportId: z.string(),
@@ -19,7 +20,8 @@ export const config: EventConfig = {
 };
 
 interface AudioData {
-  audioData: string;
+  audioData?: string; // base64 for local dev
+  audioUrl?: string;  // URL from Supabase for production
 }
 
 type SynthesizeSpeechInput = z.infer<typeof inputSchema>;
@@ -35,8 +37,28 @@ export const handler: Handlers['SynthesizeSpeech'] = async (input, { logger, sta
     
     logger.info('Speech synthesized successfully', { traceId, teleportId });
     
-    // Store in state for later retrieval via GetAudio API
-    const audioState: AudioData = { audioData };
+    // Upload to Supabase if configured (production), otherwise store in state (local dev)
+    let audioState: AudioData;
+    
+    if (isSupabaseConfigured()) {
+      try {
+        logger.info('Uploading audio to Supabase', { teleportId });
+        const audioUrl = await uploadAudio(teleportId, audioData);
+        audioState = { audioUrl };
+        logger.info('Audio uploaded successfully', { teleportId, audioUrl });
+      } catch (uploadError) {
+        logger.warn('Failed to upload audio to Supabase, storing in state', { 
+          teleportId, 
+          error: uploadError instanceof Error ? uploadError.message : 'Unknown error'
+        });
+        // Fallback to state storage (may fail due to size limits)
+        audioState = { audioData };
+      }
+    } else {
+      // Local development - store in state
+      audioState = { audioData };
+    }
+    
     await state.set('teleport-audio', teleportId, audioState);
 
   } catch (error) {

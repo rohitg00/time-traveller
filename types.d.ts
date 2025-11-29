@@ -21,8 +21,8 @@ declare module 'motia' {
     'GetUser': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { user: { id: string; email: string; name: string; avatarUrl?: string } }> | ApiResponse<401, { error: string }> | ApiResponse<404, { error: string }> | ApiResponse<500, { error: string }>, never>
     'GetTeleportProgress': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { id: string; destination: string; era: string; style: string; status: string; progress: number; imageData?: string; description?: string; mapsUri?: string; error?: string; timestamp: number }> | ApiResponse<404, { error: string }>, never>
     'GetLocationInfo': ApiRouteHandler<Record<string, unknown>, unknown, never>
-    'GetHistory': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { history: Array<{ id: string; destination: string; era: string; style: string; imageData: string; description: string; mapsUri?: string; referenceImage?: string; usedStreetView?: boolean; timestamp: number }> }> | ApiResponse<401, { error: string }>, never>
-    'GetAudio': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { audioData: string }> | ApiResponse<404, { error: string }>, never>
+    'GetHistory': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { history: Array<{ id: string; destination: string; era: string; style: string; imageUrl?: string; imageData?: string; description: string; mapsUri?: string; referenceImageUrl?: string; referenceImage?: string; usedStreetView?: boolean; timestamp: number }> }> | ApiResponse<401, { error: string }>, never>
+    'GetAudio': ApiRouteHandler<Record<string, unknown>, ApiResponse<200, { audioData?: string; audioUrl?: string }> | ApiResponse<404, { error: string }>, never>
     'Auth': ApiRouteHandler<{ authToken: string }, ApiResponse<200, { accessToken: string; user: { id: string; email: string; name: string; avatarUrl?: string } }> | ApiResponse<401, { error: string }> | ApiResponse<500, { error: string }>, never>
   }
     
