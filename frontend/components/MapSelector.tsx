@@ -126,7 +126,7 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [retryTrigger, setRetryTrigger] = useState(0);
-  
+
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
