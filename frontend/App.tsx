@@ -11,8 +11,9 @@ import { Header } from './components/Header';
 import { Starfield } from './components/Starfield';
 import { AuthBanner } from './components/AuthBanner';
 import { GuidedTour } from './components/GuidedTour';
+import { TermsModal } from './components/TermsModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AlertCircle, Lock, Zap } from 'lucide-react';
+import { AlertCircle, Lock, Zap, Shield } from 'lucide-react';
 
 // Main app content that uses auth
 const AppContent: React.FC = () => {
@@ -27,6 +28,7 @@ const AppContent: React.FC = () => {
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [weatherCondition, setWeatherCondition] = useState<string | undefined>(undefined);
   const [showTour, setShowTour] = useState<boolean>(false);
+  const [showTerms, setShowTerms] = useState<boolean>(false);
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('time-traveller-tour-completed');
@@ -431,7 +433,18 @@ const AppContent: React.FC = () => {
 
       </main>
       
+      <footer className="p-4 text-center text-xs text-slate-600 font-mono z-10 relative">
+        <button 
+          onClick={() => setShowTerms(true)}
+          className="hover:text-cyber-400 transition-colors flex items-center justify-center gap-2 mx-auto"
+        >
+          <Shield className="w-3 h-3" />
+          TERMS & PRIVACY PROTOCOL
+        </button>
+      </footer>
+
       {showTour && <GuidedTour onComplete={handleTourComplete} />}
+      <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
     </div>
   );
 };
