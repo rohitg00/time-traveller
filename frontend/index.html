@@ -64,6 +64,7 @@
               'spin-slow': 'spin 4s linear infinite',
               'scroll-up': 'scroll-up 40s linear infinite',
               'scroll-down': 'scroll-down 45s linear infinite',
+              'scroll-left': 'scroll-left 40s linear infinite',
             },
             keyframes: {
               scan: {
@@ -85,6 +86,10 @@
               'scroll-down': {
                 '0%': { transform: 'translateY(-33.33%)' },
                 '100%': { transform: 'translateY(0)' },
+              },
+              'scroll-left': {
+                '0%': { transform: 'translateX(0)' },
+                '100%': { transform: 'translateX(-33.33%)' },
               }
             }
           },

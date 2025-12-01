@@ -12,7 +12,7 @@ import { Starfield } from './components/Starfield';
 import { AuthBanner } from './components/AuthBanner';
 import { GuidedTour } from './components/GuidedTour';
 import { TermsModal } from './components/TermsModal';
-import { ScrollingGallery } from './components/ScrollingGallery';
+import { ScrollingGallery, MobileGallery } from './components/ScrollingGallery';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AlertCircle, Lock, Zap, Shield } from 'lucide-react';
 
@@ -402,10 +402,11 @@ const AppContent: React.FC = () => {
 
       <Header />
       
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col xl:flex-row overflow-hidden min-h-0">
         <ScrollingGallery side="left" />
         
         <main className="flex-1 overflow-y-auto px-3 py-4 md:p-6 lg:p-8">
+          <MobileGallery />
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-full">
             <div className="w-full lg:w-1/3 xl:w-2/5 flex flex-col gap-4 lg:gap-6 order-2 lg:order-1 lg:max-h-[calc(100vh-120px)] lg:overflow-hidden">
               <ControlPanel 

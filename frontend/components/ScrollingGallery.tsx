@@ -120,3 +120,37 @@ export const ScrollingGallery: React.FC<ScrollingGalleryProps> = ({ side }) => {
     </div>
   );
 };
+
+export const MobileGallery: React.FC = () => {
+  // Combine some top images from both sides for the mobile strip
+  const mobileImages = [...leftGalleryImages.slice(0, 8), ...rightGalleryImages.slice(0, 8)];
+  
+  return (
+    <div className="xl:hidden w-full h-24 relative overflow-hidden rounded-lg border border-cyber-800/50 bg-cyber-900/40 mb-4 shrink-0">
+      <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-cyber-900 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-cyber-900 to-transparent z-10 pointer-events-none"></div>
+      
+      <div className="flex items-center h-full animate-scroll-left hover:pause-animation w-max">
+        {/* Duplicate strictly for marquee effect */}
+        {[...mobileImages, ...mobileImages, ...mobileImages].map((img, index) => (
+          <div 
+            key={`mobile-${index}`}
+            className="relative w-16 h-20 mx-1.5 rounded-md overflow-hidden border border-cyber-700/30 shrink-0 shadow-lg"
+          >
+            <img 
+              src={img.src} 
+              alt={img.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100">
+              <div className="absolute bottom-1 left-1 right-1">
+                <p className="text-[6px] text-white font-bold truncate text-center">{img.title}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
