@@ -119,9 +119,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             alt={`${location.destination} in ${location.era}`}
             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
-          
-          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[size:100%_4px] opacity-30"></div>
-          <div className="absolute inset-0 pointer-events-none border-[20px] border-black/20"></div>
 
           <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
              <div className="flex flex-col gap-1">
@@ -186,11 +183,6 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             )}
           </div>
 
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-             <div className="w-64 h-[1px] bg-white/50"></div>
-             <div className="h-64 w-[1px] bg-white/50 absolute"></div>
-             <div className="w-20 h-20 border border-white/30 rounded-full absolute"></div>
-          </div>
         </div>
 
         <div className="bg-cyber-800/60 border border-cyber-700 rounded-xl p-6 relative backdrop-blur-sm shadow-lg">

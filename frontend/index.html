@@ -62,6 +62,8 @@
               'scan': 'scan 3s linear infinite',
               'grid-move': 'grid-move 20s linear infinite',
               'spin-slow': 'spin 4s linear infinite',
+              'scroll-up': 'scroll-up 40s linear infinite',
+              'scroll-down': 'scroll-down 45s linear infinite',
             },
             keyframes: {
               scan: {
@@ -75,6 +77,14 @@
               'spin-reverse': {
                 'from': { transform: 'rotate(360deg)' },
                 'to': { transform: 'rotate(0deg)' },
+              },
+              'scroll-up': {
+                '0%': { transform: 'translateY(0)' },
+                '100%': { transform: 'translateY(-33.33%)' },
+              },
+              'scroll-down': {
+                '0%': { transform: 'translateY(-33.33%)' },
+                '100%': { transform: 'translateY(0)' },
               }
             }
           },

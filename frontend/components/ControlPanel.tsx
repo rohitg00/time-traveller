@@ -1,14 +1,33 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { LocationStyle } from '../types';
-import { Send, MapPin, Clock, Palette, Camera, Upload, X, User, Circle, Terminal, Globe, Sliders } from 'lucide-react';
+import { LocationStyle, ImageConfig, AspectRatio, ImageSize, ASPECT_RATIO_OPTIONS, IMAGE_SIZE_OPTIONS, DEFAULT_IMAGE_CONFIG } from '../types';
+import { Send, MapPin, Clock, Palette, Camera, Upload, X, User, Circle, Terminal, Globe, Sliders, Image, Maximize2, Settings2 } from 'lucide-react';
 import { MapSelector } from './MapSelector';
 import { LocationInfo } from './LocationInfo';
 import { TravelerIdentity } from './TravelerIdentity';
 import * as api from '../apiClient';
 
+const getStyleDescription = (style: string): string => {
+  const descriptions: Record<string, string> = {
+    [LocationStyle.REALISTIC]: 'High-fidelity photorealistic rendering',
+    [LocationStyle.CYBERPUNK]: 'Neon-lit futuristic sci-fi aesthetic',
+    [LocationStyle.VINTAGE]: 'Classic film grain and warm tones',
+    [LocationStyle.PAINTING]: 'Artistic oil painting style',
+    [LocationStyle.SURREAL]: 'Dreamlike surrealist imagery',
+    [LocationStyle.DISPOSABLE]: 'Low-quality disposable camera look with imperfections',
+    [LocationStyle.PHOTOBOOK]: 'Beautiful photo book layout with elegant typography',
+    [LocationStyle.AERIAL]: 'Drone/aerial view looking down from the sky',
+    [LocationStyle.CINEMATIC_GRID]: '9-shot cinematic contact sheet with multiple angles',
+    [LocationStyle.CCTV]: 'CCTV surveillance camera style with noise',
+    [LocationStyle.WEATHER_REALTIME]: 'Matches real-time local weather and time of day',
+    [LocationStyle.LIGHT_LEAK]: 'Retro failed photo with light leaks and blur',
+    [LocationStyle.HYPER_CANDID]: 'Ultra-realistic candid street photography, 8K raw style',
+  };
+  return descriptions[style] || style;
+};
+
 interface ControlPanelProps {
-  onTeleport: (dest: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }) => void;
+  onTeleport: (dest: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }, imageConfig?: ImageConfig) => void;
   isTeleporting: boolean;
   onWeatherUpdate?: (condition: string) => void;
 }
@@ -29,6 +48,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
     { role: 'ai', text: 'Time Traveller NavSystem v9.2 online. Awaiting command.' }
   ]);
   const [isProcessingChat, setIsProcessingChat] = useState(false);
+  const [imageConfig, setImageConfig] = useState<ImageConfig>(DEFAULT_IMAGE_CONFIG);
+  const [showImageSettings, setShowImageSettings] = useState(true);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +80,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
         }
       }
 
-      onTeleport(destination, targetEra, style, userImage || undefined, coordsToUse);
+      onTeleport(destination, targetEra, style, userImage || undefined, coordsToUse, imageConfig);
     }
   };
 
@@ -161,23 +182,103 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
                 <label className="text-xs text-cyber-400 font-mono uppercase tracking-wider flex items-center gap-2">
                   <Palette className="w-3 h-3" /> Visual Renderer
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {styles.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setStyle(s)}
-                      disabled={isTeleporting}
-                      className={`px-3 py-2 rounded-md text-[10px] uppercase font-mono text-left transition-all border truncate ${
-                        style === s
-                          ? 'bg-cyber-500/20 border-cyber-500 text-white shadow-[0_0_10px_rgba(14,165,233,0.2)]'
-                          : 'bg-cyber-900 border-cyber-700 text-slate-400 hover:border-slate-500'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
+                <div className="max-h-[180px] overflow-y-auto scrollbar-thin scrollbar-thumb-cyber-700 scrollbar-track-transparent pr-1">
+                  <div className="grid grid-cols-2 gap-2">
+                    {styles.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setStyle(s)}
+                        disabled={isTeleporting}
+                        className={`px-3 py-2 rounded-md text-[9px] uppercase font-mono text-left transition-all border truncate ${
+                          style === s
+                            ? 'bg-cyber-500/20 border-cyber-500 text-white shadow-[0_0_10px_rgba(14,165,233,0.2)]'
+                            : 'bg-cyber-900 border-cyber-700 text-slate-400 hover:border-slate-500'
+                        }`}
+                        title={getStyleDescription(s)}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                <p className="text-[9px] text-slate-600 font-mono">Hover for style details</p>
+              </div>
+
+              {/* Image Configuration */}
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setShowImageSettings(!showImageSettings)}
+                  className="w-full flex items-center justify-between text-xs text-cyber-400 font-mono uppercase tracking-wider hover:text-cyber-300 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Settings2 className="w-3 h-3" /> Image Settings
+                  </span>
+                  <span className="text-[9px] text-slate-500">
+                    {imageConfig.aspectRatio} • {imageConfig.imageSize}
+                  </span>
+                </button>
+                
+                {showImageSettings && (
+                  <div className="bg-cyber-900/50 border border-cyber-700 rounded-lg p-3 space-y-3 animate-[slideIn_0.2s_ease-out]">
+                    {/* Aspect Ratio */}
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] text-slate-500 font-mono uppercase flex items-center gap-1">
+                        <Maximize2 className="w-2.5 h-2.5" /> Aspect Ratio
+                      </label>
+                      <div className="grid grid-cols-5 gap-1">
+                        {ASPECT_RATIO_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setImageConfig(prev => ({ ...prev, aspectRatio: option.value }))}
+                            disabled={isTeleporting}
+                            className={`px-2 py-1.5 rounded text-[8px] font-mono transition-all border ${
+                              imageConfig.aspectRatio === option.value
+                                ? 'bg-cyber-500/20 border-cyber-500 text-white'
+                                : 'bg-cyber-900 border-cyber-800 text-slate-500 hover:border-cyber-600'
+                            }`}
+                            title={option.description}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Image Size */}
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] text-slate-500 font-mono uppercase flex items-center gap-1">
+                        <Image className="w-2.5 h-2.5" /> Resolution
+                      </label>
+                      <div className="grid grid-cols-3 gap-1">
+                        {IMAGE_SIZE_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setImageConfig(prev => ({ ...prev, imageSize: option.value }))}
+                            disabled={isTeleporting}
+                            className={`px-2 py-2 rounded text-[9px] font-mono transition-all border flex flex-col items-center ${
+                              imageConfig.imageSize === option.value
+                                ? 'bg-cyber-500/20 border-cyber-500 text-white'
+                                : 'bg-cyber-900 border-cyber-800 text-slate-500 hover:border-cyber-600'
+                            }`}
+                            title={option.description}
+                          >
+                            <span className="font-bold">{option.label}</span>
+                            <span className="text-[7px] opacity-60">{option.resolution}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[8px] text-slate-600 font-mono">
+                        {imageConfig.imageSize === '4K' ? '⚠️ 4K may take longer to generate' : 
+                         imageConfig.imageSize === '1K' ? '⚡ Fast generation' : 
+                         '✨ Recommended for quality/speed balance'}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>

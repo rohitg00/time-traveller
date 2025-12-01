@@ -11,7 +11,7 @@ interface HistoryLogProps {
 export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onSelect, currentId }) => {
   if (history.length === 0) {
       return (
-        <div className="bg-cyber-800/50 border border-cyber-700/50 rounded-xl p-6 shadow-xl flex-1 flex flex-col min-h-[300px] backdrop-blur-sm">
+        <div className="bg-cyber-800/50 border border-cyber-700/50 rounded-xl p-4 lg:p-5 shadow-xl flex flex-col h-full backdrop-blur-sm">
             <div className="flex flex-col items-center justify-center h-full text-slate-600 gap-3">
                 <div className="p-4 rounded-full bg-cyber-900/50 border border-cyber-700/30">
                     <Database className="w-6 h-6 opacity-50" />
@@ -23,7 +23,7 @@ export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onSelect, curre
   }
 
   return (
-    <div className="bg-cyber-800/80 border border-cyber-700 rounded-xl p-6 shadow-[0_0_30px_rgba(0,0,0,0.3)] flex-1 flex flex-col min-h-[250px] md:min-h-[300px] backdrop-blur-md relative overflow-hidden">
+    <div className="bg-cyber-800/80 border border-cyber-700 rounded-xl p-4 lg:p-5 shadow-[0_0_30px_rgba(0,0,0,0.3)] flex flex-col h-full max-h-full backdrop-blur-md relative overflow-hidden">
       {/* Decorative header line */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-500/50 to-transparent"></div>
       
@@ -32,7 +32,7 @@ export const HistoryLog: React.FC<HistoryLogProps> = ({ history, onSelect, curre
         <span className="ml-auto text-[10px] text-slate-500">{history.length} RECORDS</span>
       </h3>
       
-      <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 scrollbar-thin min-h-0">
         {history.map((item, index) => (
           <button
             key={item.id}

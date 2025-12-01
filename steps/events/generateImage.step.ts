@@ -3,6 +3,11 @@ import { z } from 'zod';
 import { generateImage } from '../../services/gemini/imageService';
 import { uploadGeneratedImage, isSupabaseConfigured } from '../../services/supabase/storageService';
 
+const imageConfigSchema = z.object({
+  aspectRatio: z.enum(['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9']).default('16:9'),
+  imageSize: z.enum(['1K', '2K', '4K']).default('2K')
+});
+
 const inputSchema = z.object({
   teleportId: z.string(),
   destination: z.string(),
@@ -11,7 +16,8 @@ const inputSchema = z.object({
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()
-  }).optional()
+  }).optional(),
+  imageConfig: imageConfigSchema.optional()
 });
 
 export const config: EventConfig = {
@@ -25,12 +31,18 @@ export const config: EventConfig = {
   flows: ['time-traveller-flow']
 };
 
+interface ImageConfig {
+  aspectRatio: '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';
+  imageSize: '1K' | '2K' | '4K';
+}
+
 interface TeleportData {
   destination: string;
   era: string;
   style: string;
   mapsApiKey: string;
   referenceImageUrl?: string;
+  imageConfig?: ImageConfig;
 }
 
 interface ImageData {
@@ -42,7 +54,7 @@ interface ImageData {
 type GenerateImageInput = z.infer<typeof inputSchema>;
 
 export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, streams, state, traceId }) => {
-  const { teleportId, destination, era, style, coordinates } = input as GenerateImageInput;
+  const { teleportId, destination, era, style, coordinates, imageConfig } = input as GenerateImageInput;
   
   try {
     logger.info('Starting image generation', { traceId, teleportId, destination });
@@ -82,13 +94,17 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       }
     }
 
+    // Use imageConfig from input or fallback to teleportData or defaults
+    const effectiveImageConfig = imageConfig || teleportData?.imageConfig || { aspectRatio: '16:9' as const, imageSize: '2K' as const };
+    
     const result = await generateImage(
       destination, 
       era, 
       style, 
       mapsApiKey,
       referenceImageBase64,
-      coordinates
+      coordinates,
+      effectiveImageConfig
     );
     
     logger.info('Image generated successfully', { 

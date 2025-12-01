@@ -3,6 +3,11 @@ import { z } from 'zod';
 import { uploadReferenceImage, isSupabaseConfigured } from '../../services/supabase/storageService';
 import { authRequired } from '../middlewares/auth.middleware';
 
+const imageConfigSchema = z.object({
+  aspectRatio: z.enum(['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9']).default('16:9'),
+  imageSize: z.enum(['1K', '2K', '4K']).default('2K')
+}).optional();
+
 const bodySchema = z.object({
   destination: z.string().min(1, "Destination cannot be empty"),
   era: z.string().min(1, "Era is required"),
@@ -11,7 +16,8 @@ const bodySchema = z.object({
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()
-  }).optional()
+  }).optional(),
+  imageConfig: imageConfigSchema
 });
 
 export const config: ApiRouteConfig = {
@@ -39,12 +45,18 @@ export const config: ApiRouteConfig = {
   }
 };
 
+interface ImageConfig {
+  aspectRatio: '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';
+  imageSize: '1K' | '2K' | '4K';
+}
+
 interface TeleportData {
   destination: string;
   era: string;
   style: string;
   referenceImageUrl?: string;
   coordinates?: { lat: number; lng: number };
+  imageConfig?: ImageConfig;
   timestamp: number;
   mapsApiKey: string;
   userId: string;
@@ -61,7 +73,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       };
     }
 
-    const { destination, era, style, referenceImage, coordinates } = bodySchema.parse(req.body);
+    const { destination, era, style, referenceImage, coordinates, imageConfig } = bodySchema.parse(req.body);
     
     const teleportId = `teleport-${userId}-${Date.now()}`;
     
@@ -71,7 +83,8 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       destination, 
       era, 
       style,
-      hasReferenceImage: !!referenceImage
+      hasReferenceImage: !!referenceImage,
+      imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' }
     });
     
     let referenceImageUrl: string | undefined;
@@ -104,6 +117,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       style,
       referenceImageUrl,
       coordinates,
+      imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' },
       timestamp: Date.now(),
       mapsApiKey: process.env.GOOGLE_API_KEY || '',
       userId
@@ -119,7 +133,8 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
         destination,
         era,
         style,
-        coordinates
+        coordinates,
+        imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' }
       }
     });
 

@@ -12,6 +12,7 @@ import { Starfield } from './components/Starfield';
 import { AuthBanner } from './components/AuthBanner';
 import { GuidedTour } from './components/GuidedTour';
 import { TermsModal } from './components/TermsModal';
+import { ScrollingGallery } from './components/ScrollingGallery';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AlertCircle, Lock, Zap, Shield } from 'lucide-react';
 
@@ -116,7 +117,7 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleTeleport = async (destination: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }) => {
+  const handleTeleport = async (destination: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }, imageConfig?: { aspectRatio: string, imageSize: string }) => {
     setTeleportState('teleporting');
     setError(null);
     setIsAudioPlaying(false);
@@ -140,7 +141,8 @@ const AppContent: React.FC = () => {
         era,
         style,
         referenceImage,
-        coordinates
+        coordinates,
+        imageConfig: imageConfig as api.ImageConfig
       });
 
       const teleportId = response.teleportId;
@@ -400,38 +402,47 @@ const AppContent: React.FC = () => {
 
       <Header />
       
-      <main className="flex-1 container mx-auto px-3 py-4 md:p-6 lg:p-8 flex flex-col lg:flex-row gap-4 lg:gap-6">
-        <div className="w-full lg:w-1/3 flex flex-col gap-4 lg:gap-6 order-2 lg:order-1">
-          <ControlPanel 
-            onTeleport={handleTeleport} 
-            isTeleporting={teleportState === 'teleporting'} 
-            onWeatherUpdate={setWeatherCondition}
-          />
-          <HistoryLog 
-            history={history} 
-            onSelect={handleSelectFromHistory} 
-            currentId={currentLocation?.id}
-          />
-        </div>
-
-        <div className="w-full lg:w-2/3 flex flex-col order-1 lg:order-2 mb-4 lg:mb-0">
-          {error && (
-            <div className="mb-4 p-4 bg-red-900/20 border border-red-500/50 rounded-lg flex items-center gap-3 text-red-200 animate-pulse">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p>{error}</p>
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        <ScrollingGallery side="left" />
+        
+        <main className="flex-1 overflow-y-auto px-3 py-4 md:p-6 lg:p-8">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-full">
+            <div className="w-full lg:w-1/3 xl:w-2/5 flex flex-col gap-4 lg:gap-6 order-2 lg:order-1 lg:max-h-[calc(100vh-120px)] lg:overflow-hidden">
+              <ControlPanel 
+                onTeleport={handleTeleport} 
+                isTeleporting={teleportState === 'teleporting'} 
+                onWeatherUpdate={setWeatherCondition}
+              />
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <HistoryLog 
+                  history={history} 
+                  onSelect={handleSelectFromHistory} 
+                  currentId={currentLocation?.id}
+                />
+              </div>
             </div>
-          )}
-          
-          <ViewScreen 
-            state={teleportState} 
-            location={currentLocation}
-            onPlayAudio={handlePlayAudio}
-            onStopAudio={handleStopAudio}
-            isAudioPlaying={isAudioPlaying}
-          />
-        </div>
 
-      </main>
+            <div className="w-full lg:w-2/3 xl:w-3/5 flex flex-col order-1 lg:order-2 mb-4 lg:mb-0">
+              {error && (
+                <div className="mb-4 p-4 bg-red-900/20 border border-red-500/50 rounded-lg flex items-center gap-3 text-red-200 animate-pulse">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <p>{error}</p>
+                </div>
+              )}
+              
+              <ViewScreen 
+                state={teleportState} 
+                location={currentLocation}
+                onPlayAudio={handlePlayAudio}
+                onStopAudio={handleStopAudio}
+                isAudioPlaying={isAudioPlaying}
+              />
+            </div>
+          </div>
+        </main>
+        
+        <ScrollingGallery side="right" />
+      </div>
       
       <footer className="p-4 text-center text-xs text-slate-600 font-mono z-10 relative">
         <button 
