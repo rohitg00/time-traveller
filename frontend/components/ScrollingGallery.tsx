@@ -1,17 +1,5 @@
 import React from 'react';
 
-import intoxicatedGrid from '../assets/intoxicated-wine-night-grid.png';
-import blueSummer from '../assets/blue-summer-photobook.png';
-import bangkokMarket from '../assets/bangkok-night-market.png';
-import parisBakery from '../assets/paris-bakery-macarons.png';
-import seoulBakery from '../assets/seoul-bakery-candid.png';
-import koreanFashion from '../assets/korean-fashion-portrait.png';
-import celebritySelfie from '../assets/celebrity-backstage-selfie.png';
-import frenchBathroom from '../assets/french-bathroom-vintage.png';
-import dramaticPortrait from '../assets/dramatic-portrait-dark.png';
-import animeCosplay from '../assets/anime-cosplay-medieval.png';
-import candidCat from '../assets/candid-cat-patio.png';
-
 import neoTokyoCyberpunk from '../assets/showcase/neo-tokyo-2099-cyberpunk.png';
 import marsColonyCyberpunk from '../assets/showcase/mars-colony-cyberpunk.png';
 import marsColonyDome from '../assets/showcase/mars-colony-dome-2150.png';
@@ -34,6 +22,9 @@ import tokyoCityPop from '../assets/showcase/tokyo-1980s-city-pop.png';
 import tokyoLightLeak from '../assets/showcase/tokyo-light-leak-fail.png';
 import icelandAurora from '../assets/showcase/iceland-aurora-weather.png';
 import hawaiiAerial from '../assets/showcase/hawaii-aerial-falling.png';
+import parisPhotobook from '../assets/showcase/paris-photobook.png';
+import atlantisSurreal from '../assets/showcase/atlantis-underwater-surreal.png';
+import bangkokStreetFood from '../assets/showcase/bangkok-street-food-candid.png';
 
 interface GalleryImage {
   src: string;
@@ -43,34 +34,26 @@ interface GalleryImage {
 }
 
 const leftGalleryImages: GalleryImage[] = [
-  { src: intoxicatedGrid, title: '微醺 Intoxicated', style: 'Cinematic 9-Shot', location: 'Tokyo Penthouse' },
-  { src: blueSummer, title: '青い夏 Blue Summer', style: 'Photo Book', location: 'Japanese Suburbs' },
-  { src: bangkokMarket, title: 'Night Market Feast', style: 'Hyper-Candid', location: 'Bangkok, Thailand' },
   { src: neoTokyoCyberpunk, title: 'Neo-Tokyo 2099', style: 'Cyberpunk', location: 'Future Tokyo' },
   { src: marsColonyCyberpunk, title: 'Mars Colony', style: 'Sci-Fi', location: 'Olympus Mons' },
   { src: midnightTokyoGrid, title: '深夜 Midnight', style: 'Cinematic Grid', location: 'Tokyo Hotel' },
   { src: summerBeachGrid, title: '青い夏 Beach', style: 'Cinematic Grid', location: 'Japanese Beach' },
   { src: tokyoRamenNight, title: 'Ramen Night', style: 'Hyper-Candid', location: 'Tokyo Izakaya' },
   { src: seoulPojangmacha, title: 'Pojangmacha', style: 'Night Scene', location: 'Seoul Street' },
-  { src: parisBakery, title: 'Macaron Dreams', style: 'Photorealistic', location: 'Paris Patisserie' },
-  { src: seoulBakery, title: 'Seoul Café', style: 'Vintage Film', location: 'Hongdae, Seoul' },
-  { src: koreanFashion, title: 'K-Fashion', style: 'Hyper-Candid', location: 'Seoul Studio' },
   { src: venetianMasquerade, title: 'Masquerade Ball', style: 'Oil Painting', location: 'Venice 1700s' },
   { src: japaneseUkiyoe, title: 'Modern Ukiyo-e', style: 'Woodblock Art', location: 'Kyoto' },
   { src: egyptPyramids, title: 'Ancient Egypt', style: 'Oil Painting', location: 'Giza 2500 BC' },
+  { src: parisPhotobook, title: 'Paris Memories', style: 'Photo Book', location: 'Paris' },
+  { src: bangkokStreetFood, title: 'Street Food', style: 'Candid', location: 'Bangkok' },
+  { src: atlantisSurreal, title: 'Lost Atlantis', style: 'Surreal', location: 'Underwater City' },
 ];
 
 const rightGalleryImages: GalleryImage[] = [
-  { src: celebritySelfie, title: 'Backstage Selfie', style: 'Photorealistic', location: 'NYC Event' },
-  { src: frenchBathroom, title: 'French Morning', style: 'Vintage Film', location: 'Paris Apartment' },
-  { src: dramaticPortrait, title: 'Shadow & Light', style: 'Dramatic', location: 'Studio Session' },
   { src: marsColonyDome, title: 'Mars Biodome', style: 'Sci-Fi', location: 'Mars 2150' },
   { src: veniceCinematicGrid, title: 'Venice Grid', style: 'Cinematic 9-Shot', location: 'Renaissance' },
   { src: kyotoTempleCat, title: 'Temple Cat', style: 'Candid', location: 'Kyoto Shrine' },
   { src: parisCafeTerrace, title: 'Café Terrace', style: 'Lifestyle', location: 'Paris' },
   { src: kyotoDisposable, title: 'Disposable Cam', style: 'Lo-Fi Film', location: 'Fushimi Inari' },
-  { src: animeCosplay, title: 'Noelle Cosplay', style: 'Anime', location: 'Medieval Castle' },
-  { src: candidCat, title: 'Cat Café', style: 'Hyper-Candid', location: 'Rustic Patio' },
   { src: floatingLibrary, title: 'Infinite Library', style: 'Surreal', location: 'Dreamscape' },
   { src: underwaterPalace, title: 'Mermaid Palace', style: 'Fantasy', location: 'Atlantis' },
   { src: fantasyCastle, title: 'Fantasy Castle', style: 'High Fantasy', location: 'Floating Island' },
@@ -122,8 +105,7 @@ export const ScrollingGallery: React.FC<ScrollingGalleryProps> = ({ side }) => {
 };
 
 export const MobileGallery: React.FC = () => {
-  // Combine some top images from both sides for the mobile strip
-  const mobileImages = [...leftGalleryImages.slice(0, 8), ...rightGalleryImages.slice(0, 8)];
+  const mobileImages = [...leftGalleryImages.slice(0, 6), ...rightGalleryImages.slice(0, 6)];
   
   return (
     <div className="xl:hidden w-full h-24 relative overflow-hidden rounded-lg border border-cyber-800/50 bg-cyber-900/40 mb-4 shrink-0">
@@ -131,7 +113,6 @@ export const MobileGallery: React.FC = () => {
       <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-cyber-900 to-transparent z-10 pointer-events-none"></div>
       
       <div className="flex items-center h-full animate-scroll-left hover:pause-animation w-max">
-        {/* Duplicate strictly for marquee effect */}
         {[...mobileImages, ...mobileImages, ...mobileImages].map((img, index) => (
           <div 
             key={`mobile-${index}`}
