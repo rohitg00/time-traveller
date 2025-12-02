@@ -13,6 +13,8 @@
 
 </div>
 
+![Time Traveller](docs/img/og-celeb.png)
+
 ---
 
 ## 🖼️ Screenshots

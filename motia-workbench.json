@@ -19,36 +19,36 @@
         "y": 54
       },
       "steps/api/parseTravelCommand.step.ts": {
-        "x": 10,
-        "y": 0
+        "x": -1207,
+        "y": 560
       },
       "steps/api/initiateTeleport.step.ts": {
-        "x": 0,
-        "y": 204
+        "x": -795,
+        "y": 219
       },
       "steps/api/getUser.step.ts": {
-        "x": 45,
-        "y": 544
+        "x": -754,
+        "y": -203
       },
       "steps/api/getTeleportProgress.step.ts": {
-        "x": 4,
-        "y": 748
+        "x": -1237,
+        "y": -221
       },
       "steps/api/getLocationInfo.step.ts": {
-        "x": 0,
-        "y": 952
+        "x": -796,
+        "y": -4
       },
       "steps/api/getHistory.step.ts": {
-        "x": 0,
-        "y": 1176
+        "x": -1245,
+        "y": 9
       },
       "steps/api/getAudio.step.ts": {
-        "x": 0,
-        "y": 1400
+        "x": -1235,
+        "y": 264
       },
       "steps/api/auth.step.ts": {
-        "x": 4,
-        "y": 1624
+        "x": -790,
+        "y": 573
       }
     }
   }
