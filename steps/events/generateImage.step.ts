@@ -17,7 +17,9 @@ const inputSchema = z.object({
     lat: z.number(),
     lng: z.number()
   }).optional(),
-  imageConfig: imageConfigSchema.optional()
+  imageConfig: imageConfigSchema.optional(),
+  userGeminiKey: z.string().optional(),
+  userMapsKey: z.string().optional()
 });
 
 export const config: EventConfig = {
@@ -41,6 +43,7 @@ interface TeleportData {
   era: string;
   style: string;
   mapsApiKey: string;
+  geminiApiKey?: string;
   referenceImageUrl?: string;
   imageConfig?: ImageConfig;
 }
@@ -54,10 +57,10 @@ interface ImageData {
 type GenerateImageInput = z.infer<typeof inputSchema>;
 
 export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, streams, state, traceId }) => {
-  const { teleportId, destination, era, style, coordinates, imageConfig } = input as GenerateImageInput;
+  const { teleportId, destination, era, style, coordinates, imageConfig, userGeminiKey, userMapsKey } = input as GenerateImageInput;
   
   try {
-    logger.info('Starting image generation', { traceId, teleportId, destination });
+    logger.info('Starting image generation', { traceId, teleportId, destination, hasUserKeys: !!userGeminiKey });
     
     await streams.teleportProgress.set('active', teleportId, {
       id: teleportId,
@@ -70,7 +73,8 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
     });
 
     const teleportData = await state.get<TeleportData>('teleports', teleportId);
-    const mapsApiKey = teleportData?.mapsApiKey || process.env.GOOGLE_API_KEY || '';
+    const mapsApiKey = userMapsKey || teleportData?.mapsApiKey || process.env.GOOGLE_API_KEY || '';
+    const geminiApiKey = userGeminiKey || teleportData?.geminiApiKey || process.env.GEMINI_API_KEY || '';
 
     const referenceImageUrl = teleportData?.referenceImageUrl;
     
@@ -104,7 +108,8 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       mapsApiKey,
       referenceImageBase64,
       coordinates,
-      effectiveImageConfig
+      effectiveImageConfig,
+      geminiApiKey
     );
     
     logger.info('Image generated successfully', { 

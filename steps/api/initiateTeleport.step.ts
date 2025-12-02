@@ -17,7 +17,9 @@ const bodySchema = z.object({
     lat: z.number(),
     lng: z.number()
   }).optional(),
-  imageConfig: imageConfigSchema
+  imageConfig: imageConfigSchema,
+  userGeminiKey: z.string().optional(),
+  userMapsKey: z.string().optional()
 });
 
 export const config: ApiRouteConfig = {
@@ -59,6 +61,7 @@ interface TeleportData {
   imageConfig?: ImageConfig;
   timestamp: number;
   mapsApiKey: string;
+  geminiApiKey?: string;
   userId: string;
 }
 
@@ -73,7 +76,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       };
     }
 
-    const { destination, era, style, referenceImage, coordinates, imageConfig } = bodySchema.parse(req.body);
+    const { destination, era, style, referenceImage, coordinates, imageConfig, userGeminiKey, userMapsKey } = bodySchema.parse(req.body);
     
     const teleportId = `teleport-${userId}-${Date.now()}`;
     
@@ -119,7 +122,8 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       coordinates,
       imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' },
       timestamp: Date.now(),
-      mapsApiKey: process.env.GOOGLE_API_KEY || '',
+      mapsApiKey: userMapsKey || process.env.GOOGLE_API_KEY || '',
+      geminiApiKey: userGeminiKey,
       userId
     };
     
@@ -134,7 +138,9 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
         era,
         style,
         coordinates,
-        imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' }
+        imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' },
+        userGeminiKey,
+        userMapsKey
       }
     });
 

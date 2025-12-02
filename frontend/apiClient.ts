@@ -66,6 +66,8 @@ export interface TeleportRequest {
   referenceImage?: string;
   coordinates?: { lat: number; lng: number };
   imageConfig?: ImageConfig;
+  userGeminiKey?: string;
+  userMapsKey?: string;
 }
 
 export interface TeleportResponse {

@@ -12,9 +12,15 @@ import { Starfield } from './components/Starfield';
 import { AuthBanner } from './components/AuthBanner';
 import { GuidedTour } from './components/GuidedTour';
 import { TermsModal } from './components/TermsModal';
+import { ApiKeyModal } from './components/ApiKeyModal';
 import { ScrollingGallery, MobileGallery } from './components/ScrollingGallery';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AlertCircle, Lock, Zap, Shield } from 'lucide-react';
+import { AlertCircle, Lock, Zap, Shield, Key } from 'lucide-react';
+
+const MAX_FREE_GENERATIONS = 5;
+const STORAGE_KEY_GENERATIONS = 'time-traveller-generations-used';
+const STORAGE_KEY_USER_GEMINI = 'time-traveller-user-gemini-key';
+const STORAGE_KEY_USER_MAPS = 'time-traveller-user-maps-key';
 
 // Main app content that uses auth
 const AppContent: React.FC = () => {
@@ -30,6 +36,25 @@ const AppContent: React.FC = () => {
   const [weatherCondition, setWeatherCondition] = useState<string | undefined>(undefined);
   const [showTour, setShowTour] = useState<boolean>(false);
   const [showTerms, setShowTerms] = useState<boolean>(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState<boolean>(false);
+  const [generationsUsed, setGenerationsUsed] = useState<number>(0);
+  const [userGeminiKey, setUserGeminiKey] = useState<string>('');
+  const [userMapsKey, setUserMapsKey] = useState<string>('');
+
+  useEffect(() => {
+    const savedGenerations = localStorage.getItem(STORAGE_KEY_GENERATIONS);
+    if (savedGenerations) {
+      setGenerationsUsed(parseInt(savedGenerations, 10) || 0);
+    }
+    const savedGeminiKey = localStorage.getItem(STORAGE_KEY_USER_GEMINI);
+    if (savedGeminiKey) {
+      setUserGeminiKey(savedGeminiKey);
+    }
+    const savedMapsKey = localStorage.getItem(STORAGE_KEY_USER_MAPS);
+    if (savedMapsKey) {
+      setUserMapsKey(savedMapsKey);
+    }
+  }, []);
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem('time-traveller-tour-completed');
@@ -37,6 +62,27 @@ const AppContent: React.FC = () => {
       setTimeout(() => setShowTour(true), 1000);
     }
   }, [authLoading, user, isAuthConfigured]);
+
+  const hasUserKeys = userGeminiKey.length > 0;
+  const remainingFreeGenerations = Math.max(0, MAX_FREE_GENERATIONS - generationsUsed);
+  const canGenerate = hasUserKeys || remainingFreeGenerations > 0;
+
+  const handleSaveApiKeys = (geminiKey: string, mapsKey: string) => {
+    setUserGeminiKey(geminiKey);
+    setUserMapsKey(mapsKey);
+    localStorage.setItem(STORAGE_KEY_USER_GEMINI, geminiKey);
+    if (mapsKey) {
+      localStorage.setItem(STORAGE_KEY_USER_MAPS, mapsKey);
+    }
+  };
+
+  const incrementGenerationCount = () => {
+    if (!hasUserKeys) {
+      const newCount = generationsUsed + 1;
+      setGenerationsUsed(newCount);
+      localStorage.setItem(STORAGE_KEY_GENERATIONS, newCount.toString());
+    }
+  };
 
   const handleTourComplete = () => {
     setShowTour(false);
@@ -118,6 +164,11 @@ const AppContent: React.FC = () => {
   };
 
   const handleTeleport = async (destination: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }, imageConfig?: { aspectRatio: string, imageSize: string }) => {
+    if (!canGenerate) {
+      setShowApiKeyModal(true);
+      return;
+    }
+
     setTeleportState('teleporting');
     setError(null);
     setIsAudioPlaying(false);
@@ -142,7 +193,9 @@ const AppContent: React.FC = () => {
         style,
         referenceImage,
         coordinates,
-        imageConfig: imageConfig as api.ImageConfig
+        imageConfig: imageConfig as api.ImageConfig,
+        userGeminiKey: userGeminiKey || undefined,
+        userMapsKey: userMapsKey || undefined,
       });
 
       const teleportId = response.teleportId;
@@ -168,6 +221,7 @@ const AppContent: React.FC = () => {
             setCurrentLocation(newItem);
             setHistory(prev => [newItem, ...prev].slice(0, 10));
             setTeleportState('arrived');
+            incrementGenerationCount();
             unsubscribe();
           } else if (progress.status === 'error') {
             setError(progress.error || "Teleportation malfunction.");
@@ -230,6 +284,7 @@ const AppContent: React.FC = () => {
           setCurrentLocation(newItem);
           setHistory(prev => [newItem, ...prev].slice(0, 10));
           setTeleportState('arrived');
+          incrementGenerationCount();
           return;
         } else if (progress.status === 'error') {
           setError(progress.error || "Teleportation malfunction.");
@@ -446,17 +501,34 @@ const AppContent: React.FC = () => {
       </div>
       
       <footer className="p-4 text-center text-xs text-slate-600 font-mono z-10 relative">
-        <button 
-          onClick={() => setShowTerms(true)}
-          className="hover:text-cyber-400 transition-colors flex items-center justify-center gap-2 mx-auto"
-        >
-          <Shield className="w-3 h-3" />
-          TERMS & PRIVACY PROTOCOL
-        </button>
+        <div className="flex items-center justify-center gap-4 flex-wrap">
+          <button 
+            onClick={() => setShowApiKeyModal(true)}
+            className={`hover:text-cyber-400 transition-colors flex items-center gap-1.5 ${hasUserKeys ? 'text-green-500' : remainingFreeGenerations === 0 ? 'text-red-400 animate-pulse' : remainingFreeGenerations <= 2 ? 'text-amber-400' : ''}`}
+          >
+            <Key className="w-3 h-3" />
+            {hasUserKeys ? 'USING YOUR API KEYS' : remainingFreeGenerations === 0 ? '⚠️ ADD API KEY' : `${remainingFreeGenerations} FREE LEFT`}
+          </button>
+          <span className="text-slate-700">|</span>
+          <button 
+            onClick={() => setShowTerms(true)}
+            className="hover:text-cyber-400 transition-colors flex items-center gap-1.5"
+          >
+            <Shield className="w-3 h-3" />
+            TERMS & PRIVACY
+          </button>
+        </div>
       </footer>
 
       {showTour && <GuidedTour onComplete={handleTourComplete} />}
       <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
+      <ApiKeyModal 
+        isOpen={showApiKeyModal} 
+        onClose={() => setShowApiKeyModal(false)}
+        onSaveKeys={handleSaveApiKeys}
+        generationsUsed={generationsUsed}
+        maxFreeGenerations={MAX_FREE_GENERATIONS}
+      />
     </div>
   );
 };

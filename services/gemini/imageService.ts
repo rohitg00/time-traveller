@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
-export const getAI = () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+export const getAI = (apiKey?: string) => new GoogleGenAI({ apiKey: apiKey || process.env.GEMINI_API_KEY });
 
 async function reverseGeocode(lat: number, lng: number, mapsApiKey: string): Promise<string | null> {
   try {
@@ -130,9 +130,10 @@ export async function generateImage(
   mapsApiKey: string,
   referenceImage?: string,
   coordinates?: { lat: number, lng: number },
-  imageConfig?: ImageConfig
+  imageConfig?: ImageConfig,
+  geminiApiKey?: string
 ): Promise<ImageGenerationResult> {
-  const ai = getAI();
+  const ai = getAI(geminiApiKey);
   
   interface ContentPart {
     inlineData?: {
