@@ -32,9 +32,19 @@ function getStream(): Stream {
     throw new Error('Stream connection already in progress');
   }
 
+  // Only create stream connection if user is authenticated
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required for stream connection');
+  }
+
   try {
     isConnecting = true;
-    streamInstance = new Stream(WS_URL);
+    streamInstance = new Stream(WS_URL, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return streamInstance;
   } catch (error) {
     streamInstance = null;
@@ -214,6 +224,13 @@ export function subscribeTeleportProgress(
   onUpdate: (progress: TeleportProgress) => void,
   onError?: (error: Error) => void
 ): () => void {
+  // Silently skip subscription if not authenticated to prevent socket errors
+  const token = getAuthToken();
+  if (!token) {
+    console.warn('Cannot subscribe to teleport progress: not authenticated');
+    return () => {};
+  }
+
   let subscription: ReturnType<Stream['subscribeGroup']> | null = null;
 
   try {
