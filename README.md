@@ -219,6 +219,7 @@ motia cloud deploy --api-key <key> --version-name 1.0.0
 | Street View unavailable | Normal! AI generates without it |
 | WebSocket failed | Falls back to polling automatically |
 | Frontend not loading | Ensure both servers running |
+| "Failed to authorize stream" errors | **Expected** - Motia Workbench trying to connect before auth. Harmless, can be ignored. Only affects dev Workbench at `:3000`, not the app at `:5173` |
 
 ---
 
