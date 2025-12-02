@@ -75,6 +75,15 @@ export interface ImageConfig {
   imageSize: ImageSize;
 }
 
+// Multi-image support for Gemini 3 Pro (up to 14 images)
+// https://ai.google.dev/gemini-api/docs/image-generation
+export interface ReferenceImageData {
+  id: string;
+  data: string;
+  type: 'person' | 'celebrity' | 'object';
+  label?: string;
+}
+
 function getStylePromptEnhancement(style: string, destination: string, coordinates?: { lat: number, lng: number }): string {
   const coordStr = coordinates ? `latitude ${coordinates.lat}, longitude ${coordinates.lng}` : destination;
   
@@ -106,6 +115,37 @@ Row 3 (Details and angles):
 
 Maintain strict consistency: Use the same person/object, same clothing, same lighting across all 9 panels. Also realistically vary the depth of field (stronger blur in close-ups). A professional 3×3 cinematic contact sheet.`,
     
+    '3x3 Expression Grid': `Generate a 3×3 photo grid featuring the same person making cute, funny, and slightly weird expressions and poses.
+
+CRITICAL REQUIREMENTS:
+1. FULLY PRESERVE the face, hairstyle, and outfit from the uploaded reference image in ALL 9 panels
+2. The SAME expression and pose must be CONSISTENT across all 9 panels
+3. Each panel uses a DIFFERENT camera angle
+
+Use these 9 camera angles (one per panel):
+Row 1:
+1. High angle (top-down looking down at subject)
+2. Low angle (from below looking up)
+3. Eye-level straight-on (direct front view)
+
+Row 2:
+4. Dutch angle (slightly tilted/diagonal frame)
+5. Close-up low angle (tight shot from below)
+6. Over-the-shoulder angle (from behind, showing profile)
+
+Row 3:
+7. Wide shot from the side (full body, side profile)
+8. 45-degree angle from the front (classic portrait angle)
+9. Slight bird's-eye angle (gentle overhead)
+
+STYLE REQUIREMENTS:
+• Photorealistic, clean professional lighting
+• Real camera lens rendering (not illustration or cartoon)
+• Same outfit, face, and hairstyle across ALL 9 images
+• The pose and expression stay IDENTICAL across the grid
+• Modern, minimal aesthetic with soft shadows
+• Natural skin texture, no heavy editing`,
+
     'CCTV Surveillance': `Generate an image in the style of a high-angle CCTV surveillance camera at ${coordStr}. Include subtle white frame detection boxes around faces. Add realistic security camera noise, slight distortion, and that characteristic washed-out look. The perspective should be from a corner ceiling mount looking down.`,
     
     'Real-time Weather': `Create an image located at ${coordStr} that matches the atmosphere of the current local time and the real-time weather. In the lower left corner of the photo, use elegant typography to write the current latitude and longitude, location information, and weather icon, and add a sentence of English location introduction copy.`,
@@ -131,7 +171,8 @@ export async function generateImage(
   referenceImage?: string,
   coordinates?: { lat: number, lng: number },
   imageConfig?: ImageConfig,
-  geminiApiKey?: string
+  geminiApiKey?: string,
+  referenceImages?: ReferenceImageData[]
 ): Promise<ImageGenerationResult> {
   const ai = getAI(geminiApiKey);
   
@@ -199,7 +240,60 @@ export async function generateImage(
     }
   }
 
-  if (referenceImage) {
+  // Handle multiple reference images (Gemini 3 Pro supports up to 14 images)
+  // https://ai.google.dev/gemini-api/docs/image-generation
+  const hasMultipleImages = referenceImages && referenceImages.length > 0;
+  
+  console.log('[ImageService] Multi-image check:', {
+    hasMultipleImages,
+    referenceImagesCount: referenceImages?.length || 0,
+    referenceImageTypes: referenceImages?.map(img => img.type) || []
+  });
+  
+  if (hasMultipleImages) {
+    let imageIndex = streetViewData ? 2 : 1;
+    const personImages = referenceImages.filter(img => img.type === 'person' || img.type === 'celebrity');
+    const objectImages = referenceImages.filter(img => img.type === 'object');
+    
+    // Add person/celebrity images first
+    for (const img of personImages) {
+      const mimeType = getMimeTypeFromDataUrl(img.data);
+      const base64 = img.data.split(',')[1] || img.data;
+      
+      parts.push({
+        inlineData: {
+          mimeType,
+          data: base64
+        }
+      });
+      
+      if (img.type === 'celebrity') {
+        promptText += `Image ${imageIndex} is a CELEBRITY (${img.label || 'famous person'}) to appear in the scene with the traveler. `;
+      } else {
+        promptText += `Image ${imageIndex} is the TRAVELER (${img.label || 'person'}) to be placed in the scene. `;
+      }
+      imageIndex++;
+    }
+    
+    // Add object images
+    for (const img of objectImages) {
+      const mimeType = getMimeTypeFromDataUrl(img.data);
+      const base64 = img.data.split(',')[1] || img.data;
+      
+      parts.push({
+        inlineData: {
+          mimeType,
+          data: base64
+        }
+      });
+      promptText += `Image ${imageIndex} is an OBJECT (${img.label || 'item'}) to include in the scene. `;
+      imageIndex++;
+    }
+    
+    promptText += `\nIMPORTANT: Combine ALL the people and objects from the reference images into ONE cohesive scene at the destination. `;
+    promptText += `Maintain each person's distinct appearance and features. `;
+  } else if (referenceImage) {
+    // Single reference image (legacy support)
     const userMimeType = getMimeTypeFromDataUrl(referenceImage);
     const userBase64 = referenceImage.split(',')[1] || referenceImage;
     
@@ -212,16 +306,33 @@ export async function generateImage(
     promptText += `The ${streetViewData ? 'second' : 'first'} image provided is the TRAVELER (user). `;
   }
 
+  const hasAnyReference = hasMultipleImages || referenceImage;
+  
   if (isSpecialStyle) {
     promptText += `\n\n${styleEnhancement}\n\n`;
     promptText += `Location: ${effectiveDestination}. Time Period: ${era}. `;
-    if (referenceImage) {
+    if (hasMultipleImages) {
+      promptText += `Use ALL the people's appearances from the reference images and blend them naturally into the scene together. `;
+    } else if (referenceImage) {
       promptText += `Use the TRAVELER's appearance and blend them naturally into the scene. `;
     }
   } else {
     promptText += `\n\nGenerate a photorealistic, ${style} image of `;
     
-    if (streetViewData && referenceImage) {
+    if (hasMultipleImages) {
+      // Multi-image mode: combine all people at the destination
+      promptText += `ALL the people from the reference images visiting ${effectiveDestination} together. 
+      IMPORTANT INSTRUCTIONS FOR MODEL (Gemini 3 Pro):
+      1. Base Scene: Generate the ICONIC view of ${effectiveDestination} that people would recognize.
+      2. Multi-Character Insertion: Place ALL the people from the reference images into this scene together naturally. 
+         - Maintain each person's distinct facial features, body type, and appearance.
+         - Scale them correctly relative to each other and the environment.
+         - Position them naturally as if they're together (friends, colleagues, etc.).
+         - Match lighting, shadows, and color grading consistently.
+      3. Objects: Include any reference objects naturally in the scene.
+      4. Era Transformation: Modify the environment details to match the ${era} era.
+      5. Output: A high-fidelity, 2K resolution cohesive photograph showing all subjects at the iconic location.`;
+    } else if (streetViewData && referenceImage) {
       promptText += `the TRAVELER visiting ${effectiveDestination}. 
       IMPORTANT INSTRUCTIONS FOR MODEL (Gemini 3 Pro):
       1. Base Scene: The REFERENCE LOCATION image shows the area, but generate the ICONIC view of ${effectiveDestination} that people would recognize.

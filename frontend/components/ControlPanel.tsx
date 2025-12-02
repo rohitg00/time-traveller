@@ -1,10 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { LocationStyle, ImageConfig, AspectRatio, ImageSize, ASPECT_RATIO_OPTIONS, IMAGE_SIZE_OPTIONS, DEFAULT_IMAGE_CONFIG } from '../types';
+import { LocationStyle, ImageConfig, AspectRatio, ImageSize, ASPECT_RATIO_OPTIONS, IMAGE_SIZE_OPTIONS, DEFAULT_IMAGE_CONFIG, ReferenceImage } from '../types';
 import { Send, MapPin, Clock, Palette, Camera, Upload, X, User, Circle, Terminal, Globe, Sliders, Image, Maximize2, Settings2 } from 'lucide-react';
 import { MapSelector } from './MapSelector';
 import { LocationInfo } from './LocationInfo';
-import { TravelerIdentity } from './TravelerIdentity';
+import { MultiImageUpload } from './MultiImageUpload';
 import * as api from '../apiClient';
 
 const getStyleDescription = (style: string): string => {
@@ -18,6 +18,7 @@ const getStyleDescription = (style: string): string => {
     [LocationStyle.PHOTOBOOK]: 'Beautiful photo book layout with elegant typography',
     [LocationStyle.AERIAL]: 'Drone/aerial view looking down from the sky',
     [LocationStyle.CINEMATIC_GRID]: '9-shot cinematic contact sheet with multiple angles',
+    [LocationStyle.PHOTO_GRID_3X3]: '3×3 grid with same pose, 9 different camera angles',
     [LocationStyle.CCTV]: 'CCTV surveillance camera style with noise',
     [LocationStyle.WEATHER_REALTIME]: 'Matches real-time local weather and time of day',
     [LocationStyle.LIGHT_LEAK]: 'Retro failed photo with light leaks and blur',
@@ -27,7 +28,7 @@ const getStyleDescription = (style: string): string => {
 };
 
 interface ControlPanelProps {
-  onTeleport: (dest: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }, imageConfig?: ImageConfig) => void;
+  onTeleport: (dest: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }, imageConfig?: ImageConfig, referenceImages?: ReferenceImage[]) => void;
   isTeleporting: boolean;
   onWeatherUpdate?: (condition: string) => void;
 }
@@ -40,7 +41,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
   const [destination, setDestination] = useState('');
   const [era, setEra] = useState('');
   const [style, setStyle] = useState<string>(LocationStyle.REALISTIC);
-  const [userImage, setUserImage] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [chatInput, setChatInput] = useState('');
@@ -50,6 +50,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
   const [isProcessingChat, setIsProcessingChat] = useState(false);
   const [imageConfig, setImageConfig] = useState<ImageConfig>(DEFAULT_IMAGE_CONFIG);
   const [showImageSettings, setShowImageSettings] = useState(true);
+  const [referenceImages, setReferenceImages] = useState<ReferenceImage[]>([]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +81,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
         }
       }
 
-      onTeleport(destination, targetEra, style, userImage || undefined, coordsToUse, imageConfig);
+      // Use multi-image array for reference images
+      const imagesToUse = referenceImages.length > 0 ? referenceImages : undefined;
+      onTeleport(destination, targetEra, style, undefined, coordsToUse, imageConfig, imagesToUse);
     }
   };
 
@@ -102,7 +105,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
       if (result.isJump && result.params) {
         setDestination(result.params.destination);
         setEra(result.params.era);
-        onTeleport(result.params.destination, result.params.era, result.params.style, userImage || undefined);
+        onTeleport(result.params.destination, result.params.era, result.params.style, undefined, undefined, undefined, referenceImages.length > 0 ? referenceImages : undefined);
       }
     } catch (e) {
       setChatLog(prev => [...prev, { role: 'ai', text: 'Error processing navigational data.' }]);
@@ -363,13 +366,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ onTeleport, isTelepo
       </div>
 
       {(activeTab === 'manual' || activeTab === 'map' || activeTab === 'terminal') && (
-        <div className="shrink-0 p-4 pt-2 border-t border-cyber-700/50 bg-cyber-800 flex gap-3 items-center">
+        <div className="shrink-0 p-4 pt-2 border-t border-cyber-700/50 bg-cyber-800 flex gap-2 items-center">
           <div className="shrink-0">
-             <TravelerIdentity 
-               userImage={userImage} 
-               onImageChange={setUserImage} 
-               isTeleporting={isTeleporting} 
-             />
+            <MultiImageUpload
+              images={referenceImages}
+              onImagesChange={setReferenceImages}
+              isTeleporting={isTeleporting}
+            />
           </div>
 
           <button

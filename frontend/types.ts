@@ -35,6 +35,20 @@ export const DEFAULT_IMAGE_CONFIG: ImageConfig = {
   imageSize: '2K',
 };
 
+// Multi-image support for Gemini 3 Pro Image Preview
+// https://ai.google.dev/gemini-api/docs/image-generation
+// Supports up to 14 reference images: 5 humans + 6 objects
+export interface ReferenceImage {
+  id: string;
+  data: string;
+  type: 'person' | 'celebrity' | 'object';
+  label?: string;
+}
+
+export const MAX_REFERENCE_IMAGES = 14;
+export const MAX_PERSON_IMAGES = 5;
+export const MAX_OBJECT_IMAGES = 6;
+
 export interface TravelLogItem {
   id: string;
   destination: string;
@@ -45,6 +59,7 @@ export interface TravelLogItem {
   description: string;
   mapsUri?: string;
   referenceImage?: string;
+  referenceImages?: ReferenceImage[];
   usedStreetView?: boolean;
 }
 
@@ -72,6 +87,7 @@ export enum LocationStyle {
   PHOTOBOOK = 'Photo Book',
   AERIAL = 'Aerial/Drone View',
   CINEMATIC_GRID = 'Cinematic 9-Shot Grid',
+  PHOTO_GRID_3X3 = '3x3 Expression Grid',
   CCTV = 'CCTV Surveillance',
   WEATHER_REALTIME = 'Real-time Weather',
   LIGHT_LEAK = 'Light Leak/Retro Fail',

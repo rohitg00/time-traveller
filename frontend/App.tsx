@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import { TeleportState, TravelLogItem } from './types';
+import { TeleportState, TravelLogItem, ReferenceImage } from './types';
 import * as api from './apiClient';
 import { decodeAudioData, decodeBase64 } from './audioUtils';
 import { ControlPanel } from './components/ControlPanel';
@@ -163,7 +163,7 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleTeleport = async (destination: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }, imageConfig?: { aspectRatio: string, imageSize: string }) => {
+  const handleTeleport = async (destination: string, era: string, style: string, referenceImage?: string, coordinates?: { lat: number, lng: number }, imageConfig?: { aspectRatio: string, imageSize: string }, referenceImages?: ReferenceImage[]) => {
     if (!canGenerate) {
       setShowApiKeyModal(true);
       return;
@@ -192,6 +192,12 @@ const AppContent: React.FC = () => {
         era,
         style,
         referenceImage,
+        referenceImages: referenceImages?.map(img => ({
+          id: img.id,
+          data: img.data,
+          type: img.type,
+          label: img.label
+        })),
         coordinates,
         imageConfig: imageConfig as api.ImageConfig,
         userGeminiKey: userGeminiKey || undefined,

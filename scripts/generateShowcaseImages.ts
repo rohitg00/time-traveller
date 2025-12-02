@@ -192,25 +192,30 @@ async function generateImage(config: typeof showcaseImages[0]): Promise<string |
     let response;
     
     try {
+      // Primary: Gemini 3 Pro (Nano Banana Pro) - highest quality
+      console.log(`   🔄 Using gemini-3-pro-image-preview (Nano Banana Pro)...`);
       response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
+        model: 'gemini-3-pro-image-preview',
         contents: { parts },
-      });
-    } catch (flashError: any) {
-      console.log(`   ⚠️ Flash model failed: ${flashError.message?.substring(0, 80)}...`);
-      try {
-        response = await ai.models.generateContent({
-          model: 'gemini-3-pro-image-preview',
-          contents: { parts },
-          config: {
-            imageConfig: {
-              aspectRatio: "16:9",
-              imageSize: "2K"
-            },
+        config: {
+          responseModalities: ['Text', 'Image'],
+          imageConfig: {
+            aspectRatio: "16:9",
+            imageSize: "2K"
           },
+        },
+      });
+    } catch (proError: any) {
+      console.log(`   ⚠️ Pro model failed: ${proError.message?.substring(0, 80)}...`);
+      try {
+        // Fallback: Gemini 2.5 Flash (Nano Banana) - faster but lower quality
+        console.log(`   🔄 Fallback to gemini-2.5-flash-image...`);
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash-image',
+          contents: { parts },
         });
-      } catch (proError: any) {
-        console.log(`   ❌ Pro model also failed: ${proError.message?.substring(0, 80)}...`);
+      } catch (flashError: any) {
+        console.log(`   ❌ Fallback also failed: ${flashError.message?.substring(0, 80)}...`);
         return null;
       }
     }

@@ -8,6 +8,14 @@ const imageConfigSchema = z.object({
   imageSize: z.enum(['1K', '2K', '4K']).default('2K')
 });
 
+// Multi-image support for Gemini 3 Pro (up to 14 images)
+const referenceImageSchema = z.object({
+  id: z.string(),
+  data: z.string(),
+  type: z.enum(['person', 'celebrity', 'object']),
+  label: z.string().optional()
+});
+
 const inputSchema = z.object({
   teleportId: z.string(),
   destination: z.string(),
@@ -17,6 +25,7 @@ const inputSchema = z.object({
     lat: z.number(),
     lng: z.number()
   }).optional(),
+  referenceImages: z.array(referenceImageSchema).optional(),
   imageConfig: imageConfigSchema.optional(),
   userGeminiKey: z.string().optional(),
   userMapsKey: z.string().optional()
@@ -38,6 +47,13 @@ interface ImageConfig {
   imageSize: '1K' | '2K' | '4K';
 }
 
+interface ReferenceImageData {
+  id: string;
+  data: string;
+  type: 'person' | 'celebrity' | 'object';
+  label?: string;
+}
+
 interface TeleportData {
   destination: string;
   era: string;
@@ -45,6 +61,7 @@ interface TeleportData {
   mapsApiKey: string;
   geminiApiKey?: string;
   referenceImageUrl?: string;
+  referenceImages?: ReferenceImageData[];
   imageConfig?: ImageConfig;
 }
 
@@ -57,10 +74,18 @@ interface ImageData {
 type GenerateImageInput = z.infer<typeof inputSchema>;
 
 export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, streams, state, traceId }) => {
-  const { teleportId, destination, era, style, coordinates, imageConfig, userGeminiKey, userMapsKey } = input as GenerateImageInput;
+  const { teleportId, destination, era, style, coordinates, referenceImages, imageConfig, userGeminiKey, userMapsKey } = input as GenerateImageInput;
   
   try {
-    logger.info('Starting image generation', { traceId, teleportId, destination, hasUserKeys: !!userGeminiKey });
+    logger.info('Starting image generation', { 
+      traceId, 
+      teleportId, 
+      destination, 
+      hasUserKeys: !!userGeminiKey,
+      multiImageCount: referenceImages?.length || 0,
+      referenceImageTypes: referenceImages?.map(img => img.type) || [],
+      hasReferenceImageData: referenceImages?.map(img => !!img.data && img.data.length > 100) || []
+    });
     
     await streams.teleportProgress.set('active', teleportId, {
       id: teleportId,
@@ -101,6 +126,17 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
     // Use imageConfig from input or fallback to teleportData or defaults
     const effectiveImageConfig = imageConfig || teleportData?.imageConfig || { aspectRatio: '16:9' as const, imageSize: '2K' as const };
     
+    // Prepare multiple reference images if available
+    const multipleImages = referenceImages || teleportData?.referenceImages;
+    
+    logger.info('Preparing to generate image', {
+      traceId,
+      teleportId,
+      hasMultipleImages: !!multipleImages && multipleImages.length > 0,
+      multipleImagesCount: multipleImages?.length || 0,
+      hasReferenceImageBase64: !!referenceImageBase64
+    });
+    
     const result = await generateImage(
       destination, 
       era, 
@@ -109,7 +145,8 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       referenceImageBase64,
       coordinates,
       effectiveImageConfig,
-      geminiApiKey
+      geminiApiKey,
+      multipleImages
     );
     
     logger.info('Image generated successfully', { 

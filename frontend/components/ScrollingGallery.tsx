@@ -1,30 +1,35 @@
 import React from 'react';
 
-import neoTokyoCyberpunk from '../assets/showcase/neo-tokyo-2099-cyberpunk.png';
-import marsColonyCyberpunk from '../assets/showcase/mars-colony-cyberpunk.png';
-import marsColonyDome from '../assets/showcase/mars-colony-dome-2150.png';
-import midnightTokyoGrid from '../assets/showcase/midnight-tokyo-hotel-grid.png';
-import summerBeachGrid from '../assets/showcase/summer-beach-memory-grid.png';
-import veniceCinematicGrid from '../assets/showcase/venice-cinematic-grid.png';
-import tokyoRamenNight from '../assets/showcase/tokyo-ramen-night.png';
-import seoulPojangmacha from '../assets/showcase/seoul-pojangmacha-night.png';
-import kyotoTempleCat from '../assets/showcase/kyoto-temple-cat-candid.png';
-import parisCafeTerrace from '../assets/showcase/paris-cafe-terrace-candid.png';
-import kyotoDisposable from '../assets/showcase/kyoto-disposable-camera.png';
+// Selected showcase images (6 curated)
 import venetianMasquerade from '../assets/showcase/venetian-masquerade-painting.png';
-import japaneseUkiyoe from '../assets/showcase/japanese-ukiyo-e-modern.png';
-import floatingLibrary from '../assets/showcase/floating-library-surreal.png';
-import underwaterPalace from '../assets/showcase/underwater-palace-fantasy.png';
-import egyptPyramids from '../assets/showcase/egypt-pyramids-oil-painting.png';
-import fantasyCastle from '../assets/showcase/fantasy-castle-medieval.png';
-import parisJazzAge from '../assets/showcase/paris-1920s-jazz-age.png';
-import tokyoCityPop from '../assets/showcase/tokyo-1980s-city-pop.png';
-import tokyoLightLeak from '../assets/showcase/tokyo-light-leak-fail.png';
-import icelandAurora from '../assets/showcase/iceland-aurora-weather.png';
-import hawaiiAerial from '../assets/showcase/hawaii-aerial-falling.png';
+import veniceCinematicGrid from '../assets/showcase/venice-cinematic-grid.png';
+import summerBeachGrid from '../assets/showcase/summer-beach-memory-grid.png';
 import parisPhotobook from '../assets/showcase/paris-photobook.png';
-import atlantisSurreal from '../assets/showcase/atlantis-underwater-surreal.png';
-import bangkokStreetFood from '../assets/showcase/bangkok-street-food-candid.png';
+import midnightTokyoGrid from '../assets/showcase/midnight-tokyo-hotel-grid.png';
+import marsColonyCyberpunk from '../assets/showcase/mars-colony-cyberpunk.png';
+
+// Male showcase images
+import maleTokyoRamen from '../assets/showcase/male-tokyo-ramen-night.png';
+import maleSeoulStreetFood from '../assets/showcase/male-seoul-street-food.png';
+import maleCyberpunkTokyo from '../assets/showcase/male-cyberpunk-tokyo.png';
+import maleMarsColony from '../assets/showcase/male-mars-colony.png';
+import maleParisCafe from '../assets/showcase/male-paris-cafe.png';
+import male1920sJazz from '../assets/showcase/male-1920s-jazz.png';
+import maleTokyoCityPop from '../assets/showcase/male-tokyo-city-pop.png';
+import maleMidnightHotel from '../assets/showcase/male-midnight-hotel-grid.png';
+import maleFloatingLibrary from '../assets/showcase/male-floating-library.png';
+import maleAncientSamurai from '../assets/showcase/male-ancient-samurai.png';
+
+// Female showcase images (3x3 grid girl)
+import femaleTokyoRamen from '../assets/showcase/female-tokyo-ramen-night.png';
+import femaleSeoulStreetFood from '../assets/showcase/female-seoul-street-food.png';
+import femaleCyberpunkTokyo from '../assets/showcase/female-cyberpunk-tokyo.png';
+import femaleMarsColony from '../assets/showcase/female-mars-colony.png';
+import female1920sJazz from '../assets/showcase/female-1920s-jazz.png';
+import femaleTokyoCityPop from '../assets/showcase/female-tokyo-city-pop.png';
+import femaleKyotoTemple from '../assets/showcase/female-kyoto-temple.png';
+import femaleFloatingLibrary from '../assets/showcase/female-floating-library.png';
+import femaleSantorini from '../assets/showcase/female-santorini-sunset.png';
 
 interface GalleryImage {
   src: string;
@@ -33,35 +38,41 @@ interface GalleryImage {
   location: string;
 }
 
+// Left gallery: Curated showcase + Male images
 const leftGalleryImages: GalleryImage[] = [
-  { src: neoTokyoCyberpunk, title: 'Neo-Tokyo 2099', style: 'Cyberpunk', location: 'Future Tokyo' },
-  { src: marsColonyCyberpunk, title: 'Mars Colony', style: 'Sci-Fi', location: 'Olympus Mons' },
-  { src: midnightTokyoGrid, title: '深夜 Midnight', style: 'Cinematic Grid', location: 'Tokyo Hotel' },
+  // Curated showcase images
+  { src: venetianMasquerade, title: 'Masquerade 🎭', style: 'Oil Painting', location: 'Venice 1700s' },
+  { src: veniceCinematicGrid, title: 'Venice Grid', style: 'Cinematic 9-Shot', location: 'Venice' },
   { src: summerBeachGrid, title: '青い夏 Beach', style: 'Cinematic Grid', location: 'Japanese Beach' },
-  { src: tokyoRamenNight, title: 'Ramen Night', style: 'Hyper-Candid', location: 'Tokyo Izakaya' },
-  { src: seoulPojangmacha, title: 'Pojangmacha', style: 'Night Scene', location: 'Seoul Street' },
-  { src: venetianMasquerade, title: 'Masquerade Ball', style: 'Oil Painting', location: 'Venice 1700s' },
-  { src: japaneseUkiyoe, title: 'Modern Ukiyo-e', style: 'Woodblock Art', location: 'Kyoto' },
-  { src: egyptPyramids, title: 'Ancient Egypt', style: 'Oil Painting', location: 'Giza 2500 BC' },
-  { src: parisPhotobook, title: 'Paris Memories', style: 'Photo Book', location: 'Paris' },
-  { src: bangkokStreetFood, title: 'Street Food', style: 'Candid', location: 'Bangkok' },
-  { src: atlantisSurreal, title: 'Lost Atlantis', style: 'Surreal', location: 'Underwater City' },
+  // Male showcase images
+  { src: maleTokyoRamen, title: 'Ramen Night 🍜', style: 'Hyper-Candid', location: 'Tokyo' },
+  { src: maleSeoulStreetFood, title: 'Seoul Street 🍻', style: 'Night Scene', location: 'Korea' },
+  { src: maleCyberpunkTokyo, title: 'Cyber Future 🤖', style: 'Cyberpunk', location: 'Neo-Tokyo' },
+  { src: maleMarsColony, title: 'Mars Explorer 🚀', style: 'Sci-Fi', location: 'Mars 2150' },
+  { src: maleParisCafe, title: 'Paris Café ☕', style: 'Lifestyle', location: 'Paris' },
+  { src: male1920sJazz, title: 'Jazz Age 🎷', style: '1920s Vintage', location: 'Paris' },
+  { src: maleTokyoCityPop, title: 'City Pop 🕺', style: '1980s Retro', location: 'Tokyo' },
+  { src: maleMidnightHotel, title: 'Midnight 🌃', style: 'Cinematic Grid', location: 'Tokyo Hotel' },
+  { src: maleFloatingLibrary, title: 'Library 📚', style: 'Surreal', location: 'Dreamscape' },
+  { src: maleAncientSamurai, title: 'Samurai ⚔️', style: 'Oil Painting', location: 'Feudal Japan' },
 ];
 
+// Right gallery: Curated showcase + Female images
 const rightGalleryImages: GalleryImage[] = [
-  { src: marsColonyDome, title: 'Mars Biodome', style: 'Sci-Fi', location: 'Mars 2150' },
-  { src: veniceCinematicGrid, title: 'Venice Grid', style: 'Cinematic 9-Shot', location: 'Renaissance' },
-  { src: kyotoTempleCat, title: 'Temple Cat', style: 'Candid', location: 'Kyoto Shrine' },
-  { src: parisCafeTerrace, title: 'Café Terrace', style: 'Lifestyle', location: 'Paris' },
-  { src: kyotoDisposable, title: 'Disposable Cam', style: 'Lo-Fi Film', location: 'Fushimi Inari' },
-  { src: floatingLibrary, title: 'Infinite Library', style: 'Surreal', location: 'Dreamscape' },
-  { src: underwaterPalace, title: 'Mermaid Palace', style: 'Fantasy', location: 'Atlantis' },
-  { src: fantasyCastle, title: 'Fantasy Castle', style: 'High Fantasy', location: 'Floating Island' },
-  { src: parisJazzAge, title: 'Jazz Age', style: '1920s Vintage', location: 'Paris' },
-  { src: tokyoCityPop, title: 'City Pop', style: '1980s Retro', location: 'Tokyo Disco' },
-  { src: tokyoLightLeak, title: 'Light Leak', style: 'Retro Fail', location: 'Shibuya' },
-  { src: icelandAurora, title: 'Aurora Borealis', style: 'Weather', location: 'Iceland' },
-  { src: hawaiiAerial, title: 'Aerial Dive', style: 'Drone View', location: 'Waikiki' },
+  // Curated showcase images
+  { src: parisPhotobook, title: 'Paris Memories', style: 'Photo Book', location: 'Paris' },
+  { src: midnightTokyoGrid, title: '深夜 Midnight', style: 'Cinematic Grid', location: 'Tokyo Hotel' },
+  { src: marsColonyCyberpunk, title: 'Mars Colony', style: 'Sci-Fi', location: 'Olympus Mons' },
+  // Female showcase images
+  { src: femaleTokyoRamen, title: 'Ramen Girl 🍜', style: 'Hyper-Candid', location: 'Tokyo' },
+  { src: femaleSeoulStreetFood, title: 'Seoul Night 🌙', style: 'Night Scene', location: 'Korea' },
+  { src: femaleCyberpunkTokyo, title: 'Neon Girl 💜', style: 'Cyberpunk', location: 'Neo-Tokyo' },
+  { src: femaleMarsColony, title: 'Mars Pioneer 🔴', style: 'Sci-Fi', location: 'Mars 2150' },
+  { src: female1920sJazz, title: 'Flapper Girl 💃', style: '1920s Vintage', location: 'Paris' },
+  { src: femaleTokyoCityPop, title: '80s Disco 🪩', style: '1980s Retro', location: 'Tokyo' },
+  { src: femaleKyotoTemple, title: 'Kyoto Autumn 🍁', style: 'Candid', location: 'Kyoto' },
+  { src: femaleFloatingLibrary, title: 'Dream Library ✨', style: 'Surreal', location: 'Dreamscape' },
+  { src: femaleSantorini, title: 'Santorini 🇬🇷', style: 'Travel', location: 'Greece' },
 ];
 
 interface ScrollingGalleryProps {

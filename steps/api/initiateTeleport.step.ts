@@ -8,11 +8,21 @@ const imageConfigSchema = z.object({
   imageSize: z.enum(['1K', '2K', '4K']).default('2K')
 }).optional();
 
+// Multi-image support for Gemini 3 Pro (up to 14 images: 5 humans + 6 objects)
+// https://ai.google.dev/gemini-api/docs/image-generation
+const referenceImageSchema = z.object({
+  id: z.string(),
+  data: z.string(),
+  type: z.enum(['person', 'celebrity', 'object']),
+  label: z.string().optional()
+});
+
 const bodySchema = z.object({
   destination: z.string().min(1, "Destination cannot be empty"),
   era: z.string().min(1, "Era is required"),
   style: z.string().default("Photorealistic"),
   referenceImage: z.string().optional(),
+  referenceImages: z.array(referenceImageSchema).max(14).optional(),
   coordinates: z.object({
     lat: z.number(),
     lng: z.number()
@@ -52,11 +62,19 @@ interface ImageConfig {
   imageSize: '1K' | '2K' | '4K';
 }
 
+interface ReferenceImageData {
+  id: string;
+  data: string;
+  type: 'person' | 'celebrity' | 'object';
+  label?: string;
+}
+
 interface TeleportData {
   destination: string;
   era: string;
   style: string;
   referenceImageUrl?: string;
+  referenceImages?: ReferenceImageData[];
   coordinates?: { lat: number; lng: number };
   imageConfig?: ImageConfig;
   timestamp: number;
@@ -76,7 +94,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       };
     }
 
-    const { destination, era, style, referenceImage, coordinates, imageConfig, userGeminiKey, userMapsKey } = bodySchema.parse(req.body);
+    const { destination, era, style, referenceImage, referenceImages, coordinates, imageConfig, userGeminiKey, userMapsKey } = bodySchema.parse(req.body);
     
     const teleportId = `teleport-${userId}-${Date.now()}`;
     
@@ -87,6 +105,8 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       era, 
       style,
       hasReferenceImage: !!referenceImage,
+      hasMultipleImages: referenceImages && referenceImages.length > 0,
+      imageCount: referenceImages?.length || (referenceImage ? 1 : 0),
       imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' }
     });
     
@@ -119,6 +139,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       era,
       style,
       referenceImageUrl,
+      referenceImages,
       coordinates,
       imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' },
       timestamp: Date.now(),
@@ -138,6 +159,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
         era,
         style,
         coordinates,
+        referenceImages,
         imageConfig: imageConfig || { aspectRatio: '16:9', imageSize: '2K' },
         userGeminiKey,
         userMapsKey

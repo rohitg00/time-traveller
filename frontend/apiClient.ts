@@ -59,11 +59,21 @@ export interface ImageConfig {
   imageSize: '1K' | '2K' | '4K';
 }
 
+// Multi-image support for Gemini 3 Pro (up to 14 images)
+// https://ai.google.dev/gemini-api/docs/image-generation
+export interface ReferenceImageData {
+  id: string;
+  data: string;
+  type: 'person' | 'celebrity' | 'object';
+  label?: string;
+}
+
 export interface TeleportRequest {
   destination: string;
   era: string;
   style: string;
   referenceImage?: string;
+  referenceImages?: ReferenceImageData[];
   coordinates?: { lat: number; lng: number };
   imageConfig?: ImageConfig;
   userGeminiKey?: string;
