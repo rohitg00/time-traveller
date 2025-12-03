@@ -162,7 +162,7 @@ export async function getTeleportProgress(teleportId: string): Promise<TeleportP
   return response.json();
 }
 
-export async function getHistory(limit: number = 10): Promise<HistoryItem[]> {
+export async function getHistory(limit: number = 100): Promise<HistoryItem[]> {
   const token = getAuthToken();
   if (!token) {
     return [];

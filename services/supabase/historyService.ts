@@ -65,7 +65,7 @@ export async function saveHistory(item: HistoryItem): Promise<void> {
   }
 }
 
-export async function getHistory(userId: string, limit: number = 10): Promise<HistoryItemResponse[]> {
+export async function getHistory(userId: string, limit: number = 100): Promise<HistoryItemResponse[]> {
   const client = getSupabaseClient();
   
   const { data, error } = await client

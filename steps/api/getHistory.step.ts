@@ -49,7 +49,7 @@ export const handler: Handlers['GetHistory'] = async (req, { logger, traceId }) 
       };
     }
 
-    const limit = parseInt(req.queryParams.limit as string) || 10;
+    const limit = parseInt(req.queryParams.limit as string) || 100;
     
     logger.info('Fetching teleport history for user', { traceId, userId, limit });
     

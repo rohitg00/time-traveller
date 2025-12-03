@@ -128,7 +128,7 @@ const AppContent: React.FC = () => {
         const savedHistory = localStorage.getItem('time-traveller-history');
         if (savedHistory) {
           const parsed = JSON.parse(savedHistory) as TravelLogItem[];
-          setHistory(parsed.slice(0, 10));
+          setHistory(parsed);
         }
       } catch {
       }
@@ -225,7 +225,7 @@ const AppContent: React.FC = () => {
             };
 
             setCurrentLocation(newItem);
-            setHistory(prev => [newItem, ...prev].slice(0, 10));
+            setHistory(prev => [newItem, ...prev]);
             setTeleportState('arrived');
             incrementGenerationCount();
             unsubscribe();
@@ -288,7 +288,7 @@ const AppContent: React.FC = () => {
           };
 
           setCurrentLocation(newItem);
-          setHistory(prev => [newItem, ...prev].slice(0, 10));
+          setHistory(prev => [newItem, ...prev]);
           setTeleportState('arrived');
           incrementGenerationCount();
           return;
