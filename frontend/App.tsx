@@ -108,7 +108,7 @@ const AppContent: React.FC = () => {
       
       if (user && isAuthConfigured) {
         try {
-          const serverHistory = await api.getHistory(10);
+          const serverHistory = await api.getHistory();
           const formattedHistory: TravelLogItem[] = serverHistory.map(item => ({
             ...item,
             imageData: item.imageUrl || item.imageData || '', // Handle both URL and base64
