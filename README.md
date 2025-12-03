@@ -1,13 +1,13 @@
-# 🌀 Time Traveller - Virtual Time Machine
+# 🌀 Time Traveller - Visit Any Place, Any Era with AI
 
 <div align="center">
 
-![Time Traveller](https://img.shields.io/badge/Time%20Traveller-Temporal%20Displacement-00d4ff?style=for-the-badge&logo=clock&logoColor=white)
+![Time Traveller](https://img.shields.io/badge/Time%20Traveller-Any%20Place%20Any%20Era-00d4ff?style=for-the-badge&logo=clock&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Gemini%203%20Pro-Nano%20Banana-ff6b6b?style=for-the-badge&logo=google&logoColor=white)
 ![Motia](https://img.shields.io/badge/Backend-Motia%20Cloud-0066FF?style=for-the-badge)
 ![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-**Step into any moment in history. Witness the past. Visualize the future.**
+**Travel anywhere in the world, across any time period. See yourself in history!**
 
 [🚀 Live Demo](https://time-traveller-motia.vercel.app) • [⭐ GitHub](https://github.com/rohitg00/time-traveller) • [📖 Docs](#-quick-start)
 
