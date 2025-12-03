@@ -23,8 +23,8 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.554.0",
     "motia": "0.13.0-beta.161",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {
