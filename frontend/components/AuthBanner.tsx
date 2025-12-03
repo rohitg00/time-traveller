@@ -17,32 +17,24 @@ import showcaseGroup from '../assets/showcase/summer-beach-memory-grid.png';
 import showcaseKyoto from '../assets/showcase/female-kyoto-temple.png';
 import showcaseMars from '../assets/showcase/female-mars-colony.png';
 import showcaseRamen from '../assets/showcase/female-tokyo-ramen-night.png';
-// import showcaseNeoTokyo from '../assets/showcase/neo-tokyo-2099-cyberpunk.png';
+import showcaseCyberpunk from '../assets/showcase/female-cyberpunk-tokyo.png';
 import showcaseParisCafe from '../assets/showcase/male-tokyo-city-pop.png';
-import showcaseAtlantis from '../assets/showcase/atlantis-underwater-surreal.png';
+import showcaseSamurai from '../assets/showcase/male-ancient-samurai.png';
 
-// Define columns explicitly for balanced masonry layout
-const columns = [
-  [
-    { src: showcaseSeoul, title: 'Seoul Night', style: 'Street Food Candid' },
-    { src: showcaseCeleb, title: 'Greece Vacation', style: 'With Celebrity' },
-    { src: showcaseRamen, title: 'Tokyo Ramen', style: 'Cinematic 8K' },
-  ],
-  [
-    { src: showcaseKyoto, title: 'Kyoto Temple', style: 'Traditional' },
-    { src: showcaseGrid, title: 'Venice Cinematic', style: '9-Shot Grid' },
-    { src: showcaseParisCafe, title: 'Paris Cafe', style: 'Candid Moment' },
-  ],
-  [
-    { src: showcaseMars, title: 'Mars Colony', style: 'Sci-Fi 2150' },
-    { src: showcaseGroup, title: 'Beach Memories', style: 'Group 3x3 Grid' },
-    // { src: showcaseNeoTokyo, title: 'Neo Tokyo', style: 'Cyberpunk 2099' },
-  ],
-  [
-    { src: showcaseMale, title: 'Pop', style: 'Tokyo City Pop' },
-    { src: showcaseBook, title: 'Paris Memories', style: 'Photo Book' },
-    { src: showcaseAtlantis, title: 'Atlantis', style: 'Surreal Fantasy' },
-  ]
+// Showcase images ordered for balanced masonry layout
+const showcaseImages = [
+  { src: showcaseSeoul, title: 'Seoul Night', style: 'Street Food Candid' },
+  { src: showcaseKyoto, title: 'Kyoto Temple', style: 'Traditional' },
+  { src: showcaseMars, title: 'Mars Colony', style: 'Sci-Fi 2150' },
+  { src: showcaseMale, title: 'Pop', style: 'Tokyo City Pop' },
+  { src: showcaseCeleb, title: 'Greece Vacation', style: 'With Celebrity' },
+  { src: showcaseGrid, title: 'Venice Cinematic', style: '9-Shot Grid' },
+  { src: showcaseGroup, title: 'Beach Memories', style: 'Group 3x3 Grid' },
+  { src: showcaseBook, title: 'Paris Memories', style: 'Photo Book' },
+  { src: showcaseRamen, title: 'Tokyo Ramen', style: 'Cinematic 8K' },
+  { src: showcaseParisCafe, title: 'Paris Cafe', style: 'Candid Moment' },
+  { src: showcaseCyberpunk, title: 'Neo Tokyo', style: 'Cyberpunk 2099' },
+  { src: showcaseSamurai, title: 'Ancient Japan', style: 'Samurai Era' },
 ];
 
 const features = [
@@ -157,30 +149,26 @@ export const AuthBanner: React.FC = () => {
               </p>
             </div>
 
-            {/* Right: Image Showcase (4 cols) */}
+            {/* Right: Image Showcase (masonry layout) */}
             <div className="order-1 lg:order-2 lg:col-span-3">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {columns.map((col, colIndex) => (
-                  <div key={colIndex} className="space-y-3">
-                    {col.map((img, imgIndex) => (
-                      <div 
-                        key={`${colIndex}-${imgIndex}`}
-                        className="relative rounded-lg overflow-hidden border border-cyber-700/50 hover:border-cyber-500 transition-all hover:scale-105 hover:z-10 shadow-lg group cursor-pointer"
-                        style={{ animationDelay: `${(colIndex * 3 + imgIndex) * 100}ms` }}
-                      >
-                        <img 
-                          src={img.src} 
-                          alt={img.title}
-                          className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity">
-                          <div className="absolute bottom-2 left-2 right-2">
-                            <p className="text-[10px] text-white font-bold truncate leading-tight">{img.title}</p>
-                            <p className="text-[8px] text-cyber-400 font-mono truncate">{img.style}</p>
-                          </div>
-                        </div>
+              <div className="columns-2 sm:columns-4 gap-3">
+                {showcaseImages.map((img, i) => (
+                  <div 
+                    key={i}
+                    className="relative rounded-lg overflow-hidden border border-cyber-700/50 hover:border-cyber-500 transition-all hover:scale-105 hover:z-10 shadow-lg group cursor-pointer mb-3 break-inside-avoid"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                  >
+                    <img 
+                      src={img.src} 
+                      alt={img.title}
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity">
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <p className="text-[10px] text-white font-bold truncate leading-tight">{img.title}</p>
+                        <p className="text-[8px] text-cyber-400 font-mono truncate">{img.style}</p>
                       </div>
-                    ))}
+                    </div>
                   </div>
                 ))}
               </div>
