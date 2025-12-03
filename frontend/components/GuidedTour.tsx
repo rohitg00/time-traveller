@@ -85,8 +85,8 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
         onClick={handleSkip}
       />
       
-      <div className="relative max-w-xl w-full bg-cyber-800 border border-cyber-500 rounded-2xl shadow-[0_0_100px_rgba(14,165,233,0.3)] overflow-hidden animate-[fadeIn_0.3s_ease-out]">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-cyber-900">
+      <div className="relative max-w-xl w-full max-h-[90vh] bg-cyber-800 border border-cyber-500 rounded-2xl shadow-[0_0_100px_rgba(14,165,233,0.3)] overflow-y-auto animate-[fadeIn_0.3s_ease-out]">
+        <div className="sticky top-0 left-0 w-full h-1.5 bg-cyber-900 z-20">
           <div 
             className="h-full bg-gradient-to-r from-cyber-500 to-cyber-400 transition-all duration-500 ease-out"
             style={{ width: `${((currentStep + 1) / tourSteps.length) * 100}%` }}
@@ -95,13 +95,13 @@ export const GuidedTour: React.FC<GuidedTourProps> = ({ onComplete }) => {
 
         <button
           onClick={handleSkip}
-          className="absolute top-4 right-4 p-2 text-slate-500 hover:text-white transition-colors z-10"
+          className="sticky top-2 right-4 float-right p-2 text-slate-500 hover:text-white transition-colors z-20 mr-2"
           aria-label="Skip tour"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="p-6 sm:p-8 pt-10">
+        <div className="p-6 sm:p-8 pt-4">
           <div className="text-center mb-2">
             <span className="text-xs font-mono text-cyber-500 tracking-widest">
               STEP {currentStep + 1} OF {tourSteps.length}
