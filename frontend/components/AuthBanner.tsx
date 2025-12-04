@@ -39,6 +39,12 @@ const showcaseImages = [
 
 const features = [
   { 
+    icon: <Github className="w-6 h-6 text-green-400" />, 
+    title: 'Free Lifetime Access with Your API Key', 
+    desc: '5 free generations included. Add your own Gemini API key in settings for unlimited free use forever. Or clone & self-host - it\'s MIT licensed with no vendor lock-in.',
+    color: 'from-green-500/20 to-emerald-500/20 border-green-500/30'
+  },
+  { 
     icon: <Users className="w-6 h-6 text-pink-400" />, 
     title: 'Group Time Travel', 
     desc: 'Bring the whole crew. Upload up to 14 people, celebrities, or pets to appear together in any historical or futuristic scene.',
@@ -61,12 +67,6 @@ const features = [
     title: 'Pro-Grade Visualization', 
     desc: 'Choose from 14+ distinct art styles including Photorealistic 8K, Cyberpunk, Oil Painting, and Vintage Film. Render in 4K resolution.',
     color: 'from-purple-500/20 to-violet-500/20 border-purple-500/30'
-  },
-  { 
-    icon: <Volume2 className="w-6 h-6 text-yellow-400" />, 
-    title: 'Immersive Audio Guide', 
-    desc: 'Every journey comes with a unique AI-narrated tour guide describing the sights, sounds, and history of your destination.',
-    color: 'from-yellow-500/20 to-orange-500/20 border-yellow-500/30'
   },
   { 
     icon: <Shield className="w-6 h-6 text-sky-400" />, 
@@ -104,9 +104,15 @@ export const AuthBanner: React.FC = () => {
           <div className="grid lg:grid-cols-5 gap-8 lg:gap-12 items-center">
             {/* Left: Text Content (2 cols) */}
             <div className="text-center lg:text-left order-2 lg:order-1 lg:col-span-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-cyber-500/10 border border-cyber-500/30 rounded-full text-cyber-400 text-xs font-mono mb-4">
-                <Sparkles className="w-3 h-3" />
-                FREE TO TRY • POWERED BY GEMINI AI
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-xs font-bold">
+                  <Github className="w-3 h-3" />
+                  100% OPEN SOURCE
+                </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-cyber-500/10 border border-cyber-500/30 rounded-full text-cyber-400 text-xs font-mono">
+                  <Sparkles className="w-3 h-3" />
+                  FREE FOREVER
+                </div>
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
@@ -118,6 +124,19 @@ export const AuthBanner: React.FC = () => {
                 See yourself in ancient Rome, 1920s Paris, or futuristic Tokyo. 
                 AI-powered time travel visualization that puts <strong className="text-white">you</strong> in the scene.
               </p>
+              
+              {/* Open Source Highlight */}
+              <div className="bg-gradient-to-r from-green-500/10 to-cyber-500/10 border border-green-500/30 rounded-xl p-4 mb-6 max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <Github className="w-4 h-4 text-green-400" />
+                  <p className="text-sm text-green-300 font-bold">
+                    100% Open Source • FREE Lifetime Access
+                  </p>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Try free with 5 hosted generations. Then add your own Gemini API key in settings for <strong className="text-green-300">unlimited free use forever</strong>. Or clone & self-host. MIT Licensed.
+                </p>
+              </div>
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-8">
@@ -143,10 +162,16 @@ export const AuthBanner: React.FC = () => {
                 </button>
               </div>
 
-              <p className="text-xs text-slate-500 flex items-center justify-center lg:justify-start gap-2">
-                <Shield className="w-3 h-3 text-green-500" />
-                Your data is private & encrypted. 5 free generations included.
-              </p>
+              <div className="space-y-2">
+                <p className="text-xs text-slate-500 flex items-center justify-center lg:justify-start gap-2">
+                  <Shield className="w-3 h-3 text-green-500" />
+                  Your data is private & encrypted. 5 free generations included.
+                </p>
+                <p className="text-xs text-green-400 flex items-center justify-center lg:justify-start gap-2 font-semibold">
+                  <Sparkles className="w-3 h-3" />
+                  Add your own API key in settings for unlimited lifetime free use
+                </p>
+              </div>
             </div>
 
             {/* Right: Image Showcase (masonry layout) */}
