@@ -18,10 +18,15 @@ function getSupabaseClient(): SupabaseClient {
 const BUCKET_NAME = 'time-traveller-images';
 const AUDIO_BUCKET_NAME = 'time-traveller-audio';
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function uploadImage(
   teleportId: string,
   imageType: 'generated' | 'reference',
-  base64Data: string
+  base64Data: string,
+  maxRetries: number = 3
 ): Promise<string> {
   const client = getSupabaseClient();
   
@@ -30,22 +35,38 @@ export async function uploadImage(
   const timestamp = Date.now();
   const filename = `${teleportId}/${imageType}-${timestamp}.jpg`;
   
-  const { error } = await client.storage
-    .from(BUCKET_NAME)
-    .upload(filename, buffer, {
-      contentType: 'image/jpeg',
-      upsert: true
-    });
+  let lastError: Error | null = null;
   
-  if (error) {
-    throw new Error(`Failed to upload image: ${error.message}`);
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const { error } = await client.storage
+        .from(BUCKET_NAME)
+        .upload(filename, buffer, {
+          contentType: 'image/jpeg',
+          upsert: true
+        });
+      
+      if (error) {
+        throw new Error(`Supabase error: ${error.message}`);
+      }
+      
+      const { data: urlData } = client.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(filename);
+      
+      return urlData.publicUrl;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error('Unknown error');
+      
+      if (attempt < maxRetries) {
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = Math.pow(2, attempt - 1) * 1000;
+        await sleep(delay);
+      }
+    }
   }
   
-  const { data: urlData } = client.storage
-    .from(BUCKET_NAME)
-    .getPublicUrl(filename);
-  
-  return urlData.publicUrl;
+  throw new Error(`Failed to upload image after ${maxRetries} attempts: ${lastError?.message}`);
 }
 
 export async function uploadReferenceImage(
@@ -82,7 +103,8 @@ export async function deleteImages(teleportId: string): Promise<void> {
 
 export async function uploadAudio(
   teleportId: string,
-  base64Data: string
+  base64Data: string,
+  maxRetries: number = 3
 ): Promise<string> {
   const client = getSupabaseClient();
   
@@ -90,34 +112,50 @@ export async function uploadAudio(
   const timestamp = Date.now();
   const filename = `${teleportId}/audio-${timestamp}.wav`;
   
-  const { error } = await client.storage
-    .from(AUDIO_BUCKET_NAME)
-    .upload(filename, buffer, {
-      contentType: 'audio/wav',
-      upsert: true
-    });
+  let lastError: Error | null = null;
   
-  if (error) {
-    throw new Error(`Failed to upload audio: ${error.message}`);
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const { error } = await client.storage
+        .from(AUDIO_BUCKET_NAME)
+        .upload(filename, buffer, {
+          contentType: 'audio/wav',
+          upsert: true
+        });
+      
+      if (error) {
+        throw new Error(`Supabase error: ${error.message}`);
+      }
+      
+      const { data: urlData } = client.storage
+        .from(AUDIO_BUCKET_NAME)
+        .getPublicUrl(filename);
+      
+      const audioUrl = urlData.publicUrl;
+      
+      const { error: dbError } = await client
+        .from('teleport_audio')
+        .upsert({
+          teleport_id: teleportId,
+          audio_url: audioUrl
+        });
+      
+      if (dbError) {
+        console.warn('Failed to store audio URL in database:', dbError.message);
+      }
+      
+      return audioUrl;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error('Unknown error');
+      
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt - 1) * 1000;
+        await sleep(delay);
+      }
+    }
   }
   
-  const { data: urlData } = client.storage
-    .from(AUDIO_BUCKET_NAME)
-    .getPublicUrl(filename);
-  
-  const audioUrl = urlData.publicUrl;
-  
-  const { error: dbError } = await client
-    .from('teleport_audio')
-    .upsert({
-      teleport_id: teleportId,
-      audio_url: audioUrl
-    });
-  
-  if (dbError) {
-  }
-  
-  return audioUrl;
+  throw new Error(`Failed to upload audio after ${maxRetries} attempts: ${lastError?.message}`);
 }
 
 export async function getAudioUrl(teleportId: string): Promise<string | null> {

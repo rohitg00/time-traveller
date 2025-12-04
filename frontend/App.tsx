@@ -441,7 +441,7 @@ const AppContent: React.FC = () => {
               </div>
               <h2 className="text-2xl font-bold text-white mb-2 font-mono">SECURITY CLEARANCE REQUIRED</h2>
               <p className="text-slate-400 mb-8 leading-relaxed">
-                To access the <b>Gemini 3 Pro</b> temporal displacement engine, you must verify your identity with a secure API Key.
+                To access <b>Gemini 3 Pro</b> AI time travel, you must verify your identity with a secure API Key.
               </p>
               
               <button 

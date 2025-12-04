@@ -17,24 +17,20 @@ export const Header: React.FC = () => {
              </div>
           </div>
           
-          {/* Title - responsive text */}
+          {/* Title - compact responsive text */}
           <div className="flex flex-col min-w-0">
-            <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black tracking-tighter text-white font-mono italic transform -skew-x-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] whitespace-nowrap">
-              {/* Full title on sm+ screens */}
+            <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-black tracking-tight text-white font-mono italic transform -skew-x-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] whitespace-nowrap">
               <span className="hidden sm:inline">TIME </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-400 via-cyan-300 to-cyber-accent animate-pulse">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-400 via-cyan-300 to-cyber-accent">
                 <span className="hidden sm:inline">TRAVELLER</span>
-                {/* Short version on mobile */}
-                <span className="sm:hidden">TIME TRAVELLER</span>
+                <span className="sm:hidden">TT</span>
               </span>
             </h1>
             {/* Subtitle - hidden on mobile */}
-            <div className="hidden md:flex items-center gap-1 lg:gap-2 mt-0.5 lg:mt-1">
-              <div className="h-[1px] w-4 lg:w-8 bg-cyber-500/50"></div>
-              <p className="text-[8px] lg:text-[10px] text-cyber-400 tracking-[0.15em] lg:tracking-[0.25em] font-mono uppercase font-bold text-shadow-glow truncate">
-                TEMPORAL DISPLACEMENT ENGINE
+            <div className="hidden md:flex items-center gap-1 mt-0.5">
+              <p className="text-[8px] lg:text-[9px] text-cyber-400/80 tracking-[0.1em] font-mono uppercase font-medium truncate">
+                Visit Any Place • Any Era
               </p>
-              <div className="h-[1px] w-4 lg:w-8 bg-cyber-500/50"></div>
             </div>
           </div>
         </div>
