@@ -6,7 +6,17 @@ export const teleportProgressSchema = z.object({
   destination: z.string(),
   era: z.string(),
   style: z.string(),
-  status: z.enum(['initiating', 'generating-image', 'generating-details', 'synthesizing-audio', 'completed', 'error']),
+  status: z.enum([
+    'initiated',
+    'generating-image',
+    'rendering-image',
+    'uploading-image',
+    'image-generated',
+    'generating-details',
+    'synthesizing-speech',
+    'completed',
+    'error'
+  ]),
   progress: z.number().min(0).max(100),
   imageData: z.string().optional(),
   imageUrl: z.string().optional(),

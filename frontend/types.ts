@@ -92,5 +92,7 @@ export enum LocationStyle {
   WEATHER_REALTIME = 'Real-time Weather',
   LIGHT_LEAK = 'Light Leak/Retro Fail',
   HYPER_CANDID = 'Hyper-Realistic Candid',
+  PHOTO_RESTORATION = 'Photo Restoration',
+  PIXAR_3D = 'Pixar 3D Style',
 }
 

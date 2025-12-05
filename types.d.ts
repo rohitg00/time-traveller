@@ -8,7 +8,7 @@ import { EventHandler, ApiRouteHandler, ApiResponse, MotiaStream, CronHandler } 
 
 declare module 'motia' {
   interface FlowContextStateStreams {
-    'teleportProgress': MotiaStream<{ id: string; destination: string; era: string; style: string; status: 'initiating' | 'generating-image' | 'generating-details' | 'synthesizing-audio' | 'completed' | 'error'; progress: number; imageData?: string; imageUrl?: string; description?: string; mapsUri?: string; referenceImageUrl?: string; usedStreetView?: boolean; error?: string; timestamp: number }>
+    'teleportProgress': MotiaStream<{ id: string; destination: string; era: string; style: string; status: 'initiated' | 'generating-image' | 'rendering-image' | 'uploading-image' | 'image-generated' | 'generating-details' | 'synthesizing-speech' | 'completed' | 'error'; progress: number; imageData?: string; imageUrl?: string; description?: string; mapsUri?: string; referenceImageUrl?: string; usedStreetView?: boolean; error?: string; timestamp: number }>
   }
 
   interface Handlers {

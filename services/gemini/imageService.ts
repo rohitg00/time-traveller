@@ -158,6 +158,52 @@ Subject treatment: If a person is provided, capture them in a natural, unposed m
 Environment: Integrate the subject naturally into the location's environment with realistic props and context.
 Style: The image should feel like a genuine moment captured by a skilled street photographer - charming, raw, youthful, and candid. Natural skin texture with soft glow, no heavy makeup or artificial posing.
 Negative: Avoid stiff poses, fake smiles, distorted features, blur, or low resolution.`,
+
+    'Photo Restoration': `Restore and enhance this damaged photo to a hyper-realistic, ultra-detailed image, 16K DSLR quality. 
+RESTORATION TASKS:
+1. Fix all scratches, tears, creases, and physical damage
+2. Remove noise, grain, and blurriness completely
+3. Enhance colors to vivid, vibrant tones while keeping natural skin tones
+4. Perfectly sharpen details in face, eyes, hair, and clothing
+5. Add realistic lighting, shadows, and depth of field
+6. Apply Photoshop-level professional retouching
+
+OUTPUT SPECS:
+- High dynamic range (HDR)
+- Ultra-HD resolution with lifelike textures
+- Cinematic finish with crisp, clean background
+- Fully restored and enhanced version of the original photo
+- Preserve the original composition and subjects exactly
+- Natural color correction without over-saturation`,
+
+    'Pixar 3D Style': `Ultra HD 4K Pixar-style 3D portrait. Transform the subjects into charming, expressive Pixar/Disney-style 3D animated characters.
+
+CHARACTER DESIGN:
+- Exaggerated but appealing cartoon proportions
+- Large expressive eyes with realistic reflections and catchlights
+- Smooth, stylized skin with subtle subsurface scattering
+- Detailed hair with individual strand rendering in Pixar style
+- Clothing with realistic fabric physics and textures
+
+SCENE COMPOSITION:
+- Warm, cinematic lighting with soft shadows
+- Vibrant, saturated color palette
+- Detailed 3D environment matching ${coordStr}
+- Atmospheric effects (golden hour glow, ambient occlusion)
+- Professional camera angle with slight tilt for dynamic feel
+
+EXPRESSION & POSE:
+- Capture genuine emotion and personality
+- Natural, candid body language
+- Exaggerated cartoon-like expressions that feel authentic
+- Interactive poses if multiple subjects (looking at each other, laughing together)
+
+TECHNICAL:
+- Pixar/Illumination Studios quality rendering
+- Smooth 3D surfaces with proper topology
+- Ray-traced global illumination
+- Depth of field with bokeh
+- No uncanny valley - fully stylized 3D aesthetic`,
   };
   
   return stylePrompts[style] || '';

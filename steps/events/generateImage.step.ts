@@ -137,6 +137,17 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       hasReferenceImageBase64: !!referenceImageBase64
     });
     
+    // Update progress: Starting AI generation
+    await streams.teleportProgress.set('active', teleportId, {
+      id: teleportId,
+      destination,
+      era,
+      style,
+      status: 'rendering-image',
+      progress: 40,
+      timestamp: Date.now()
+    });
+    
     const result = await generateImage(
       destination, 
       era, 
@@ -154,6 +165,17 @@ export const handler: Handlers['GenerateImage'] = async (input, { emit, logger, 
       teleportId, 
       usedStreetView: result.usedStreetView,
       hasFallbackMessage: !!result.fallbackMessage 
+    });
+    
+    // Update progress: Image rendered, now uploading
+    await streams.teleportProgress.set('active', teleportId, {
+      id: teleportId,
+      destination,
+      era,
+      style,
+      status: 'uploading-image',
+      progress: 50,
+      timestamp: Date.now()
     });
     
     let imageUrl: string;

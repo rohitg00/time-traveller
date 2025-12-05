@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { LogIn, Shield, Lock, Github, Sparkles, MapPin, Clock, Camera, Rocket, Globe, Palette, Volume2, Users, Terminal, Cloud } from 'lucide-react';
+import { LogIn, Shield, Lock, Github, Sparkles, MapPin, Clock, Camera, Rocket, Globe, Palette, Volume2, Users, Terminal, Cloud, Wand2, Box } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 // Import showcase images - diverse styles & capabilities
@@ -39,10 +39,16 @@ const showcaseImages = [
 
 const features = [
   { 
-    icon: <Github className="w-6 h-6 text-green-400" />, 
-    title: 'Free Lifetime Access with Your API Key', 
-    desc: '5 free generations included. Add your own Gemini API key in settings for unlimited free use forever. Or clone & self-host - it\'s MIT licensed with no vendor lock-in.',
-    color: 'from-green-500/20 to-emerald-500/20 border-green-500/30'
+    icon: <Wand2 className="w-6 h-6 text-amber-400" />, 
+    title: 'Photo Restoration', 
+    desc: 'Breathe new life into old, damaged photos. AI repairs scratches, tears, and fading while enhancing to 16K DSLR quality with vivid colors.',
+    color: 'from-amber-500/20 to-orange-500/20 border-amber-500/30'
+  },
+  { 
+    icon: <Box className="w-6 h-6 text-cyan-400" />, 
+    title: 'Pixar 3D Style', 
+    desc: 'Transform yourself or groups into charming Pixar/Disney-style 3D characters with expressive faces, cinematic lighting, and vibrant scenes.',
+    color: 'from-cyan-500/20 to-teal-500/20 border-cyan-500/30'
   },
   { 
     icon: <Users className="w-6 h-6 text-pink-400" />, 
@@ -51,28 +57,22 @@ const features = [
     color: 'from-pink-500/20 to-rose-500/20 border-pink-500/30'
   },
   { 
+    icon: <Palette className="w-6 h-6 text-purple-400" />, 
+    title: '16+ Art Styles', 
+    desc: 'Photorealistic 8K, Cyberpunk, Oil Painting, Vintage Film, Photo Book, Cinematic Grid, CCTV, Aerial Drone, and more. Render up to 4K.',
+    color: 'from-purple-500/20 to-violet-500/20 border-purple-500/30'
+  },
+  { 
     icon: <Terminal className="w-6 h-6 text-green-400" />, 
     title: 'Natural Language Terminal', 
     desc: 'Navigate spacetime with conversation. Simply type "Take us to Paris in 1920" and the AI interprets your intent instantly.',
     color: 'from-green-500/20 to-emerald-500/20 border-green-500/30'
   },
   { 
-    icon: <MapPin className="w-6 h-6 text-blue-400" />, 
-    title: 'Orbital Intelligence', 
-    desc: 'Interactive 3D globe with real-time location data. Scout destinations with live weather, air quality, and landmark info before you jump.',
-    color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/30'
-  },
-  { 
-    icon: <Palette className="w-6 h-6 text-purple-400" />, 
-    title: 'Pro-Grade Visualization', 
-    desc: 'Choose from 14+ distinct art styles including Photorealistic 8K, Cyberpunk, Oil Painting, and Vintage Film. Render in 4K resolution.',
-    color: 'from-purple-500/20 to-violet-500/20 border-purple-500/30'
-  },
-  { 
-    icon: <Shield className="w-6 h-6 text-sky-400" />, 
-    title: 'Secure & Private', 
-    desc: 'Your history is yours alone. Enterprise-grade encryption ensures your personal photos and generated timelines remain completely private.',
-    color: 'from-sky-500/20 to-indigo-500/20 border-sky-500/30'
+    icon: <Github className="w-6 h-6 text-slate-300" />, 
+    title: '100% Open Source', 
+    desc: '5 free hosted generations, then add your own Gemini API key for unlimited free use. Or clone & self-host - MIT licensed, no lock-in.',
+    color: 'from-slate-500/20 to-gray-500/20 border-slate-500/30'
   },
 ];
 

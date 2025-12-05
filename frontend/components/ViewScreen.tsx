@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TeleportState, TravelLogItem, getImageSrc } from '../types';
 import { Volume2, Loader2, VolumeX, Map, ExternalLink, Scan, Sparkles, Camera, AlertTriangle, Download } from 'lucide-react';
 
@@ -8,9 +8,93 @@ interface ViewScreenProps {
   onPlayAudio: () => void;
   onStopAudio: () => void;
   isAudioPlaying: boolean;
+  progress?: number;
+  progressStatus?: string;
 }
 
-export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, onStopAudio, isAudioPlaying }) => {
+// Status messages that cycle during loading for a realistic feel
+const loadingMessages = [
+  'Initializing temporal coordinates...',
+  'Calibrating quantum flux capacitor...',
+  'Scanning historical databases...',
+  'Generating visual matrix...',
+  'Rendering spacetime image...',
+  'Processing temporal data...',
+  'Stabilizing wormhole connection...',
+  'Decoding spatial frequencies...',
+  'Mapping chronological pathways...',
+  'Finalizing molecular reconstruction...',
+];
+
+export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, onStopAudio, isAudioPlaying, progress = 0, progressStatus }) => {
+  // Animated progress that smoothly increases from 0 to 95%
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  const [messageIndex, setMessageIndex] = useState(0);
+  const animationRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const isCompletedRef = useRef(false);
+
+  // Start animation when teleporting begins
+  useEffect(() => {
+    if (state === 'teleporting') {
+      // Reset on new teleport
+      startTimeRef.current = Date.now();
+      isCompletedRef.current = false;
+      setAnimatedProgress(0);
+      
+      const animate = () => {
+        // Stop if completed
+        if (isCompletedRef.current) return;
+        
+        const elapsed = Date.now() - startTimeRef.current;
+        const duration = 35000; // 35 seconds to reach 95%
+        
+        // Smooth easing - starts fast, slows down near the end
+        const t = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 2); // ease-out quadratic
+        const targetProgress = eased * 95;
+        
+        setAnimatedProgress(targetProgress);
+        
+        if (t < 1) {
+          animationRef.current = requestAnimationFrame(animate);
+        }
+      };
+      
+      animationRef.current = requestAnimationFrame(animate);
+      
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    } else {
+      // Reset when not teleporting
+      setAnimatedProgress(0);
+      isCompletedRef.current = false;
+    }
+  }, [state]); // Only depend on state, not progress
+
+  // Jump to 100% when completed
+  useEffect(() => {
+    if (progress >= 100 && state === 'teleporting') {
+      isCompletedRef.current = true;
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      setAnimatedProgress(100);
+    }
+  }, [progress, state]);
+
+  // Cycle through messages
+  useEffect(() => {
+    if (state === 'teleporting') {
+      const interval = setInterval(() => {
+        setMessageIndex(prev => (prev + 1) % loadingMessages.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [state]);
   const handleDownloadImage = async () => {
     if (!location?.imageData) return;
     
@@ -86,25 +170,103 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
   }
 
   if (state === 'teleporting') {
+    const displayProgress = Math.max(5, Math.min(animatedProgress, 100)); // Use animated progress
+    const currentMessage = progressStatus || loadingMessages[messageIndex];
+    
     return (
       <div className="flex-1 bg-black rounded-xl border border-cyber-500 shadow-[0_0_50px_rgba(14,165,233,0.3)] flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
+        {/* Animated background effects */}
         <div className="absolute inset-0 flex items-center justify-center">
-           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent animate-pulse"></div>
+           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-cyber-500/20 via-transparent to-transparent animate-pulse"></div>
            <div className="w-[1px] h-[1px] bg-white shadow-[0_0_100px_2px_white] animate-[ping_0.2s_linear_infinite]"></div>
         </div>
         
-        <div className="z-10 text-center relative bg-black/40 backdrop-blur-sm p-8 rounded-2xl border border-cyber-500/30">
+        {/* Scanning lines effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(14,165,233,0.03)_2px,rgba(14,165,233,0.03)_4px)]"></div>
+          <div 
+            className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyber-400 to-transparent opacity-60"
+            style={{ 
+              animation: 'scan-line 3s linear infinite'
+            }}
+          ></div>
+        </div>
+        
+        <div className="z-10 text-center relative bg-black/60 backdrop-blur-md p-8 rounded-2xl border border-cyber-500/50 shadow-[0_0_30px_rgba(14,165,233,0.2)] max-w-md w-full mx-4">
+          {/* Spinner with progress ring */}
           <div className="relative mb-6 inline-block">
-             <Loader2 className="w-16 h-16 text-cyber-400 animate-spin" />
-             <div className="absolute inset-0 w-16 h-16 border-t-4 border-cyber-500 rounded-full animate-spin"></div>
+            <svg className="w-24 h-24 transform -rotate-90">
+              {/* Background circle */}
+              <circle
+                cx="48"
+                cy="48"
+                r="42"
+                fill="none"
+                stroke="rgba(14,165,233,0.15)"
+                strokeWidth="6"
+              />
+              {/* Progress circle */}
+              <circle
+                cx="48"
+                cy="48"
+                r="42"
+                fill="none"
+                stroke="url(#progressGradient)"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 42}`}
+                strokeDashoffset={`${2 * Math.PI * 42 * (1 - displayProgress / 100)}`}
+                style={{ transition: 'stroke-dashoffset 0.3s ease-out' }}
+              />
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#0ea5e9" />
+                  <stop offset="50%" stopColor="#22d3ee" />
+                  <stop offset="100%" stopColor="#a855f7" />
+                </linearGradient>
+              </defs>
+            </svg>
+            {/* Center percentage */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyber-400 to-cyan-300 font-mono tabular-nums">
+                {Math.round(displayProgress)}%
+              </span>
+            </div>
           </div>
-          <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-cyber-400 tracking-widest font-mono animate-pulse mb-2">
+          
+          <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyber-300 to-cyber-400 tracking-widest font-mono mb-4">
             TRAVERSING SPACETIME
           </h2>
-          <div className="h-1 w-48 bg-cyber-900 rounded-full mx-auto overflow-hidden">
-            <div className="h-full bg-cyber-500 animate-[scan_1s_linear_infinite]"></div>
+          
+          {/* Smooth progress bar - no dots */}
+          <div className="relative mb-4">
+            <div className="h-3 bg-cyber-900/80 rounded-full overflow-hidden border border-cyber-700/50">
+              <div 
+                className="h-full bg-gradient-to-r from-cyber-600 via-cyber-400 to-purple-500 rounded-full relative"
+                style={{ 
+                  width: `${displayProgress}%`,
+                  transition: 'width 0.3s ease-out'
+                }}
+              >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shimmer_1.5s_infinite]"></div>
+                {/* Glow at the tip */}
+                <div className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white/60 to-transparent rounded-full"></div>
+              </div>
+            </div>
+            
           </div>
-          <p className="text-cyber-400 mt-3 font-mono text-xs uppercase tracking-widest">Reconstructing molecular data...</p>
+          
+          {/* Status text with fade transition */}
+          <p className="text-cyber-400 font-mono text-sm uppercase tracking-widest min-h-[1.5rem] transition-opacity duration-500">
+            {currentMessage}
+          </p>
+          
+          {/* Live indicator */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
+            <span className="text-green-400 text-[10px] font-mono tracking-wider">LIVE STREAM ACTIVE</span>
+          </div>
         </div>
       </div>
     );

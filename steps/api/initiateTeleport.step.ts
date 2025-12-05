@@ -129,7 +129,7 @@ export const handler: Handlers['InitiateTeleport'] = async (req, { emit, logger,
       destination,
       era,
       style,
-      status: 'initiating',
+      status: 'initiated',
       progress: 10,
       timestamp: Date.now()
     });

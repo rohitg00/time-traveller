@@ -23,6 +23,8 @@ const getStyleDescription = (style: string): string => {
     [LocationStyle.WEATHER_REALTIME]: 'Matches real-time local weather and time of day',
     [LocationStyle.LIGHT_LEAK]: 'Retro failed photo with light leaks and blur',
     [LocationStyle.HYPER_CANDID]: 'Ultra-realistic candid street photography, 8K raw style',
+    [LocationStyle.PHOTO_RESTORATION]: 'Restore & enhance old/damaged photos to 16K quality',
+    [LocationStyle.PIXAR_3D]: 'Pixar-style 3D cartoon portrait with expressive characters',
   };
   return descriptions[style] || style;
 };

@@ -35,7 +35,7 @@ export async function parseTravelCommand(
             reply: { type: Type.STRING, description: "A short, robotic, sci-fi confirmation message or a conversational reply if not jumping." },
             destination: { type: Type.STRING },
             era: { type: Type.STRING },
-            style: { type: Type.STRING, description: "One of: Photorealistic, Cyberpunk/Sci-Fi, Vintage Film, Oil Painting, Surrealist Dream" },
+            style: { type: Type.STRING, description: "One of: Photorealistic, Cyberpunk/Sci-Fi, Vintage Film, Oil Painting, Surrealist Dream, Photo Restoration, Pixar 3D Style, Photo Book, Cinematic 9-Shot Grid, 3x3 Expression Grid, CCTV Surveillance, Aerial/Drone View, Real-time Weather, Light Leak/Retro Fail, Hyper-Realistic Candid, Disposable Camera" },
           },
           required: ["isJump", "reply"]
         }

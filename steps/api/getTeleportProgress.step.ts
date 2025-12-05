@@ -36,15 +36,23 @@ export const handler: Handlers['GetTeleportProgress'] = async (req, { logger, st
     const progress = await streams.teleportProgress.get('active', teleportId);
     
     if (!progress) {
+      logger.warn('Teleport progress not found in stream', { traceId, teleportId });
       return {
         status: 404,
         body: { error: 'Teleport not found' }
       };
     }
     
+    logger.info('Teleport progress found', { 
+      traceId, 
+      teleportId, 
+      status: progress.status,
+      progressValue: progress.progress
+    });
+    
     return {
       status: 200,
-      body: progress.data
+      body: progress  // Stream data is directly on the object
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch progress';

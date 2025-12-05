@@ -101,7 +101,7 @@ export interface TeleportProgress {
   destination: string;
   era: string;
   style: string;
-  status: 'initiating' | 'generating-image' | 'generating-details' | 'synthesizing-audio' | 'completed' | 'error';
+  status: 'pending' | 'initiated' | 'generating-image' | 'rendering-image' | 'uploading-image' | 'image-generated' | 'generating-details' | 'synthesizing-speech' | 'completed' | 'error';
   progress: number;
   imageUrl?: string;
   imageData?: string;
@@ -152,14 +152,54 @@ export async function initiateTeleport(request: TeleportRequest): Promise<Telepo
 }
 
 export async function getTeleportProgress(teleportId: string): Promise<TeleportProgress> {
-  const response = await fetch(`${API_BASE_URL}/teleport/${teleportId}`);
+  const response = await fetch(`${API_BASE_URL}/teleport/${teleportId}`, {
+    headers: getAuthHeaders(),
+  });
 
+  // Get response text first to handle empty responses
+  const text = await response.text();
+  
+  // On 404, return null to indicate "not found yet" - don't reset progress
+  if (response.status === 404) {
+    return {
+      id: teleportId,
+      status: 'pending',
+      progress: -1, // Signal to keep existing progress
+      destination: '',
+      era: '',
+      style: '',
+      timestamp: Date.now(),
+    } as TeleportProgress;
+  }
+  
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to get teleport progress');
+    // Try to parse error, fallback to status text
+    try {
+      const error = text ? JSON.parse(text) : {};
+      throw new Error(error.error || `Failed to get progress: ${response.status}`);
+    } catch {
+      throw new Error(`Failed to get progress: ${response.status} ${response.statusText}`);
+    }
   }
 
-  return response.json();
+  // Handle empty response - return pending with -1 progress to keep existing
+  if (!text || text.trim() === '') {
+    return {
+      id: teleportId,
+      status: 'pending',
+      progress: -1, // Signal to keep existing progress
+      destination: '',
+      era: '',
+      style: '',
+      timestamp: Date.now(),
+    } as TeleportProgress;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('Invalid response format from server');
+  }
 }
 
 export async function getHistory(limit: number = 100): Promise<HistoryItem[]> {

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { TeleportState, TravelLogItem, ReferenceImage } from './types';
 import * as api from './apiClient';
@@ -35,6 +35,14 @@ const AppContent: React.FC = () => {
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   const [weatherCondition, setWeatherCondition] = useState<string | undefined>(undefined);
   const [showTour, setShowTour] = useState<boolean>(false);
+  
+  // Ref to track teleporting state for closures (avoids stale closure bug)
+  const isTeleportingRef = useRef(false);
+  
+  // Real-time progress tracking from Motia streams
+  const [teleportProgress, setTeleportProgress] = useState<number>(0);
+  const [progressStatus, setProgressStatus] = useState<string>('');
+  
   const [showTerms, setShowTerms] = useState<boolean>(false);
   const [showApiKeyModal, setShowApiKeyModal] = useState<boolean>(false);
   const [generationsUsed, setGenerationsUsed] = useState<number>(0);
@@ -170,6 +178,9 @@ const AppContent: React.FC = () => {
     }
 
     setTeleportState('teleporting');
+    isTeleportingRef.current = true;
+    setTeleportProgress(0);
+    setProgressStatus('Initiating temporal jump...');
     setError(null);
     setIsAudioPlaying(false);
     
@@ -205,12 +216,44 @@ const AppContent: React.FC = () => {
       });
 
       const teleportId = response.teleportId;
+      let hasCompleted = false;
+      
+      // Mark as completed to prevent duplicate state updates
+      const markComplete = () => {
+        hasCompleted = true;
+        isTeleportingRef.current = false;
+      };
 
       const unsubscribe = api.subscribeTeleportProgress(
         teleportId,
         (progress) => {
+          if (hasCompleted) return;
+          
+          // Update real-time progress from Motia stream (only if valid, -1 means keep existing)
+          if (typeof progress.progress === 'number' && progress.progress >= 0) {
+            setTeleportProgress(progress.progress);
+          }
+          // Only update status if we have valid progress (not -1 which means "keep existing")
+          if (progress.status && progress.progress >= 0) {
+            // Map status to user-friendly message
+            const statusMessages: Record<string, string> = {
+              'pending': 'Preparing temporal jump...',
+              'initiated': 'Initiating temporal coordinates...',
+              'generating-image': 'Calibrating quantum flux...',
+              'rendering-image': 'Rendering spacetime image...',
+              'uploading-image': 'Storing visual data...',
+              'image-generated': 'Image captured successfully...',
+              'generating-details': 'Analyzing location data...',
+              'synthesizing-speech': 'Generating audio narration...',
+              'completed': 'Teleportation complete!',
+            };
+            setProgressStatus(statusMessages[progress.status] || progress.status);
+          }
+          
           const imageSource = progress.imageUrl || progress.imageData;
           if (progress.status === 'completed' && imageSource && progress.description) {
+            markComplete();
+            setTeleportProgress(100);
             const newItem: TravelLogItem = {
               id: progress.id,
               destination: progress.destination,
@@ -230,23 +273,41 @@ const AppContent: React.FC = () => {
             incrementGenerationCount();
             unsubscribe();
           } else if (progress.status === 'error') {
+            markComplete();
             setError(progress.error || "Teleportation malfunction.");
             setTeleportState('error');
             unsubscribe();
           }
         },
         () => {
-          pollTeleportProgress(teleportId, referenceImage);
+          // SSE error - fallback to polling
+          if (!hasCompleted) {
+            pollTeleportProgress(teleportId, referenceImage);
+          }
         }
       );
 
+      // Fallback: Start polling after 3s if SSE hasn't delivered updates
+      // Uses ref to avoid stale closure bug
       setTimeout(() => {
-        if (teleportState === 'teleporting') {
+        if (isTeleportingRef.current && !hasCompleted) {
+          console.log('[Teleport] SSE fallback - starting polling');
           pollTeleportProgress(teleportId, referenceImage);
         }
       }, 3000);
+      
+      // Hard timeout: If still loading after 90s, show error
+      setTimeout(() => {
+        if (isTeleportingRef.current && !hasCompleted) {
+          markComplete();
+          setError("Generation timeout. The image may still be processing - check your history in a moment.");
+          setTeleportState('error');
+          unsubscribe();
+        }
+      }, 90000);
 
     } catch (err: unknown) {
+      isTeleportingRef.current = false;
       const message = err instanceof Error ? err.message : 'Unknown error';
       
       if (message.includes('sign in')) {
@@ -266,14 +327,53 @@ const AppContent: React.FC = () => {
   };
 
   const pollTeleportProgress = async (teleportId: string, referenceImage?: string) => {
+    // Skip if already completed (prevents duplicate processing)
+    if (!isTeleportingRef.current) return;
+    
     const maxAttempts = 60;
     let attempts = 0;
 
     const poll = async () => {
+      // Check if already completed before each poll
+      if (!isTeleportingRef.current) return;
+      
       try {
         const progress = await api.getTeleportProgress(teleportId);
+        
+        // Debug: Log what we're receiving (expand nested object)
+        console.log('[Poll] Progress response:', JSON.stringify({ 
+          status: progress.status, 
+          progress: progress.progress,
+          hasImage: !!(progress.imageUrl || progress.imageData)
+        }));
+        
+        // Update progress from polling response (only if valid, -1 means keep existing)
+        if (typeof progress.progress === 'number' && progress.progress >= 0) {
+          setTeleportProgress((prev) => {
+            console.log(`[Poll] Progress: ${prev} -> ${progress.progress}`);
+            return progress.progress;
+          });
+        }
+        // Only update status if we have valid progress (not -1 which means "keep existing")
+        if (progress.status && progress.progress >= 0) {
+          const statusMessages: Record<string, string> = {
+            'pending': 'Preparing temporal jump...',
+            'initiated': 'Initiating temporal coordinates...',
+            'generating-image': 'Calibrating quantum flux...',
+            'rendering-image': 'Rendering spacetime image...',
+            'uploading-image': 'Storing visual data...',
+            'image-generated': 'Image captured successfully...',
+            'generating-details': 'Analyzing location data...',
+            'synthesizing-speech': 'Generating audio narration...',
+            'completed': 'Teleportation complete!',
+          };
+          setProgressStatus(statusMessages[progress.status] || progress.status);
+        }
+        
         const imageSource = progress.imageUrl || progress.imageData;
         if (progress.status === 'completed' && imageSource && progress.description) {
+          isTeleportingRef.current = false;
+          setTeleportProgress(100);
           const newItem: TravelLogItem = {
             id: progress.id,
             destination: progress.destination,
@@ -293,6 +393,7 @@ const AppContent: React.FC = () => {
           incrementGenerationCount();
           return;
         } else if (progress.status === 'error') {
+          isTeleportingRef.current = false;
           setError(progress.error || "Teleportation malfunction.");
           setTeleportState('error');
           return;
@@ -302,10 +403,12 @@ const AppContent: React.FC = () => {
           attempts++;
           setTimeout(poll, 1000);
         } else {
+          isTeleportingRef.current = false;
           setError("Teleportation timeout. Please try again.");
           setTeleportState('error');
         }
       } catch (err: unknown) {
+        isTeleportingRef.current = false;
         const message = err instanceof Error ? err.message : 'Unknown error';
         setError(message);
         setTeleportState('error');
@@ -498,6 +601,8 @@ const AppContent: React.FC = () => {
                 onPlayAudio={handlePlayAudio}
                 onStopAudio={handleStopAudio}
                 isAudioPlaying={isAudioPlaying}
+                progress={teleportProgress}
+                progressStatus={progressStatus}
               />
             </div>
           </div>
