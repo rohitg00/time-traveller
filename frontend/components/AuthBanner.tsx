@@ -8,6 +8,7 @@ import { LogIn, Shield, Lock, Github, Sparkles, MapPin, Clock, Camera, Rocket, G
 import { useAuth } from '../contexts/AuthContext';
 
 // Import showcase images - diverse styles & capabilities
+import showcaseMagazine from '../assets/showcase/female-magazine-cover.png';
 import showcaseGrid from '../assets/showcase/venice-cinematic-grid.png';
 import showcaseBook from '../assets/showcase/paris-photobook.png';
 import showcaseCeleb from '../assets/showcase/celeb-greece.jpg';
@@ -23,6 +24,7 @@ import showcaseSamurai from '../assets/showcase/male-ancient-samurai.png';
 
 // Showcase images ordered for balanced masonry layout
 const showcaseImages = [
+  { src: showcaseMagazine, title: 'Santorini Cover', style: 'Magazine Style' },
   { src: showcaseSeoul, title: 'Seoul Night', style: 'Street Food Candid' },
   { src: showcaseKyoto, title: 'Kyoto Temple', style: 'Traditional' },
   { src: showcaseMars, title: 'Mars Colony', style: 'Sci-Fi 2150' },

@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { OptimizedImage } from './OptimizedImage';
+
+// Static imports for Vite asset handling (hashed URLs, optimization)
+// But we'll use lazy loading to prevent all images from loading at once
 
 // Selected showcase images (6 curated)
 import venetianMasquerade from '../assets/showcase/venetian-masquerade-painting.png';
@@ -9,6 +13,7 @@ import midnightTokyoGrid from '../assets/showcase/midnight-tokyo-hotel-grid.png'
 import marsColonyCyberpunk from '../assets/showcase/mars-colony-cyberpunk.png';
 
 // Male showcase images
+import maleMagazineCover from '../assets/showcase/male-magazine-cover.png';
 import maleTokyoRamen from '../assets/showcase/male-tokyo-ramen-night.png';
 import maleSeoulStreetFood from '../assets/showcase/male-seoul-street-food.png';
 import maleCyberpunkTokyo from '../assets/showcase/male-cyberpunk-tokyo.png';
@@ -20,7 +25,8 @@ import maleMidnightHotel from '../assets/showcase/male-midnight-hotel-grid.png';
 import maleFloatingLibrary from '../assets/showcase/male-floating-library.png';
 import maleAncientSamurai from '../assets/showcase/male-ancient-samurai.png';
 
-// Female showcase images (3x3 grid girl)
+// Female showcase images
+import femaleMagazineCover from '../assets/showcase/female-magazine-cover.png';
 import femaleTokyoRamen from '../assets/showcase/female-tokyo-ramen-night.png';
 import femaleSeoulStreetFood from '../assets/showcase/female-seoul-street-food.png';
 import femaleCyberpunkTokyo from '../assets/showcase/female-cyberpunk-tokyo.png';
@@ -40,11 +46,10 @@ interface GalleryImage {
 
 // Left gallery: Curated showcase + Male images
 const leftGalleryImages: GalleryImage[] = [
-  // Curated showcase images
   { src: venetianMasquerade, title: 'Masquerade 🎭', style: 'Oil Painting', location: 'Venice 1700s' },
   { src: veniceCinematicGrid, title: 'Venice Grid', style: 'Cinematic 9-Shot', location: 'Venice' },
   { src: summerBeachGrid, title: '青い夏 Beach', style: 'Cinematic Grid', location: 'Japanese Beach' },
-  // Male showcase images
+  { src: maleMagazineCover, title: 'Magazine Cover 📖', style: 'Photo Book', location: 'Kyoto' },
   { src: maleTokyoRamen, title: 'Ramen Night 🍜', style: 'Hyper-Candid', location: 'Tokyo' },
   { src: maleSeoulStreetFood, title: 'Seoul Street 🍻', style: 'Night Scene', location: 'Korea' },
   { src: maleCyberpunkTokyo, title: 'Cyber Future 🤖', style: 'Cyberpunk', location: 'Neo-Tokyo' },
@@ -59,11 +64,10 @@ const leftGalleryImages: GalleryImage[] = [
 
 // Right gallery: Curated showcase + Female images
 const rightGalleryImages: GalleryImage[] = [
-  // Curated showcase images
   { src: parisPhotobook, title: 'Paris Memories', style: 'Photo Book', location: 'Paris' },
   { src: midnightTokyoGrid, title: '深夜 Midnight', style: 'Cinematic Grid', location: 'Tokyo Hotel' },
   { src: marsColonyCyberpunk, title: 'Mars Colony', style: 'Sci-Fi', location: 'Olympus Mons' },
-  // Female showcase images
+  { src: femaleMagazineCover, title: 'Magazine Cover 📖', style: 'Photo Book', location: 'Santorini' },
   { src: femaleTokyoRamen, title: 'Ramen Girl 🍜', style: 'Hyper-Candid', location: 'Tokyo' },
   { src: femaleSeoulStreetFood, title: 'Seoul Night 🌙', style: 'Night Scene', location: 'Korea' },
   { src: femaleCyberpunkTokyo, title: 'Neon Girl 💜', style: 'Cyberpunk', location: 'Neo-Tokyo' },
@@ -79,70 +83,159 @@ interface ScrollingGalleryProps {
   side: 'left' | 'right';
 }
 
+// Memoized gallery item to prevent unnecessary re-renders
+const GalleryItem = memo<{ img: GalleryImage; index: number; side: string }>(({ img, index, side }) => (
+  <div 
+    key={`${side}-${index}`}
+    className="group relative w-24 h-32 2xl:w-32 2xl:h-44 mx-auto rounded-lg overflow-hidden border border-cyber-700/30 hover:border-cyber-500 transition-all duration-300 cursor-pointer hover:scale-105 hover:z-20 shadow-md hover:shadow-[0_0_25px_rgba(0,102,255,0.4)] bg-cyber-800/50"
+  >
+    <OptimizedImage
+      src={img.src}
+      alt={img.title}
+      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+      placeholderClassName="w-full h-full"
+      rootMargin="150px"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="absolute bottom-1.5 left-1.5 right-1.5">
+        <p className="text-[8px] 2xl:text-[10px] text-white font-bold truncate leading-tight drop-shadow-lg">{img.title}</p>
+        <p className="text-[7px] 2xl:text-[9px] text-cyber-400 truncate font-medium">{img.style}</p>
+        <p className="text-[6px] 2xl:text-[8px] text-slate-400 truncate">{img.location}</p>
+      </div>
+    </div>
+    <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.9)]"></div>
+  </div>
+));
+
+GalleryItem.displayName = 'GalleryItem';
+
 export const ScrollingGallery: React.FC<ScrollingGalleryProps> = ({ side }) => {
   const images = side === 'left' ? leftGalleryImages : rightGalleryImages;
   const animationClass = side === 'left' ? 'animate-scroll-up' : 'animate-scroll-down';
-  
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Only render gallery when component is in viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="hidden xl:block w-28 2xl:w-36 flex-shrink-0 sticky top-0 h-screen overflow-hidden mx-1 2xl:mx-2">
+    <div 
+      ref={containerRef}
+      className="hidden xl:block w-28 2xl:w-36 flex-shrink-0 sticky top-0 h-screen overflow-hidden mx-1 2xl:mx-2"
+    >
       <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-cyber-900 via-cyber-900/90 to-transparent z-10 pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-cyber-900 via-cyber-900/90 to-transparent z-10 pointer-events-none"></div>
       
-      <div className={`flex flex-col gap-3 pt-16 ${animationClass}`}>
-        {[...images, ...images].map((img, index) => (
-          <div 
-            key={`${side}-${index}`}
-            className="group relative w-24 h-32 2xl:w-32 2xl:h-44 mx-auto rounded-lg overflow-hidden border border-cyber-700/30 hover:border-cyber-500 transition-all duration-300 cursor-pointer hover:scale-105 hover:z-20 shadow-md hover:shadow-[0_0_25px_rgba(0,102,255,0.4)] bg-cyber-800/50"
-          >
-            <img 
-              src={img.src} 
-              alt={img.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              loading="lazy"
+      {isVisible ? (
+        <div className={`flex flex-col gap-3 pt-16 ${animationClass}`}>
+          {[...images, ...images].map((img, index) => (
+            <GalleryItem key={`${side}-${index}`} img={img} index={index} side={side} />
+          ))}
+        </div>
+      ) : (
+        // Skeleton placeholders before gallery loads
+        <div className="flex flex-col gap-3 pt-16">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div 
+              key={`skeleton-${i}`}
+              className="w-24 h-32 2xl:w-32 2xl:h-44 mx-auto rounded-lg bg-cyber-800/50 border border-cyber-700/30 animate-pulse"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute bottom-1.5 left-1.5 right-1.5">
-                <p className="text-[8px] 2xl:text-[10px] text-white font-bold truncate leading-tight drop-shadow-lg">{img.title}</p>
-                <p className="text-[7px] 2xl:text-[9px] text-cyber-400 truncate font-medium">{img.style}</p>
-                <p className="text-[6px] 2xl:text-[8px] text-slate-400 truncate">{img.location}</p>
-              </div>
-            </div>
-            <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.9)]"></div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
+// Mobile Gallery with reduced image count and lazy loading
+const MobileGalleryItem = memo<{ img: GalleryImage; index: number }>(({ img, index }) => (
+  <div 
+    key={`mobile-${index}`}
+    className="relative w-16 h-20 mx-1.5 rounded-md overflow-hidden border border-cyber-700/30 shrink-0 shadow-lg"
+  >
+    <OptimizedImage
+      src={img.src}
+      alt={img.title}
+      className="w-full h-full object-cover"
+      placeholderClassName="w-full h-full"
+      rootMargin="50px"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100">
+      <div className="absolute bottom-1 left-1 right-1">
+        <p className="text-[6px] text-white font-bold truncate text-center">{img.title}</p>
+      </div>
+    </div>
+  </div>
+));
+
+MobileGalleryItem.displayName = 'MobileGalleryItem';
+
 export const MobileGallery: React.FC = () => {
-  const mobileImages = [...leftGalleryImages.slice(0, 6), ...rightGalleryImages.slice(0, 6)];
-  
+  // Reduced from 12 images to 8 for mobile
+  const mobileImages = [...leftGalleryImages.slice(0, 4), ...rightGalleryImages.slice(0, 4)];
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '50px' }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="xl:hidden w-full h-24 relative overflow-hidden rounded-lg border border-cyber-800/50 bg-cyber-900/40 mb-4 shrink-0">
+    <div 
+      ref={containerRef}
+      className="xl:hidden w-full h-24 relative overflow-hidden rounded-lg border border-cyber-800/50 bg-cyber-900/40 mb-4 shrink-0"
+    >
       <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-cyber-900 to-transparent z-10 pointer-events-none"></div>
       <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-cyber-900 to-transparent z-10 pointer-events-none"></div>
       
-      <div className="flex items-center h-full animate-scroll-left hover:pause-animation w-max">
-        {[...mobileImages, ...mobileImages, ...mobileImages].map((img, index) => (
-          <div 
-            key={`mobile-${index}`}
-            className="relative w-16 h-20 mx-1.5 rounded-md overflow-hidden border border-cyber-700/30 shrink-0 shadow-lg"
-          >
-            <img 
-              src={img.src} 
-              alt={img.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
+      {isVisible ? (
+        <div className="flex items-center h-full animate-scroll-left hover:pause-animation w-max">
+          {/* Reduced duplication from 3x to 2x */}
+          {[...mobileImages, ...mobileImages].map((img, index) => (
+            <MobileGalleryItem key={`mobile-${index}`} img={img} index={index} />
+          ))}
+        </div>
+      ) : (
+        // Skeleton for mobile
+        <div className="flex items-center h-full gap-1.5 px-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div 
+              key={`mobile-skeleton-${i}`}
+              className="w-16 h-20 rounded-md bg-cyber-800/50 border border-cyber-700/30 animate-pulse shrink-0"
             />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100">
-              <div className="absolute bottom-1 left-1 right-1">
-                <p className="text-[6px] text-white font-bold truncate text-center">{img.title}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

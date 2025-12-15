@@ -273,20 +273,61 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
 
     if (mapInstanceRef.current) {
       if (markerInstanceRef.current) {
-        markerInstanceRef.current.setPosition(newCoords);
+        // Update existing marker position (works for both AdvancedMarkerElement and legacy Marker)
+        if (typeof markerInstanceRef.current.setPosition === 'function') {
+          // Legacy Marker
+          markerInstanceRef.current.setPosition(newCoords);
+        } else {
+          // AdvancedMarkerElement uses property assignment
+          markerInstanceRef.current.position = newCoords;
+        }
       } else {
-        markerInstanceRef.current = new window.google.maps.Marker({
-          position: newCoords,
-          map: mapInstanceRef.current,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 7,
-            fillColor: "#0ea5e9",
-            fillOpacity: 1,
-            strokeColor: "#ffffff",
-            strokeWeight: 2,
-          },
-        });
+        // Use AdvancedMarkerElement (modern API) with fallback to legacy Marker
+        try {
+          if (window.google.maps.marker?.AdvancedMarkerElement) {
+            // Create a custom pin element for styling
+            const pinElement = new window.google.maps.marker.PinElement({
+              background: "#0ea5e9",
+              borderColor: "#ffffff",
+              glyphColor: "#ffffff",
+              scale: 1.2,
+            });
+
+            markerInstanceRef.current = new window.google.maps.marker.AdvancedMarkerElement({
+              position: newCoords,
+              map: mapInstanceRef.current,
+              content: pinElement.element,
+            });
+          } else {
+            // Fallback to legacy Marker if AdvancedMarkerElement is not available
+            markerInstanceRef.current = new window.google.maps.Marker({
+              position: newCoords,
+              map: mapInstanceRef.current,
+              icon: {
+                path: window.google.maps.SymbolPath.CIRCLE,
+                scale: 7,
+                fillColor: "#0ea5e9",
+                fillOpacity: 1,
+                strokeColor: "#ffffff",
+                strokeWeight: 2,
+              },
+            });
+          }
+        } catch {
+          // Fallback to legacy Marker on any error
+          markerInstanceRef.current = new window.google.maps.Marker({
+            position: newCoords,
+            map: mapInstanceRef.current,
+            icon: {
+              path: window.google.maps.SymbolPath.CIRCLE,
+              scale: 7,
+              fillColor: "#0ea5e9",
+              fillOpacity: 1,
+              strokeColor: "#ffffff",
+              strokeWeight: 2,
+            },
+          });
+        }
       }
     }
 

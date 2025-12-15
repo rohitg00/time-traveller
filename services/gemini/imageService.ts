@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { getFullFidelityPrompt } from "./imageFidelityPrompt";
 
 export const getAI = (apiKey?: string) => new GoogleGenAI({ apiKey: apiKey || process.env.GEMINI_API_KEY });
 
@@ -177,33 +178,51 @@ OUTPUT SPECS:
 - Natural color correction without over-saturation`,
 
     'Pixar 3D Style': `Ultra HD 4K Pixar-style 3D portrait. Transform the subjects into charming, expressive Pixar/Disney-style 3D animated characters.
+   
+   CHARACTER DESIGN:
+   - Exaggerated but appealing cartoon proportions
+   - Large expressive eyes with realistic reflections and catchlights
+   - Smooth, stylized skin with subtle subsurface scattering
+   - Detailed hair with individual strand rendering in Pixar style
+   - Clothing with realistic fabric physics and textures
+   
+   SCENE COMPOSITION:
+   - Warm, cinematic lighting with soft shadows
+   - Vibrant, saturated color palette
+   - Detailed 3D environment matching ${coordStr}
+   - Atmospheric effects (golden hour glow, ambient occlusion)
+   - Professional camera angle with slight tilt for dynamic feel
+   
+   EXPRESSION & POSE:
+   - Capture genuine emotion and personality
+   - Natural, candid body language
+   - Exaggerated cartoon-like expressions that feel authentic
+   - Interactive poses if multiple subjects (looking at each other, laughing together)
+   
+   TECHNICAL:
+   - Pixar/Illumination Studios quality rendering
+   - Smooth 3D surfaces with proper topology
+   - Ray-traced global illumination
+   - Depth of field with bokeh
+   - No uncanny valley - fully stylized 3D aesthetic`,
 
-CHARACTER DESIGN:
-- Exaggerated but appealing cartoon proportions
-- Large expressive eyes with realistic reflections and catchlights
-- Smooth, stylized skin with subtle subsurface scattering
-- Detailed hair with individual strand rendering in Pixar style
-- Clothing with realistic fabric physics and textures
-
-SCENE COMPOSITION:
-- Warm, cinematic lighting with soft shadows
-- Vibrant, saturated color palette
-- Detailed 3D environment matching ${coordStr}
-- Atmospheric effects (golden hour glow, ambient occlusion)
-- Professional camera angle with slight tilt for dynamic feel
-
-EXPRESSION & POSE:
-- Capture genuine emotion and personality
-- Natural, candid body language
-- Exaggerated cartoon-like expressions that feel authentic
-- Interactive poses if multiple subjects (looking at each other, laughing together)
-
-TECHNICAL:
-- Pixar/Illumination Studios quality rendering
-- Smooth 3D surfaces with proper topology
-- Ray-traced global illumination
-- Depth of field with bokeh
-- No uncanny valley - fully stylized 3D aesthetic`,
+    'Magazine Cover': `Create a stunning, high-end travel magazine cover in 9:16 vertical format.
+    
+    COMPOSITION & LAYOUT:
+    - Format: Classic glossy magazine cover layout.
+    - Title: Include a large, elegant magazine title at the top (e.g., "TRAVEL", "WANDERLUST", or the location name).
+    - Subject Placement: Place the subject naturally in the scene (sightseeing, candid) in the lower 2/3rds of the frame, allowing space for the title above.
+    - Text Overlay: You MAY include stylish editorial text, headlines, or a "Special Edition" tag, but ensure it looks professionally designed.
+    
+    AESTHETIC:
+    - Lighting: Golden hour, cinematic, warm and inviting.
+    - Style: Luxury travel photography, high fidelity, "National Geographic" or "Condé Nast Traveler" quality.
+    - Integration: The subject must be perfectly blended into the ${coordStr} environment (matching lighting, shadows, and perspective).
+    
+    NEGATIVE PROMPT / RESTRICTIONS:
+    - CRITICAL NEGATIVE: Do NOT include raw GPS coordinate numbers (e.g., "35.6895° N, 139.6917° E").
+    - No ugly UI elements, digital clocks, or viewfinder overlays.
+    - No low-quality text rendering (keep text minimal and large if possible).`,
   };
   
   return stylePrompts[style] || '';
@@ -264,7 +283,8 @@ export async function generateImage(
   
   const effectiveDestination = locationName || destination;
 
-  let promptText = "";
+  // Start with the maximum fidelity system prompt for physically grounded image synthesis
+  let promptText = getFullFidelityPrompt(true) + "\n\n---\n\nSCENE SPECIFICATION:\n\n";
   const styleEnhancement = getStylePromptEnhancement(style, effectiveDestination, coordinates);
   const isSpecialStyle = styleEnhancement.length > 0;
   
