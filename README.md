@@ -191,13 +191,46 @@ npm run dev
 
 ### Motia Cloud (Backend)
 
+#### Option 1: GitHub Actions (Recommended)
+
+Automatic deployment on every push to `main`:
+
+1. **Add GitHub Secrets** (Settings → Secrets → Actions):
+
+   | Secret | Description | Where to Get |
+   |--------|-------------|--------------|
+   | `MOTIA_API_KEY` | Motia Cloud API key | [Motia Cloud](https://motia.cloud) → Settings → API Keys |
+   | `MOTIA_ENV_ID` | Environment ID | [Motia Cloud](https://motia.cloud) → Your Project → Settings |
+   | `GEMINI_API_KEY` | Google Gemini API key | [aistudio.google.com](https://aistudio.google.com/apikey) |
+   | `GOOGLE_API_KEY` | Google Maps API key | [Google Cloud Console](https://console.cloud.google.com) |
+   | `SUPABASE_URL` | Supabase project URL | [supabase.com](https://supabase.com) → Project Settings |
+   | `SUPABASE_KEY` | Supabase anon key | Supabase → Project Settings → API |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Supabase → Project Settings → API |
+
+2. **Push to main** - Deployment triggers automatically!
+
+3. **Manual Deploy** - Go to Actions → "Deploy to Motia Cloud" → "Run workflow"
+
+```yaml
+# .github/workflows/deploy.yml - Already configured!
+# Auto-generates version: v1.0.X based on commit count
+```
+
+#### Option 2: Manual via Workbench
+
 1. Start local backend: `npm run backend`
 2. Go to [cloud.motia.dev](https://cloud.motia.dev)
 3. Import from Workbench → Add env vars → Deploy
 
-**Or via CLI:**
+#### Option 3: CLI
+
 ```bash
-motia cloud deploy --api-key <key> --version-name 1.0.0
+npx motia cloud deploy \
+  --api-key <MOTIA_API_KEY> \
+  --project-name time-traveller \
+  --environment-id <MOTIA_ENV_ID> \
+  --version-name v1.0.0 \
+  --env-file .env
 ```
 
 ### Vercel (Frontend)
