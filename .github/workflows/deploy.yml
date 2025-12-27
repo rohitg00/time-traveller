@@ -1,0 +1,95 @@
+name: Deploy to Motia Cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Version Name to deploy (e.g., v1.2.0)'
+        required: false
+      versionDescription:
+        description: 'Version Description to deploy'
+        required: false
+
+env:
+  # API Key stored as GitHub Secret (NEVER commit API keys to code)
+  MOTIA_API_KEY: ${{ secrets.MOTIA_API_KEY }}
+  # Project name in Motia Cloud
+  MOTIA_PROJECT_NAME: time-traveller
+  # Environment ID from Motia Cloud dashboard (Settings tab)
+  MOTIA_ENV_ID: ${{ secrets.MOTIA_ENV_ID }}
+
+jobs:
+  deploy:
+    name: Deploy to Motia Cloud
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for commit count
+
+      - name: Generate Version Number
+        id: version
+        run: |
+          # Get commit count for incremental versioning
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          # Calculate version: major.minor.patch based on commit count
+          MAJOR=1
+          MINOR=$((COMMIT_COUNT / 100))
+          PATCH=$((COMMIT_COUNT % 100))
+          AUTO_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.versionName }}" ]; then
+            echo "VERSION_NAME=${{ github.event.inputs.versionName }}" >> $GITHUB_ENV
+            echo "VERSION_DESCRIPTION=${{ github.event.inputs.versionDescription || github.event.head_commit.message }}" >> $GITHUB_ENV
+          else
+            echo "VERSION_NAME=${AUTO_VERSION}" >> $GITHUB_ENV
+            echo "VERSION_DESCRIPTION=${{ github.event.head_commit.message }}" >> $GITHUB_ENV
+          fi
+          
+          echo "Generated version: ${AUTO_VERSION}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate types
+        run: npx motia generate-types
+
+      - name: Create Env file from Secrets
+        run: |
+          # Create .env file from GitHub Secrets (secure way to pass env vars)
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+          echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env
+
+      - name: Deploy to Motia Cloud
+        run: |
+          npx motia cloud deploy \
+            --api-key ${{ env.MOTIA_API_KEY }} \
+            --project-name ${{ env.MOTIA_PROJECT_NAME }} \
+            --environment-id ${{ env.MOTIA_ENV_ID }} \
+            --version-name "${{ env.VERSION_NAME }}" \
+            --version-description "${{ env.VERSION_DESCRIPTION }}" \
+            --env-file .env
+
+      - name: Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ env.VERSION_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Description:** ${{ env.VERSION_DESCRIPTION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

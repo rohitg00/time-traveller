@@ -1,5 +1,4 @@
 import { GoogleGenAI } from "@google/genai";
-import { getFullFidelityPrompt } from "./imageFidelityPrompt";
 
 export const getAI = (apiKey?: string) => new GoogleGenAI({ apiKey: apiKey || process.env.GEMINI_API_KEY });
 
@@ -283,8 +282,7 @@ export async function generateImage(
   
   const effectiveDestination = locationName || destination;
 
-  // Start with the maximum fidelity system prompt for physically grounded image synthesis
-  let promptText = getFullFidelityPrompt(true) + "\n\n---\n\nSCENE SPECIFICATION:\n\n";
+  let promptText = "";
   const styleEnhancement = getStylePromptEnhancement(style, effectiveDestination, coordinates);
   const isSpecialStyle = styleEnhancement.length > 0;
   
