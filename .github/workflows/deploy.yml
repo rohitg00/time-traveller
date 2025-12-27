@@ -43,12 +43,24 @@ jobs:
           PATCH=$((COMMIT_COUNT % 100))
           AUTO_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           
+          # Get first line of commit message (handles multi-line messages)
+          COMMIT_MSG=$(git log -1 --pretty=%s | head -c 100)
+          
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.versionName }}" ]; then
             echo "VERSION_NAME=${{ github.event.inputs.versionName }}" >> $GITHUB_ENV
-            echo "VERSION_DESCRIPTION=${{ github.event.inputs.versionDescription || github.event.head_commit.message }}" >> $GITHUB_ENV
+            # Use heredoc for multi-line description
+            {
+              echo "VERSION_DESCRIPTION<<EOF"
+              echo "${{ github.event.inputs.versionDescription }}" | head -c 200 || echo "$COMMIT_MSG"
+              echo "EOF"
+            } >> $GITHUB_ENV
           else
             echo "VERSION_NAME=${AUTO_VERSION}" >> $GITHUB_ENV
-            echo "VERSION_DESCRIPTION=${{ github.event.head_commit.message }}" >> $GITHUB_ENV
+            {
+              echo "VERSION_DESCRIPTION<<EOF"
+              echo "${COMMIT_MSG}"
+              echo "EOF"
+            } >> $GITHUB_ENV
           fi
           
           echo "Generated version: ${AUTO_VERSION}"
