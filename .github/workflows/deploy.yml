@@ -88,6 +88,7 @@ jobs:
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "JWT_EXPIRATION=30d" >> .env
+          echo "VITE_GOOGLE_MAPS_MAP_ID=${{ secrets.GOOGLE_MAPS_MAP_ID }}" >> .env
 
       - name: Deploy to Motia Cloud
         run: |

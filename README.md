@@ -207,6 +207,7 @@ Automatic deployment on every push to `main`:
    | `SUPABASE_KEY` | Supabase anon key | Supabase → Project Settings → API |
    | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Supabase → Project Settings → API |
    | `JWT_SECRET` | Secret for signing JWTs | Generate: `openssl rand -base64 32` |
+   | `GOOGLE_MAPS_MAP_ID` | Map ID for Advanced Markers | [Google Cloud Console](https://console.cloud.google.com/google/maps-apis/studio/maps) |
 
 2. **Push to main** - Deployment triggers automatically!
 

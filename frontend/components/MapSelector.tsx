@@ -102,6 +102,9 @@ const MAP_STYLE = [
 
 const DEFAULT_CENTER = { lat: 47.5763831, lng: -122.4211769 };
 
+// Map ID for Advanced Markers support (from environment variable)
+const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
+
 export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const panoramaContainerRef = useRef<HTMLDivElement>(null);
@@ -172,6 +175,7 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
         backgroundColor: '#050b14',
         mapTypeControl: false,
         streetViewControl: false,
+        ...(GOOGLE_MAPS_MAP_ID && { mapId: GOOGLE_MAPS_MAP_ID }), // For Advanced Markers (optional)
       });
 
       map.addListener("click", (e: any) => {
