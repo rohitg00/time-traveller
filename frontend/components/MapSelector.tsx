@@ -166,16 +166,19 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
     }
 
     try {
+      // When mapId is present, styles must be configured in Google Cloud Console
+      // When no mapId, use inline styles for the dark theme
       const map = new window.google.maps.Map(mapContainerRef.current, {
         center: DEFAULT_CENTER,
         zoom: 12,
-        styles: MAP_STYLE,
+        ...(GOOGLE_MAPS_MAP_ID 
+          ? { mapId: GOOGLE_MAPS_MAP_ID } // Cloud-styled map with Advanced Markers
+          : { styles: MAP_STYLE }), // Inline dark theme styles
         disableDefaultUI: true,
         zoomControl: false,
         backgroundColor: '#050b14',
         mapTypeControl: false,
         streetViewControl: false,
-        ...(GOOGLE_MAPS_MAP_ID && { mapId: GOOGLE_MAPS_MAP_ID }), // For Advanced Markers (optional)
       });
 
       map.addListener("click", (e: any) => {
