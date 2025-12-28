@@ -123,14 +123,6 @@ npm run dev
 | **💻 Terminal** | Natural language: `"Take me to Paris in 1889"` |
 | **🌍 Orbital** | Click map, search address/pincode, see weather & places |
 
-### Teleport Progress
-
-```
-10% ⏳ Initiating...
-30% 🎨 Generating image...
-60% 📝 Creating description...
-100% ✨ Complete!
-```
 
 ---
 
