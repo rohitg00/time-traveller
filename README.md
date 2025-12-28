@@ -206,6 +206,7 @@ Automatic deployment on every push to `main`:
    | `SUPABASE_URL` | Supabase project URL | [supabase.com](https://supabase.com) → Project Settings |
    | `SUPABASE_KEY` | Supabase anon key | Supabase → Project Settings → API |
    | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Supabase → Project Settings → API |
+   | `JWT_SECRET` | Secret for signing JWTs | Generate: `openssl rand -base64 32` |
 
 2. **Push to main** - Deployment triggers automatically!
 
