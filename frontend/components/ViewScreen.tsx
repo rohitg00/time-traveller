@@ -12,53 +12,60 @@ interface ViewScreenProps {
   progressStatus?: string;
 }
 
-// Status messages that cycle during loading for a realistic feel
-const loadingMessages = [
-  'Initializing temporal coordinates...',
-  'Calibrating quantum flux capacitor...',
-  'Scanning historical databases...',
-  'Generating visual matrix...',
-  'Rendering spacetime image...',
-  'Processing temporal data...',
-  'Stabilizing wormhole connection...',
-  'Decoding spatial frequencies...',
-  'Mapping chronological pathways...',
-  'Finalizing molecular reconstruction...',
+// Inspirational travel quotes that cycle during loading
+const travelQuotes = [
+  '"The world is a book, and those who do not travel read only one page." — Saint Augustine',
+  '"Not all those who wander are lost." — J.R.R. Tolkien',
+  '"Travel is fatal to prejudice, bigotry, and narrow-mindedness." — Mark Twain',
+  '"The journey of a thousand miles begins with a single step." — Lao Tzu',
+  '"Adventure is worthwhile in itself." — Amelia Earhart',
+  '"To travel is to live." — Hans Christian Andersen',
+  '"Life is either a daring adventure or nothing at all." — Helen Keller',
+  '"The real voyage of discovery consists not in seeking new landscapes, but in having new eyes." — Marcel Proust',
+  '"Travel makes one modest. You see what a tiny place you occupy in the world." — Gustave Flaubert',
+  '"We travel not to escape life, but for life not to escape us." — Anonymous',
 ];
 
-export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, onStopAudio, isAudioPlaying, progress = 0, progressStatus }) => {
-  // Animated progress that smoothly increases from 0 to 95%
-  const [animatedProgress, setAnimatedProgress] = useState(0);
-  const [messageIndex, setMessageIndex] = useState(0);
-  const animationRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(0);
-  const isCompletedRef = useRef(false);
+// Status messages mapped to actual backend status
+const statusMessages: Record<string, string> = {
+  'initiated': 'Initializing temporal coordinates...',
+  'generating-image': 'Activating visual sensors...',
+  'rendering-image': 'Rendering destination imagery...',
+  'uploading-image': 'Storing visual data in archives...',
+  'generating-details': 'Analyzing environmental data...',
+  'synthesizing-speech': 'Generating audio narration...',
+  'completing': 'Finalizing spacetime jump...',
+  'complete': 'Arrival confirmed!',
+  'error': 'Temporal disruption detected...',
+};
 
-  // Start animation when teleporting begins
+export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayAudio, onStopAudio, isAudioPlaying, progress = 0, progressStatus }) => {
+  // Animated progress that follows backend progress smoothly
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const targetProgressRef = useRef(0);
+  const animationRef = useRef<number | null>(null);
+
+  // Smoothly animate towards the actual backend progress
   useEffect(() => {
     if (state === 'teleporting') {
-      // Reset on new teleport
-      startTimeRef.current = Date.now();
-      isCompletedRef.current = false;
-      setAnimatedProgress(0);
+      // Set target from backend progress (ensure minimum of 5%)
+      targetProgressRef.current = Math.max(5, progress);
       
       const animate = () => {
-        // Stop if completed
-        if (isCompletedRef.current) return;
+        setAnimatedProgress(prev => {
+          const target = targetProgressRef.current;
+          const diff = target - prev;
+          
+          // Smooth interpolation towards target
+          if (Math.abs(diff) < 0.5) {
+            return target;
+          }
+          // Move 5% of the remaining distance per frame for smooth animation
+          return prev + diff * 0.05;
+        });
         
-        const elapsed = Date.now() - startTimeRef.current;
-        const duration = 35000; // 35 seconds to reach 95%
-        
-        // Smooth easing - starts fast, slows down near the end
-        const t = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - t, 2); // ease-out quadratic
-        const targetProgress = eased * 95;
-        
-        setAnimatedProgress(targetProgress);
-        
-        if (t < 1) {
-          animationRef.current = requestAnimationFrame(animate);
-        }
+        animationRef.current = requestAnimationFrame(animate);
       };
       
       animationRef.current = requestAnimationFrame(animate);
@@ -69,29 +76,27 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
         }
       };
     } else {
-      // Reset when not teleporting
       setAnimatedProgress(0);
-      isCompletedRef.current = false;
     }
-  }, [state]); // Only depend on state, not progress
+  }, [state]);
 
-  // Jump to 100% when completed
+  // Update target when backend progress changes
   useEffect(() => {
-    if (progress >= 100 && state === 'teleporting') {
-      isCompletedRef.current = true;
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+    targetProgressRef.current = Math.max(5, progress);
+    if (progress >= 100) {
       setAnimatedProgress(100);
     }
-  }, [progress, state]);
+  }, [progress]);
 
-  // Cycle through messages
+  // Cycle through travel quotes
   useEffect(() => {
     if (state === 'teleporting') {
+      // Set random initial quote
+      setQuoteIndex(Math.floor(Math.random() * travelQuotes.length));
+      
       const interval = setInterval(() => {
-        setMessageIndex(prev => (prev + 1) % loadingMessages.length);
-      }, 3000);
+        setQuoteIndex(prev => (prev + 1) % travelQuotes.length);
+      }, 5000); // Change quote every 5 seconds
       return () => clearInterval(interval);
     }
   }, [state]);
@@ -171,7 +176,10 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
 
   if (state === 'teleporting') {
     const displayProgress = Math.max(5, Math.min(animatedProgress, 100)); // Use animated progress
-    const currentMessage = progressStatus || loadingMessages[messageIndex];
+    // Get status message from backend status or use a default
+    const statusKey = progressStatus?.toLowerCase().replace(/\s+/g, '-') || 'initiated';
+    const currentStatus = statusMessages[statusKey] || progressStatus || 'Processing temporal data...';
+    const currentQuote = travelQuotes[quoteIndex];
     
     return (
       <div className="flex-1 bg-black rounded-xl border border-cyber-500 shadow-[0_0_50px_rgba(14,165,233,0.3)] flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px] lg:min-h-[600px] relative overflow-hidden">
@@ -257,13 +265,20 @@ export const ViewScreen: React.FC<ViewScreenProps> = ({ state, location, onPlayA
             
           </div>
           
-          {/* Status text with fade transition */}
-          <p className="text-cyber-400 font-mono text-sm uppercase tracking-widest min-h-[1.5rem] transition-opacity duration-500">
-            {currentMessage}
+          {/* Status text */}
+          <p className="text-cyber-400 font-mono text-sm uppercase tracking-widest mb-4 transition-opacity duration-500">
+            {currentStatus}
           </p>
           
+          {/* Inspirational quote */}
+          <div className="min-h-[3rem] px-4">
+            <p className="text-slate-400 text-xs italic transition-all duration-700 ease-in-out opacity-80">
+              {currentQuote}
+            </p>
+          </div>
+          
           {/* Live indicator */}
-          <div className="mt-4 flex items-center justify-center gap-2">
+          <div className="mt-3 flex items-center justify-center gap-2">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span>
             <span className="text-green-400 text-[10px] font-mono tracking-wider">LIVE STREAM ACTIVE</span>
           </div>

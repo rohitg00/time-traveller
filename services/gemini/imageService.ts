@@ -1,6 +1,25 @@
 import { GoogleGenAI } from "@google/genai";
 
-export const getAI = (apiKey?: string) => new GoogleGenAI({ apiKey: apiKey || process.env.GEMINI_API_KEY });
+// Force use of GEMINI_API_KEY - the SDK auto-reads GOOGLE_API_KEY which we need to prevent
+export const getAI = (apiKey?: string) => {
+  const key = apiKey || process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error('GEMINI_API_KEY is required for image generation');
+  }
+  
+  // Temporarily hide GOOGLE_API_KEY so SDK doesn't use it
+  const savedGoogleKey = process.env.GOOGLE_API_KEY;
+  delete process.env.GOOGLE_API_KEY;
+  
+  const ai = new GoogleGenAI({ apiKey: key });
+  
+  // Restore GOOGLE_API_KEY for Maps/Street View usage
+  if (savedGoogleKey) {
+    process.env.GOOGLE_API_KEY = savedGoogleKey;
+  }
+  
+  return ai;
+};
 
 async function reverseGeocode(lat: number, lng: number, mapsApiKey: string): Promise<string | null> {
   try {
@@ -448,6 +467,7 @@ export async function generateImage(
 
   try {
     // Try Nano Banana Pro first (supports up to 4K)
+    console.log('[ImageService] Trying gemini-3-pro-image-preview...');
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
       contents: { parts: parts },
@@ -462,13 +482,17 @@ export async function generateImage(
 
     const data = extractImage(response);
     if (data) {
+      console.log('[ImageService] Success with gemini-3-pro-image-preview');
       return { imageData: data, usedStreetView, fallbackMessage };
     }
-  } catch {
+    console.log('[ImageService] No image data from gemini-3-pro-image-preview');
+  } catch (err: any) {
+    console.error('[ImageService] gemini-3-pro-image-preview failed:', err?.message || err);
   }
 
   try {
     // Fallback to Nano Banana (only 1K supported)
+    console.log('[ImageService] Trying gemini-2.5-flash-image...');
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: { parts: parts },
@@ -483,9 +507,12 @@ export async function generateImage(
 
     const data = extractImage(response);
     if (data) {
+      console.log('[ImageService] Success with gemini-2.5-flash-image');
       return { imageData: data, usedStreetView, fallbackMessage };
     }
-  } catch {
+    console.log('[ImageService] No image data from gemini-2.5-flash-image');
+  } catch (err: any) {
+    console.error('[ImageService] gemini-2.5-flash-image failed:', err?.message || err);
   }
 
   throw new Error("Visual sensors failed to render destination. Both Primary and Auxiliary cores failed.");

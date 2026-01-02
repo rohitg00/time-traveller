@@ -102,9 +102,6 @@ const MAP_STYLE = [
 
 const DEFAULT_CENTER = { lat: 47.5763831, lng: -122.4211769 };
 
-// Map ID for Advanced Markers support (from environment variable)
-const GOOGLE_MAPS_MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
-
 export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const panoramaContainerRef = useRef<HTMLDivElement>(null);
@@ -166,14 +163,10 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
     }
 
     try {
-      // When mapId is present, styles must be configured in Google Cloud Console
-      // When no mapId, use inline styles for the dark theme
       const map = new window.google.maps.Map(mapContainerRef.current, {
         center: DEFAULT_CENTER,
         zoom: 12,
-        ...(GOOGLE_MAPS_MAP_ID 
-          ? { mapId: GOOGLE_MAPS_MAP_ID } // Cloud-styled map with Advanced Markers
-          : { styles: MAP_STYLE }), // Inline dark theme styles
+        styles: MAP_STYLE,
         disableDefaultUI: true,
         zoomControl: false,
         backgroundColor: '#050b14',
@@ -280,61 +273,22 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ onSelect }) => {
 
     if (mapInstanceRef.current) {
       if (markerInstanceRef.current) {
-        // Update existing marker position (works for both AdvancedMarkerElement and legacy Marker)
-        if (typeof markerInstanceRef.current.setPosition === 'function') {
-          // Legacy Marker
-          markerInstanceRef.current.setPosition(newCoords);
-        } else {
-          // AdvancedMarkerElement uses property assignment
-          markerInstanceRef.current.position = newCoords;
-        }
+        // Update existing marker position
+        markerInstanceRef.current.setPosition(newCoords);
       } else {
-        // Use AdvancedMarkerElement (modern API) with fallback to legacy Marker
-        try {
-          if (window.google.maps.marker?.AdvancedMarkerElement) {
-            // Create a custom pin element for styling
-            const pinElement = new window.google.maps.marker.PinElement({
-              background: "#0ea5e9",
-              borderColor: "#ffffff",
-              glyphColor: "#ffffff",
-              scale: 1.2,
-            });
-
-            markerInstanceRef.current = new window.google.maps.marker.AdvancedMarkerElement({
-              position: newCoords,
-              map: mapInstanceRef.current,
-              content: pinElement.element,
-            });
-          } else {
-            // Fallback to legacy Marker if AdvancedMarkerElement is not available
-            markerInstanceRef.current = new window.google.maps.Marker({
-              position: newCoords,
-              map: mapInstanceRef.current,
-              icon: {
-                path: window.google.maps.SymbolPath.CIRCLE,
-                scale: 7,
-                fillColor: "#0ea5e9",
-                fillOpacity: 1,
-                strokeColor: "#ffffff",
-                strokeWeight: 2,
-              },
-            });
-          }
-        } catch {
-          // Fallback to legacy Marker on any error
-          markerInstanceRef.current = new window.google.maps.Marker({
-            position: newCoords,
-            map: mapInstanceRef.current,
-            icon: {
-              path: window.google.maps.SymbolPath.CIRCLE,
-              scale: 7,
-              fillColor: "#0ea5e9",
-              fillOpacity: 1,
-              strokeColor: "#ffffff",
-              strokeWeight: 2,
-            },
-          });
-        }
+        // Use legacy Marker
+        markerInstanceRef.current = new window.google.maps.Marker({
+          position: newCoords,
+          map: mapInstanceRef.current,
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 7,
+            fillColor: "#0ea5e9",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 2,
+          },
+        });
       }
     }
 
