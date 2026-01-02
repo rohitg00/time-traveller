@@ -611,23 +611,40 @@ const AppContent: React.FC = () => {
         <ScrollingGallery side="right" />
       </div>
       
-      <footer className="p-4 text-center text-xs text-slate-600 font-mono z-10 relative">
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <button 
-            onClick={() => setShowApiKeyModal(true)}
-            className={`hover:text-cyber-400 transition-colors flex items-center gap-1.5 ${hasUserKeys ? 'text-green-500' : remainingFreeGenerations === 0 ? 'text-red-400 animate-pulse' : remainingFreeGenerations <= 2 ? 'text-amber-400' : ''}`}
+      <footer className="p-4 text-xs text-slate-600 font-mono z-10 relative">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          {/* Left side - spacer for balance */}
+          <div className="hidden sm:block w-32"></div>
+          
+          {/* Center - main footer links */}
+          <div className="flex items-center justify-center gap-4 flex-wrap flex-1">
+            <button 
+              onClick={() => setShowApiKeyModal(true)}
+              className={`hover:text-cyber-400 transition-colors flex items-center gap-1.5 ${hasUserKeys ? 'text-green-500' : remainingFreeGenerations === 0 ? 'text-red-400 animate-pulse' : remainingFreeGenerations <= 2 ? 'text-amber-400' : ''}`}
+            >
+              <Key className="w-3 h-3" />
+              {hasUserKeys ? 'USING YOUR API KEYS' : remainingFreeGenerations === 0 ? '⚠️ ADD API KEY' : `${remainingFreeGenerations} FREE LEFT`}
+            </button>
+            <span className="text-slate-700">|</span>
+            <button 
+              onClick={() => setShowTerms(true)}
+              className="hover:text-cyber-400 transition-colors flex items-center gap-1.5"
+            >
+              <Shield className="w-3 h-3" />
+              TERMS & PRIVACY
+            </button>
+          </div>
+          
+          {/* Right side - Powered by Motia */}
+          <a 
+            href="https://github.com/motiadev/motia" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-slate-500 hover:text-cyber-400 transition-colors group"
           >
-            <Key className="w-3 h-3" />
-            {hasUserKeys ? 'USING YOUR API KEYS' : remainingFreeGenerations === 0 ? '⚠️ ADD API KEY' : `${remainingFreeGenerations} FREE LEFT`}
-          </button>
-          <span className="text-slate-700">|</span>
-          <button 
-            onClick={() => setShowTerms(true)}
-            className="hover:text-cyber-400 transition-colors flex items-center gap-1.5"
-          >
-            <Shield className="w-3 h-3" />
-            TERMS & PRIVACY
-          </button>
+            <Zap className="w-3 h-3 group-hover:text-yellow-400 transition-colors" />
+            <span>Powered by <span className="font-semibold">Motia</span></span>
+          </a>
         </div>
       </footer>
 
