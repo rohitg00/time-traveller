@@ -41,13 +41,6 @@ export const config: ApiRouteConfig = {
 export const handler: Handlers['Auth'] = async (req, { logger, state }) => {
   logger.info('Auth: Token exchange request received');
 
-  // Log environment configuration status for debugging
-  logger.info('Auth: Environment check', {
-    hasSupabaseUrl: !!process.env.SUPABASE_URL,
-    hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    hasJwtSecret: !!process.env.JWT_SECRET,
-  });
-
   try {
     const { authToken } = req.body;
 
