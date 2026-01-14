@@ -49,6 +49,10 @@
       "steps/api/auth.step.ts": {
         "x": 4,
         "y": 1617
+      },
+      "steps/api/health.step.ts": {
+        "x": 4,
+        "y": 1840
       }
     }
   }

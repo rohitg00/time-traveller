@@ -5,6 +5,13 @@ import { createClient, SupabaseClient, User as SupabaseUser, Session } from '@su
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug logging to help diagnose initialization issues
+console.log('[AuthContext] Initializing Supabase client...', {
+  hasUrl: !!supabaseUrl,
+  hasKey: !!supabaseAnonKey,
+  url: supabaseUrl,
+});
+
 let supabase: SupabaseClient | null = null;
 
 if (supabaseUrl && supabaseAnonKey) {
@@ -16,6 +23,18 @@ if (supabaseUrl && supabaseAnonKey) {
       flowType: 'pkce',
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     }
+  });
+  console.log('[AuthContext] ✅ Supabase client created successfully');
+
+  // Expose to window for debugging
+  if (typeof window !== 'undefined') {
+    (window as any).supabase = supabase;
+    console.log('[AuthContext] ✅ Supabase client exposed to window.supabase');
+  }
+} else {
+  console.error('[AuthContext] ❌ Supabase client NOT created - missing environment variables!', {
+    VITE_SUPABASE_URL: supabaseUrl ? 'SET' : 'MISSING',
+    VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? 'SET' : 'MISSING',
   });
 }
 
